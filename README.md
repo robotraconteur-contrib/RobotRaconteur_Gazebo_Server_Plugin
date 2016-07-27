@@ -4,7 +4,7 @@ A plugin for [Gazebo](http://gazebosim.org) using the [Robot Raconteur](http://r
 
 ## Download plugin binary
 
-The Robot Raconteur Gazebo Plugin binaries  can be downloaded from [http://robotraconteur.com/download](http://robotraconetur.com/download). Registration is required but the dowload is free.
+The Robot Raconteur Gazebo Plugin binaries  can be downloaded from [http://robotraconteur.com/download](http://robotraconteur.com/download). Registration is required but the dowload is free.
 
 ## Building the plugin
 
