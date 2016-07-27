@@ -1,0 +1,451 @@
+service experimental.gazebo
+
+option version 0.5
+
+struct Pose
+	field double[4] Orientation
+	field double[3] Position	
+end struct
+
+struct PIDParam
+	field double p
+	field double i
+	field double d
+	field double imax
+	field double imin
+	field double cmdMax
+	field double cmdMin
+end struct
+
+struct CameraImage
+	field int32 width
+	field int32 height
+	field string format
+	field uint8[] data	
+end struct
+
+struct DepthCameraImage
+	field int32 width
+	field int32 height
+	field string imageFormat
+	field uint8[] imageData
+	field single[] depthData		
+end struct
+
+struct LaserScan
+	field double angleMax
+	field double angleMin
+	field double angleStep
+	field uint32 count
+	field double verticalAngleMax
+	field double verticalAngleMin
+	field double verticalAngleStep
+	field uint32 verticalCount	
+	field double rangeResolution
+	field double[] intensities
+	field double[] ranges
+	field int32[] fiducial	
+end struct
+
+struct Contact
+	field string contactName1
+	field string contactName2
+end struct
+
+struct GpsState
+	field double altitude
+	field double latitude_deg
+	field double longitude_deg
+	field double velocity_east
+	field double velocity_north
+	field double velocity_up
+end struct
+
+struct ImuState
+	field double[3] angular_velocity
+	field double[3] linear_acceleration
+	field double[4] orientation
+end struct
+
+struct Color
+	field single a
+	field single b
+	field single g
+	field single r
+end struct
+
+object Base
+	property string Name
+	property string ScopedName
+end object
+
+object Server
+	property string{list} WorldNames
+	objref World{string} Worlds
+
+	property string{list} SensorNames
+	objref Sensor{string} Sensors
+end object
+
+object World
+	property string Name
+
+	property double SimTime
+	property double RealTime
+	property double WallTime
+	property double StartTime
+
+	property string{list} ModelNames
+	objref Model{string} Models
+	
+	property string{list} LightNames
+	objref Light{string} Lights
+
+	wire double SimTimeWire
+	wire double RealTimeWire
+end object
+
+object Entity
+	implements Base
+	property string Name
+	property string ScopedName
+
+	property Pose WorldPose
+	property Pose RelativePose
+
+	property double[6] WorldVelocity
+	property double[6] RelativeVelocity
+	property double[6] WorldAcceleration
+	property double[6] RelativeAcceleration
+
+	wire Pose WorldPoseGetWire
+	wire Pose RelativePoseGetWire
+
+	wire double[6] WorldVelocityGetWire
+	wire double[6] RelativeVelocityGetWire
+	wire double[6] WorldAccelerationGetWire
+	wire double[6] RelativeAccelerationGetWire
+end object
+
+object Model
+	implements Entity
+	property string Name
+	property string ScopedName
+
+	property string{list} ChildModelNames
+	objref Model{string} ChildModels
+
+	property string{list} LinkNames
+	objref Link{string} Links
+
+	property string{list} JointNames
+	objref Joint{string} Joints
+
+	property Pose WorldPose
+	property Pose RelativePose
+
+	property double[6] WorldVelocity
+	property double[6] RelativeVelocity
+	property double[6] WorldAcceleration
+	property double[6] RelativeAcceleration
+
+	wire Pose WorldPoseGetWire
+	wire Pose RelativePoseGetWire
+
+	wire double[6] WorldVelocityGetWire
+	wire double[6] RelativeVelocityGetWire
+	wire double[6] WorldAccelerationGetWire
+	wire double[6] RelativeAccelerationGetWire
+
+	function void CreateJointController()
+	function void DestroyJointController()
+
+	objref JointController JointController
+end object
+
+object Link
+	implements Entity
+	property string Name
+	property string ScopedName
+
+	property string{list} SensorNames
+
+	property Pose WorldPose
+	property Pose RelativePose
+
+	property double[6] WorldVelocity
+	property double[6] RelativeVelocity
+	property double[6] WorldAcceleration
+	property double[6] RelativeAcceleration
+
+	wire Pose WorldPoseGetWire
+	wire Pose RelativePoseGetWire
+
+	wire double[6] WorldVelocityGetWire
+	wire double[6] RelativeVelocityGetWire
+	wire double[6] WorldAccelerationGetWire
+	wire double[6] RelativeAccelerationGetWire
+
+	property double[6]{list} AppliedWrenches
+
+	wire double[6]{list} AppliedWrenchesSetWire	
+end object
+
+object Joint
+	implements Base
+
+	property string Name
+	property string ScopedName
+
+	property string ParentLinkName
+	property string ChildLinkName
+
+	property int32 AxisCount
+
+	function double[3] GetGlobalAxis(int32 axis)
+	function double[3] GetLocalAxis(int32 axis)
+
+	property double{int32} AxesAngles
+	function double GetAxisAngle(int32 axis)
+	function void SetAxisPosition(int32 axis, double value)
+	property double{int32} AxesVelocities
+	function double GetAxisVelocity(int32 axis)
+	function void SetAxisVelocity(int32 axis, double value)
+
+	function double GetForce(int32 axis)
+	function void SetForce(int32 axis, double value)
+
+	function double[6] GetForceTorque(int32 link)
+
+	wire double{int32} AxisAngleGetWire	
+	wire double{int32} AxisVelocityGetWire	
+	wire double[]{int32} ForceTorqueGetWire
+
+	wire double{int32} AxisPositionSetWire
+	wire double{int32} AxisVelocitySetWire
+	wire double{int32} ForceSetWire	
+end object
+
+object JointController
+	property string{list} JointNames
+	property PIDParam{string} PositionPIDs
+	property PIDParam{string} VelocityPIDs
+	property double{string} JointTargetPositions
+	property double{string} JointTargetVelocities
+	
+	property double{string} JointForces
+	
+	function void AddJoint(string name)
+	function void SetPositionPID(string name, PIDParam pid)
+	function void SetVelocityPID(string name, PIDParam pid)
+
+	wire double{string} JointTargetPositionsSetWire
+	wire double{string} JointTargetVelocitiesSetWire
+	wire double{string} JointActualPositionsGetWire
+	wire double{string} JointActualVelocitiesGetWire
+end object
+
+object Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime	
+end object
+
+object CameraSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime	
+	
+	function CameraImage CaptureImage()
+	pipe CameraImage ImageStream
+end object
+
+object MultiCameraSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime	
+	
+	property int32 CameraCount 
+	function CameraImage CaptureImage(int32 ind)
+	pipe CameraImage{int32} ImageStream
+end object
+
+object DepthCameraSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime	
+	
+	function DepthCameraImage CaptureImage()
+	pipe DepthCameraImage ImageStream
+end object
+
+object RaySensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime	
+	
+	function LaserScan CaptureScan()
+	pipe LaserScan ScanStream
+end object
+
+object ContactSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime
+	
+	function Contact{list} CaptureContacts()
+	wire Contact{list} ContactWire		
+end object
+
+object AltimeterSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime
+	
+	property double Altitude
+	wire double AltitudeWire		
+end object
+
+object SonarSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime
+	
+	property double RangeMin
+	property double RangeMax
+	property double Radius
+	
+	property double Range
+	wire double RangeWire		
+end object
+
+object MagnetometerSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime
+	
+	property double[3] MagneticField
+	wire double[3] MagneticFieldWire		
+end object
+
+object ForceTorqueSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime
+	
+	property double[6] ForceTorque
+	wire double[6] ForceTorqueWire		
+end object
+
+object GpsSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime
+	
+	property GpsState ReadState
+	wire GpsState StateWire		
+end object
+
+object ImuSensor
+	implements Sensor
+	property string Name
+	property string Type
+	property string ParentName
+	property Pose Pose
+	
+	property uint8 Active
+	property double UpdateRate
+	property double LastUpdateTime
+	property double LastMeasurementTime
+	
+	function void SetReferencePose()
+	
+	property ImuState ReadState
+	wire ImuState StateWire		
+end object
+
+object Light
+	property string Name
+	property string Type
+	property Pose Pose
+	property double[3] Direction
+	
+	property Color DiffuseColor
+	property Color SpecularColor
+end object
