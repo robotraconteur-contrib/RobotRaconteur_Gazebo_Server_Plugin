@@ -2,13 +2,9 @@
 
 A plugin for [Gazebo](http://gazebosim.org) using the [Robot Raconteur](http://robotraconteur.com) communication system to provide a friendly object-oriented interface to the Gazebo API without requiring the modification of SDF world files. It is developed by Wason Technology, LLC.
 
-## Download plugin binary
-
-The Robot Raconteur Gazebo Plugin binaries  can be downloaded from [http://robotraconteur.com/download](http://robotraconteur.com/download). Registration is required but the dowload is free.
-
 ## Building the plugin
 
-The plugin is built using CMake. Building has only been tested on Ubuntu Trusty and Xenial.  Gazebo and the Robot Raconteur SDK must be installed before building. The Robot Raconteur SDK can be download at [http://robotraconteur.com/download](http://robotraconteur.com/download). Registration is required but the dowload is free. Be sure to download the correct *Ubuntu* SDK version that matches your operating system.
+The plugin is built using CMake. Gazebo and the Robot Raconteur SDK must be installed before building. See https://github.com/robotraconteur/robotraconteur for Robot Raconteur installation instructions.
 
 To build, set **RobotRaconteur_DIR** to the directory of the extracted Robot Raconteur SDK.
 
