@@ -32,11 +32,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		updateConnection=get_raysensor()->ConnectUpdated(boost::bind(&RaySensorImpl::OnUpdate,c));
 	}
 
-	RR_SHARED_PTR<rrgz::LaserScan > RaySensorImpl::CaptureScan()
+	rrgz::LaserScanPtr RaySensorImpl::CaptureScan()
 	{
 
 		boost::mutex::scoped_lock lock(this_lock);
-		auto o=RR_MAKE_SHARED<rrgz::LaserScan>();
+		rrgz::LaserScanPtr o(new rrgz::LaserScan());
 		sensors::RaySensorPtr c=get_raysensor();
 
 		bool a=c->IsActive();
@@ -57,9 +57,9 @@ namespace RobotRaconteurGazeboServerPlugin
 		o->ranges=RR::AllocateRRArray<double>(sample_count);
 		o->fiducial=RR::AllocateRRArray<int32_t>(sample_count);
 
-		auto i=o->intensities->ptr();
-		auto r=o->ranges->ptr();
-		auto f=o->fiducial->ptr();
+		auto i=&o->intensities->at(0);
+		auto r=&o->ranges->at(0);
+		auto f=&o->fiducial->at(0);
 		for (uint32_t j=0; j<sample_count; j++)
 		{
 			i[j]=c->Retro(j);
@@ -77,17 +77,17 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::RaySensor>(get_sensor());
 	}
 
-	RR_SHARED_PTR<RR::Pipe<RR_SHARED_PTR<rrgz::LaserScan > > > RaySensorImpl::get_ScanStream()
+	RR::PipePtr<rrgz::LaserScanPtr> RaySensorImpl::get_ScanStream()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_ImageStream;
 	}
-	void RaySensorImpl::set_ScanStream(RR_SHARED_PTR<RR::Pipe<RR_SHARED_PTR<rrgz::LaserScan > > > value)
+	void RaySensorImpl::set_ScanStream(RR::PipePtr<rrgz::LaserScanPtr> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_ImageStream) throw std::runtime_error("Already set");
 		m_ImageStream=value;
-		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<RR_SHARED_PTR<rrgz::LaserScan > > >();
+		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<rrgz::LaserScanPtr> >();
 		m_ImageStream_b->Init(m_ImageStream,3);
 	}
 
@@ -101,7 +101,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void RaySensorImpl::OnUpdate1()
 	{
 
-		RR_SHARED_PTR<RR::PipeBroadcaster<RR_SHARED_PTR<rrgz::LaserScan > > > b;
+		RR::PipeBroadcasterPtr<rrgz::LaserScanPtr> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_ImageStream_b;

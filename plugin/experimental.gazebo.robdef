@@ -1,6 +1,6 @@
 service experimental.gazebo
 
-option version 0.5
+stdver 0.9
 
 struct Pose
 	field double[4] Orientation
@@ -75,87 +75,88 @@ struct Color
 end struct
 
 object Base
-	property string Name
-	property string ScopedName
+	property string Name [readonly]
+	property string ScopedName [readonly]
 end object
 
 object Server
-	property string{list} WorldNames
+	property string{list} WorldNames [readonly]
 	objref World{string} Worlds
 
-	property string{list} SensorNames
+	property string{list} SensorNames [readonly]
 	objref Sensor{string} Sensors
 end object
 
 object World
-	property string Name
+	property string Name [readonly]
 
-	property double SimTime
-	property double RealTime
-	property double WallTime
-	property double StartTime
+	property double SimTime [readonly]
+	property double RealTime [readonly]
+	property double WallTime [readonly]
+	property double StartTime [readonly]
 
-	property string{list} ModelNames
+	property string{list} ModelNames [readonly]
 	objref Model{string} Models
 	
-	property string{list} LightNames
+	property string{list} LightNames [readonly]
 	objref Light{string} Lights
 
-	wire double SimTimeWire
-	wire double RealTimeWire
+	wire double SimTimeWire [readonly]
+	wire double RealTimeWire [readonly]
 end object
 
 object Entity
 	implements Base
-	property string Name
-	property string ScopedName
+	property string Name [readonly]
+	property string ScopedName [readonly]
 
 	property Pose WorldPose
 	property Pose RelativePose
 
-	property double[6] WorldVelocity
-	property double[6] RelativeVelocity
-	property double[6] WorldAcceleration
-	property double[6] RelativeAcceleration
+	property double[6] WorldVelocity [readonly]
+	property double[6] RelativeVelocity [readonly]
+	property double[6] WorldAcceleration [readonly]
+	property double[6] RelativeAcceleration [readonly]
 
-	wire Pose WorldPoseGetWire
-	wire Pose RelativePoseGetWire
+	wire Pose WorldPoseGetWire [readonly]
+	wire Pose RelativePoseGetWire [readonly]
 
-	wire double[6] WorldVelocityGetWire
-	wire double[6] RelativeVelocityGetWire
-	wire double[6] WorldAccelerationGetWire
-	wire double[6] RelativeAccelerationGetWire
+	wire double[6] WorldVelocityGetWire [readonly]
+	wire double[6] RelativeVelocityGetWire [readonly]
+	wire double[6] WorldAccelerationGetWire [readonly]
+	wire double[6] RelativeAccelerationGetWire [readonly]
 end object
 
 object Model
 	implements Entity
-	property string Name
-	property string ScopedName
+	implements Base
+	property string Name [readonly]
+	property string ScopedName [readonly]
 
-	property string{list} ChildModelNames
+	property string{list} ChildModelNames [readonly]
 	objref Model{string} ChildModels
 
-	property string{list} LinkNames
+	property string{list} LinkNames [readonly]
 	objref Link{string} Links
 
-	property string{list} JointNames
+	property string{list} JointNames [readonly]
 	objref Joint{string} Joints
 
 	property Pose WorldPose
 	property Pose RelativePose
 
-	property double[6] WorldVelocity
-	property double[6] RelativeVelocity
-	property double[6] WorldAcceleration
-	property double[6] RelativeAcceleration
+	property double[6] WorldVelocity [readonly]
+	property double[6] RelativeVelocity [readonly]
+	property double[6] WorldAcceleration [readonly]
+	property double[6] RelativeAcceleration [readonly]
 
-	wire Pose WorldPoseGetWire
-	wire Pose RelativePoseGetWire
+	wire Pose WorldPoseGetWire [readonly]
+	wire Pose RelativePoseGetWire [readonly]
 
-	wire double[6] WorldVelocityGetWire
-	wire double[6] RelativeVelocityGetWire
-	wire double[6] WorldAccelerationGetWire
-	wire double[6] RelativeAccelerationGetWire
+	wire double[6] WorldVelocityGetWire [readonly]
+	wire double[6] RelativeVelocityGetWire [readonly]
+	wire double[6] WorldAccelerationGetWire [readonly]
+	wire double[6] RelativeAccelerationGetWire [readonly]
 
 	function void CreateJointController()
 	function void DestroyJointController()
@@ -165,42 +166,43 @@ end object
 
 object Link
 	implements Entity
-	property string Name
-	property string ScopedName
+	implements Base
+	property string Name [readonly]
+	property string ScopedName [readonly]
 
-	property string{list} SensorNames
+	property string{list} SensorNames [readonly]
 
-	property Pose WorldPose
+	property Pose WorldPose 
 	property Pose RelativePose
 
-	property double[6] WorldVelocity
-	property double[6] RelativeVelocity
-	property double[6] WorldAcceleration
-	property double[6] RelativeAcceleration
+	property double[6] WorldVelocity [readonly]
+	property double[6] RelativeVelocity [readonly]
+	property double[6] WorldAcceleration [readonly]
+	property double[6] RelativeAcceleration [readonly]
 
-	wire Pose WorldPoseGetWire
-	wire Pose RelativePoseGetWire
+	wire Pose WorldPoseGetWire [readonly]
+	wire Pose RelativePoseGetWire [readonly]
 
-	wire double[6] WorldVelocityGetWire
-	wire double[6] RelativeVelocityGetWire
-	wire double[6] WorldAccelerationGetWire
-	wire double[6] RelativeAccelerationGetWire
+	wire double[6] WorldVelocityGetWire [readonly]
+	wire double[6] RelativeVelocityGetWire [readonly]
+	wire double[6] WorldAccelerationGetWire [readonly]
+	wire double[6] RelativeAccelerationGetWire [readonly]
 
 	property double[6]{list} AppliedWrenches
 
-	wire double[6]{list} AppliedWrenchesSetWire	
+	wire double[6]{list} AppliedWrenchesSetWire	[writeonly]
 end object
 
 object Joint
 	implements Base
 
-	property string Name
-	property string ScopedName
+	property string Name [readonly]
+	property string ScopedName [readonly]
 
-	property string ParentLinkName
-	property string ChildLinkName
+	property string ParentLinkName [readonly]
+	property string ChildLinkName [readonly]
 
-	property int32 AxisCount
+	property int32 AxisCount [readonly]
 
 	function double[3] GetGlobalAxis(int32 axis)
 	function double[3] GetLocalAxis(int32 axis)
@@ -217,234 +219,234 @@ object Joint
 
 	function double[6] GetForceTorque(int32 link)
 
-	wire double{int32} AxisAngleGetWire	
-	wire double{int32} AxisVelocityGetWire	
-	wire double[]{int32} ForceTorqueGetWire
+	wire double{int32} AxisAngleGetWire	[readonly]
+	wire double{int32} AxisVelocityGetWire	[readonly]
+	wire double[]{int32} ForceTorqueGetWire [readonly]
 
-	wire double{int32} AxisPositionSetWire
-	wire double{int32} AxisVelocitySetWire
-	wire double{int32} ForceSetWire	
+	wire double{int32} AxisPositionSetWire [writeonly]
+	wire double{int32} AxisVelocitySetWire [writeonly]
+	wire double{int32} ForceSetWire	 [writeonly]
 end object
 
 object JointController
-	property string{list} JointNames
-	property PIDParam{string} PositionPIDs
-	property PIDParam{string} VelocityPIDs
+	property string{list} JointNames [readonly]
+	property PIDParam{string} PositionPIDs [readonly]
+	property PIDParam{string} VelocityPIDs [readonly]
 	property double{string} JointTargetPositions
 	property double{string} JointTargetVelocities
 	
-	property double{string} JointForces
+	property double{string} JointForces [readonly]
 	
 	function void AddJoint(string name)
 	function void SetPositionPID(string name, PIDParam pid)
 	function void SetVelocityPID(string name, PIDParam pid)
 
-	wire double{string} JointTargetPositionsSetWire
-	wire double{string} JointTargetVelocitiesSetWire
-	wire double{string} JointActualPositionsGetWire
-	wire double{string} JointActualVelocitiesGetWire
+	wire double{string} JointTargetPositionsSetWire [writeonly]
+	wire double{string} JointTargetVelocitiesSetWire [writeonly]
+	wire double{string} JointActualPositionsGetWire [readonly]
+	wire double{string} JointActualVelocitiesGetWire [readonly]
 end object
 
 object Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime	
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime	[readonly]
 end object
 
 object CameraSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime	
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime	[readonly]
 	
 	function CameraImage CaptureImage()
-	pipe CameraImage ImageStream
+	pipe CameraImage ImageStream [readonly]
 end object
 
 object MultiCameraSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property uint8 Active 
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime	
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime	[readonly]
 	
-	property int32 CameraCount 
+	property int32 CameraCount [readonly]
 	function CameraImage CaptureImage(int32 ind)
-	pipe CameraImage{int32} ImageStream
+	pipe CameraImage{int32} ImageStream [readonly]
 end object
 
 object DepthCameraSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime	
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime	[readonly]
 	
 	function DepthCameraImage CaptureImage()
-	pipe DepthCameraImage ImageStream
+	pipe DepthCameraImage ImageStream [readonly]
 end object
 
 object RaySensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime	
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime	[readonly]
 	
 	function LaserScan CaptureScan()
-	pipe LaserScan ScanStream
+	pipe LaserScan ScanStream [readonly]
 end object
 
 object ContactSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime [readonly]
 	
 	function Contact{list} CaptureContacts()
-	wire Contact{list} ContactWire		
+	wire Contact{list} ContactWire [readonly]
 end object
 
 object AltimeterSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime [readonly]
 	
-	property double Altitude
-	wire double AltitudeWire		
+	property double Altitude [readonly]
+	wire double AltitudeWire [readonly]
 end object
 
 object SonarSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime [readonly]
 	
-	property double RangeMin
-	property double RangeMax
-	property double Radius
+	property double RangeMin [readonly]
+	property double RangeMax [readonly]
+	property double Radius [readonly]
 	
-	property double Range
-	wire double RangeWire		
+	property double Range [readonly]
+	wire double RangeWire [readonly]
 end object
 
 object MagnetometerSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime [readonly]
 	
-	property double[3] MagneticField
-	wire double[3] MagneticFieldWire		
+	property double[3] MagneticField [readonly]
+	wire double[3] MagneticFieldWire [readonly]
 end object
 
 object ForceTorqueSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime [readonly]
 	
-	property double[6] ForceTorque
-	wire double[6] ForceTorqueWire		
+	property double[6] ForceTorque [readonly]
+	wire double[6] ForceTorqueWire [readonly]
 end object
 
 object GpsSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime [readonly]
 	
-	property GpsState ReadState
-	wire GpsState StateWire		
+	property GpsState ReadState [readonly]
+	wire GpsState StateWire [readonly]
 end object
 
 object ImuSensor
 	implements Sensor
-	property string Name
-	property string Type
-	property string ParentName
-	property Pose Pose
+	property string Name [readonly]
+	property string Type [readonly]
+	property string ParentName [readonly]
+	property Pose Pose [readonly]
 	
 	property uint8 Active
 	property double UpdateRate
-	property double LastUpdateTime
-	property double LastMeasurementTime
+	property double LastUpdateTime [readonly]
+	property double LastMeasurementTime [readonly]
 	
 	function void SetReferencePose()
 	
-	property ImuState ReadState
-	wire ImuState StateWire		
+	property ImuState ReadState [readonly]
+	wire ImuState StateWire [readonly]
 end object
 
 object Light
-	property string Name
-	property string Type
-	property Pose Pose
-	property double[3] Direction
+	property string Name [readonly]
+	property string Type [readonly]
+	property Pose Pose [readonly]
+	property double[3] Direction [readonly]
 	
 	property Color DiffuseColor
 	property Color SpecularColor

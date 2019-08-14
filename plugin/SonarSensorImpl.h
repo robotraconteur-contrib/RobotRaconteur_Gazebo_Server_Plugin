@@ -41,44 +41,34 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual std::string get_Name() {return SensorImpl::get_Name();}
-  	  virtual void set_Name(std::string value) {SensorImpl::set_Name(value);}
+  	  virtual std::string get_Name() override {return SensorImpl::get_Name();}	  
 
-  	  virtual std::string get_Type() {return SensorImpl::get_Type();}
-  	  virtual void set_Type(std::string value) {SensorImpl::set_Type(value);}
+	  virtual std::string get_Type() override {return SensorImpl::get_Type();}	  
 
-  	  virtual std::string get_ParentName() {return SensorImpl::get_ParentName();}
-	  virtual void set_ParentName(std::string value) {SensorImpl::set_ParentName(value);}
+  	  virtual std::string get_ParentName() override {return SensorImpl::get_ParentName();}	  
 
-  	  virtual RR_SHARED_PTR<rrgz::Pose > get_Pose() {return SensorImpl::get_Pose();}
-  	  virtual void set_Pose(RR_SHARED_PTR<rrgz::Pose > value) {SensorImpl::set_Pose(value);}
+	  virtual rrgz::PosePtr get_Pose() override {return SensorImpl::get_Pose();}   	  
 
-  	  virtual uint8_t get_Active() {return SensorImpl::get_Active();}
-  	  virtual void set_Active(uint8_t value) {SensorImpl::set_Active(value);}
+	  virtual uint8_t get_Active() override {return SensorImpl::get_Active();}
+	  virtual void set_Active(uint8_t value) override {SensorImpl::set_Active(value);}
 
-  	  virtual double get_UpdateRate() {return SensorImpl::get_UpdateRate();}
-  	  virtual void set_UpdateRate(double value) {SensorImpl::set_UpdateRate(value);}
+	  virtual double get_UpdateRate() override {return SensorImpl::get_UpdateRate();}
+	  virtual void set_UpdateRate(double value) override {SensorImpl::set_UpdateRate(value);}
 
-  	  virtual double get_LastUpdateTime() {return SensorImpl::get_LastUpdateTime();}
-  	  virtual void set_LastUpdateTime(double value) {SensorImpl::set_LastUpdateTime(value);}
+	  virtual double get_LastUpdateTime() override {return SensorImpl::get_LastUpdateTime();}	  
 
-  	  virtual double get_LastMeasurementTime() {return SensorImpl::get_LastMeasurementTime();}
-  	  virtual void set_LastMeasurementTime(double value) {SensorImpl::set_LastMeasurementTime(value);}
+	  virtual double get_LastMeasurementTime() override {return SensorImpl::get_LastMeasurementTime();}
 
-  	  virtual double get_RangeMin();
-  	  virtual void set_RangeMin(double value);
+  	  virtual double get_RangeMin() override;
 
-  	  virtual double get_RangeMax();
-  	  virtual void set_RangeMax(double value);
+  	  virtual double get_RangeMax() override;
 
-  	  virtual double get_Radius();
-  	  virtual void set_Radius(double value);
+  	  virtual double get_Radius() override;
 
-  	  virtual double get_Range();
-  	  virtual void set_Range(double value);
+  	  virtual double get_Range() override;
 
-  	  virtual RR_SHARED_PTR<RR::Wire<double> > get_RangeWire();
-  	  virtual void set_RangeWire(RR_SHARED_PTR<RR::Wire<double> > value);
+  	  virtual RR::WirePtr<double> get_RangeWire() override;
+  	  virtual void set_RangeWire(RR::WirePtr<double> value) override;
 
       virtual std::string RRType() {return "experimental.gazebo.SonarSensor";  }
   protected:
@@ -87,8 +77,8 @@ namespace RobotRaconteurGazeboServerPlugin
       void OnUpdate1();
       event::ConnectionPtr updateConnection;
 
-      RR_SHARED_PTR<RR::Wire<double> > m_RangeWire;
-      RR_SHARED_PTR<RR::WireBroadcaster<double> > m_RangeWire_b;
+      RR::WirePtr<double> m_RangeWire;
+      RR::WireBroadcasterPtr<double> m_RangeWire_b;
   };
 
 

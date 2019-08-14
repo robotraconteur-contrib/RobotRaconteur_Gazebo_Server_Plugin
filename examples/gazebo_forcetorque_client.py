@@ -24,8 +24,6 @@ import time
 import cv2
 import numpy as np
 
-RRN.UseNumPy=True
-
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
 print server.SensorNames
 a=server.get_Sensors('default::rip::joint_2::force_torque')

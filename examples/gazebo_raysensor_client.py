@@ -24,8 +24,6 @@ import time
 import cv2
 import numpy as np
 
-RRN.UseNumPy=True
-
 current_ranges=None
 current_intensities=None
 
@@ -61,7 +59,8 @@ while True:
         cv2.imshow("Ranges",current_ranges)
     if (not current_intensities is None):
         cv2.imshow("Intensities", current_intensities)
-    if cv2.waitKey(50)!=-1:
+    ret = cv2.waitKey(50)
+    if ret!=-1 and ret!=255:
         break
 cv2.destroyAllWindows()
 

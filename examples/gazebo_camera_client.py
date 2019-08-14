@@ -24,8 +24,6 @@ import time
 import cv2
 import numpy as np
 
-RRN.UseNumPy=True
-
 current_frame=None
 
 def ImageToMat(image):
@@ -55,7 +53,8 @@ cv2.namedWindow("Image")
 while True:
     if (not current_frame is None):
         cv2.imshow("Image",current_frame)
-    if cv2.waitKey(50)!=-1:
+    ret = cv2.waitKey(50)
+    if ret!=-1 and ret!=255:
         break
 cv2.destroyAllWindows()
 

@@ -43,109 +43,81 @@ std::string WorldImpl::GetRRPath()
 
 std::string WorldImpl::get_Name()
 {
-	return get_world()->GetName();
-}
-void WorldImpl::set_Name(std::string value)
-{
-	throw std::runtime_error("Read only property");
+	return get_world()->Name();
 }
 
 double WorldImpl::get_SimTime()
 {
-	return get_world()->GetSimTime().Double();
-}
-void WorldImpl::set_SimTime(double value)
-{
-	throw std::runtime_error("Read only property");
+	return get_world()->SimTime().Double();
 }
 
 double WorldImpl::get_RealTime()
 {
-	return get_world()->GetRealTime().Double();
-}
-void WorldImpl::set_RealTime(double value)
-{
-	throw std::runtime_error("Read only property");
+	return get_world()->RealTime().Double();
 }
 
 double WorldImpl::get_WallTime()
 {
 	return common::Time::GetWallTime().Double();
 }
-void WorldImpl::set_WallTime(double value)
-{
-	throw std::runtime_error("Read only property");
-}
 
 double WorldImpl::get_StartTime()
 {
-	return get_world()->GetStartTime().Double();
-}
-void WorldImpl::set_StartTime(double value)
-{
-	throw std::runtime_error("Read only property");
+	return get_world()->StartTime().Double();
 }
 
-RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > WorldImpl::get_ModelNames()
+RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_ModelNames()
 {
-	RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > o=RR_MAKE_SHARED<RR::RRList<RR::RRArray<char>  > >();
-	physics::Model_V v=get_world()->GetModels();
+	RR::RRListPtr<RR::RRArray<char> > o( new RR::RRList<RR::RRArray<char> >());
+	physics::Model_V v=get_world()->Models();
 	for(auto e=v.begin(); e!=v.end(); e++)
 	{
-		o->list.push_back(RR::stringToRRArray((*e)->GetName()));
+		o->push_back(RR::stringToRRArray((*e)->GetName()));
 	}
 	return o;
 }
-void WorldImpl::set_ModelNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value)
-{
-	throw std::runtime_error("Read only property");
-}
 
-RR_SHARED_PTR<rrgz::Model> WorldImpl::get_Models(std::string ind)
+rrgz::ModelPtr WorldImpl::get_Models(const std::string& ind)
 {
-	if (ind.find(':')!=std::string::npos) throw std::invalid_argument("Do not use scoped names for index");
-	physics::ModelPtr m=get_world()->GetModel(ind);
-	if (!m) throw std::invalid_argument("Unknown index");
+	if (ind.find(':')!=std::string::npos) throw RR::InvalidArgumentException("Do not use scoped names for index");
+	physics::ModelPtr m=get_world()->ModelByName(ind);
+	if (!m) throw RR::InvalidArgumentException("Unknown index");
 	RR_SHARED_PTR<ModelImpl> m_impl=RR_MAKE_SHARED<ModelImpl>(m);
 	m_impl->Init(GetRRPath() + ".Models[" + RR::detail::encode_index(ind) + "]");
 	return m_impl;
 }
 
-RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > WorldImpl::get_LightNames()
+RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_LightNames()
 {
-	RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > o=RR_MAKE_SHARED<RR::RRList<RR::RRArray<char>  > >();
+	RR::RRListPtr<RR::RRArray<char> > o(new RR::RRList<RR::RRArray<char> >());
 	physics::Light_V v=get_world()->Lights();
 	for(auto e=v.begin(); e!=v.end(); e++)
 	{
-		o->list.push_back(RR::stringToRRArray((*e)->GetName()));
+		o->push_back(RR::stringToRRArray((*e)->GetName()));
 	}
 	return o;
 }
-void WorldImpl::set_LightNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value)
-{
-	throw std::runtime_error("Read only property");
-}
 
-RR_SHARED_PTR<rrgz::Light> WorldImpl::get_Lights(std::string ind)
+rrgz::LightPtr WorldImpl::get_Lights(const std::string& ind)
 {
 	//if (ind.find(':')!=std::string::npos) throw std::invalid_argument("Do not use scoped names for index");
-	rendering::ScenePtr scene=rendering::get_scene(get_world()->GetName());
-	if (!scene) throw std::invalid_argument("Unknown index");
-	physics::LightPtr world_light=get_world()->Light(ind);
-	if (!world_light) throw std::invalid_argument("Unknown index");
+	rendering::ScenePtr scene=rendering::get_scene(get_world()->Name());
+	if (!scene) throw RR::InvalidArgumentException("Unknown index");
+	physics::LightPtr world_light=get_world()->LightByName(ind);
+	if (!world_light) throw RR::InvalidArgumentException("Unknown index");
 	rendering::LightPtr l=scene->GetLight(world_light->GetScopedName());
-	if (!l) throw std::invalid_argument("Unknown index");
+	if (!l) throw RR::InvalidArgumentException("Unknown index");
 	RR_SHARED_PTR<LightImpl> l_impl=RR_MAKE_SHARED<LightImpl>(l);
 	l_impl->Init();
 	return l_impl;
 }
 
-RR_SHARED_PTR<RR::Wire<double > > WorldImpl::get_SimTimeWire()
+RR::WirePtr<double> WorldImpl::get_SimTimeWire()
 {
 	boost::mutex::scoped_lock lock(this_lock);
 	return m_SimTimeWire;
 }
-void WorldImpl::set_SimTimeWire(RR_SHARED_PTR<RR::Wire<double > > value)
+void WorldImpl::set_SimTimeWire(RR::WirePtr<double> value)
 {
 	boost::mutex::scoped_lock lock(this_lock);
 	if (m_SimTimeWire) throw std::runtime_error("Already set");

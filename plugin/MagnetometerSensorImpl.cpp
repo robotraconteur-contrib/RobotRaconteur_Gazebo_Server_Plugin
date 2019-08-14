@@ -39,7 +39,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 
 
-	RR_SHARED_PTR<RR::RRArray<double> > MagnetometerSensorImpl::get_MagneticField()
+	RR::RRArrayPtr<double> MagnetometerSensorImpl::get_MagneticField()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		sensors::MagnetometerSensorPtr c=get_magnetometersensor();
@@ -50,21 +50,17 @@ namespace RobotRaconteurGazeboServerPlugin
 		(*o)[2]=v[2];
 		return o;
 	}
-	void MagnetometerSensorImpl::set_MagneticField(RR_SHARED_PTR<RR::RRArray<double> > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double> > > > MagnetometerSensorImpl::get_MagneticFieldWire()
+	
+	RR::WirePtr<RR::RRArrayPtr<double> > MagnetometerSensorImpl::get_MagneticFieldWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_MagneticFieldWire;
 	}
-	void MagnetometerSensorImpl::set_MagneticFieldWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double> > > > value)
+	void MagnetometerSensorImpl::set_MagneticFieldWire(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		m_MagneticFieldWire=value;
-		m_MagneticFieldWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double> > > >();
+		m_MagneticFieldWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRArrayPtr<double> > >();
 		m_MagneticFieldWire_b->Init(m_MagneticFieldWire);
 	}
 
@@ -75,7 +71,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void MagnetometerSensorImpl::OnUpdate1()
 	{
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double> > > > b;
+		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_MagneticFieldWire_b;

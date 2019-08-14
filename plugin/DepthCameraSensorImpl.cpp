@@ -31,13 +31,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		updateConnection=get_camera()->ConnectUpdated(boost::bind(&DepthCameraSensorImpl::OnUpdate,c));
 	}
 
-	RR_SHARED_PTR<rrgz::DepthCameraImage > DepthCameraSensorImpl::CaptureImage()
+	rrgz::DepthCameraImagePtr DepthCameraSensorImpl::CaptureImage()
 	{
 
 		sensors::DepthCameraSensorPtr c=get_camera();
 		rendering::DepthCameraPtr c2=c->DepthCamera();
 		if (!c2->CaptureData()) throw std::runtime_error("Image not ready");
-		auto o=RR_MAKE_SHARED<rrgz::DepthCameraImage>();
+		rrgz::DepthCameraImagePtr o(new rrgz::DepthCameraImage());
 		const uint8_t* image_bytes=c2->ImageData();
 		size_t image_byte_size=c2->ImageByteSize();
 		o->imageData=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
@@ -59,17 +59,17 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::DepthCameraSensor>(get_sensor());
 	}
 
-	RR_SHARED_PTR<RR::Pipe<RR_SHARED_PTR<rrgz::DepthCameraImage > > > DepthCameraSensorImpl::get_ImageStream()
+	RR::PipePtr<rrgz::DepthCameraImagePtr> DepthCameraSensorImpl::get_ImageStream()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_ImageStream;
 	}
-	void DepthCameraSensorImpl::set_ImageStream(RR_SHARED_PTR<RR::Pipe<RR_SHARED_PTR<rrgz::DepthCameraImage > > > value)
+	void DepthCameraSensorImpl::set_ImageStream(RR::PipePtr<rrgz::DepthCameraImagePtr> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_ImageStream) throw std::runtime_error("Already set");
 		m_ImageStream=value;
-		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<RR_SHARED_PTR<rrgz::DepthCameraImage > > >();
+		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<rrgz::DepthCameraImagePtr> >();
 		m_ImageStream_b->Init(m_ImageStream,3);
 	}
 
@@ -83,7 +83,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void DepthCameraSensorImpl::OnUpdate1()
 	{
 
-		RR_SHARED_PTR<RR::PipeBroadcaster<RR_SHARED_PTR<rrgz::DepthCameraImage > > > b;
+		RR::PipeBroadcasterPtr<rrgz::DepthCameraImagePtr> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_ImageStream_b;

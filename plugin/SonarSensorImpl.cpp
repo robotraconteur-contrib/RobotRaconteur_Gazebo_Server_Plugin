@@ -42,47 +42,30 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return get_sonarsensor()->RangeMin();
 	}
-	void SonarSensorImpl::set_RangeMin(double value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	double SonarSensorImpl::get_RangeMax()
 	{
 		return get_sonarsensor()->RangeMax();
 	}
-	void SonarSensorImpl::set_RangeMax(double value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	double SonarSensorImpl::get_Radius()
 	{
 		return get_sonarsensor()->Radius();
 	}
-	void SonarSensorImpl::set_Radius(double value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-
+	
 	double SonarSensorImpl::get_Range()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		sensors::SonarSensorPtr c=get_sonarsensor();
 		return c->Range();
 	}
-	void SonarSensorImpl::set_Range(double value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<RR::Wire<double> > SonarSensorImpl::get_RangeWire()
+	
+	RR::WirePtr<double> SonarSensorImpl::get_RangeWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_RangeWire;
 	}
-	void SonarSensorImpl::set_RangeWire(RR_SHARED_PTR<RR::Wire<double> > value)
+	void SonarSensorImpl::set_RangeWire(RR::WirePtr<double> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		m_RangeWire=value;
@@ -97,7 +80,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void SonarSensorImpl::OnUpdate1()
 	{
-		RR_SHARED_PTR<RR::WireBroadcaster<double> > b;
+		RR::WireBroadcasterPtr<double> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_RangeWire_b;

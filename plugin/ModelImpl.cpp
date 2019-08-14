@@ -26,9 +26,9 @@ namespace RobotRaconteurGazeboServerPlugin
 		gz_world=m->GetWorld();
 	}
 
-	RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > ModelImpl::get_ChildModelNames()
+	RR::RRListPtr<RR::RRArray<char> > ModelImpl::get_ChildModelNames()
 	{
-		RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > o=RR_MAKE_SHARED<RR::RRList<RR::RRArray<char>  > >();
+		RR::RRListPtr<RR::RRArray<char> > o(new RR::RRList<RR::RRArray<char> >());
 		auto m=get_model();
 		unsigned int n=m->GetChildCount();
 		for(unsigned int i=0; i<n; i++)
@@ -36,17 +36,13 @@ namespace RobotRaconteurGazeboServerPlugin
 			auto e=m->GetChild(i);
 			if( e->HasType(physics::Base::EntityType::MODEL) )
 			{
-				o->list.push_back(RR::stringToRRArray(e->GetName()));
+				o->push_back(RR::stringToRRArray(e->GetName()));
 			}
 		}
 		return o;
 	}
-	void ModelImpl::set_ChildModelNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<rrgz::Model > ModelImpl::get_ChildModels(std::string ind)
+	
+	rrgz::ModelPtr ModelImpl::get_ChildModels(const std::string& ind)
 	{
 		if (ind.find(':')!=std::string::npos) throw std::invalid_argument("Do not use scoped names for index");
 		physics::BasePtr e=get_model()->GetChild(ind);
@@ -58,22 +54,18 @@ namespace RobotRaconteurGazeboServerPlugin
 		return m_impl;
 	}
 
-	RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > ModelImpl::get_LinkNames()
+	RR::RRListPtr<RR::RRArray<char> > ModelImpl::get_LinkNames()
 	{
-		RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > o=RR_MAKE_SHARED<RR::RRList<RR::RRArray<char>  > >();
+		RR::RRListPtr<RR::RRArray<char> > o(new RR::RRList<RR::RRArray<char> >());
 		physics::Link_V v=get_model()->GetLinks();
 		for(auto e=v.begin(); e!=v.end(); e++)
 		{
-			o->list.push_back(RR::stringToRRArray((*e)->GetName()));
+			o->push_back(RR::stringToRRArray((*e)->GetName()));
 		}
 		return o;
 	}
-	void ModelImpl::set_LinkNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<rrgz::Link > ModelImpl::get_Links(std::string ind)
+	
+	rrgz::LinkPtr ModelImpl::get_Links(const std::string& ind)
 	{
 		if (ind.find(':')!=std::string::npos) throw std::invalid_argument("Do not use scoped names for index");
 		physics::LinkPtr m=get_model()->GetLink(ind);
@@ -83,23 +75,18 @@ namespace RobotRaconteurGazeboServerPlugin
 		return m_impl;
 	}
 
-	RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > ModelImpl::get_JointNames()
+	RR::RRListPtr<RR::RRArray<char> > ModelImpl::get_JointNames()
 	{
-		RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > o=RR_MAKE_SHARED<RR::RRList<RR::RRArray<char>  > >();
+		RR::RRListPtr<RR::RRArray<char> > o(new RR::RRList<RR::RRArray<char> >());
 		physics::Joint_V v=get_model()->GetJoints();
 		for(auto e=v.begin(); e!=v.end(); e++)
 		{
-			o->list.push_back(RR::stringToRRArray((*e)->GetName()));
+			o->push_back(RR::stringToRRArray((*e)->GetName()));
 		}
 		return o;
 	}
-
-	void ModelImpl::set_JointNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<rrgz::Joint > ModelImpl::get_Joints(std::string ind)
+	
+	rrgz::JointPtr ModelImpl::get_Joints(const std::string& ind)
 	{
 		if (ind.find(':')!=std::string::npos) throw std::invalid_argument("Do not use scoped names for index");
 		physics::JointPtr m=get_model()->GetJoint(ind);
@@ -140,7 +127,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		joint_controller.reset();
 	}
 
-	RR_SHARED_PTR<rrgz::JointController > ModelImpl::get_JointController()
+	rrgz::JointControllerPtr ModelImpl::get_JointController()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (!joint_controller) throw std::runtime_error("Joint controller not active");

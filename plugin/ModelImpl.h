@@ -38,66 +38,58 @@ namespace RobotRaconteurGazeboServerPlugin
   public:
 	  ModelImpl(physics::ModelPtr m);
 
-	  virtual std::string get_Name() {return EntityImpl::get_Name();}
-	  virtual void set_Name(std::string n) {return EntityImpl::set_Name(n);}
-	  virtual std::string get_ScopedName() {return EntityImpl::get_ScopedName();}
-	  virtual void set_ScopedName(std::string n) {return EntityImpl::set_ScopedName(n);}
+	  virtual std::string get_Name() override {return EntityImpl::get_Name();}
+	  
+	  virtual std::string get_ScopedName() override {return EntityImpl::get_ScopedName();}
 
-	  virtual RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > get_ChildModelNames();
-	  virtual void set_ChildModelNames(RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > value);
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_ChildModelNames() override; 
 
-	  virtual RR_SHARED_PTR<rrgz::Model> get_ChildModels(std::string ind);
+	  virtual rrgz::ModelPtr get_ChildModels(const std::string& ind) override;
 
-	  virtual RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > get_LinkNames();
-	  virtual void set_LinkNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value);
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_LinkNames() override;
+	  
+	  virtual rrgz::LinkPtr get_Links(const std::string& ind) override;
 
-	  virtual RR_SHARED_PTR<rrgz::Link > get_Links(std::string ind);
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_JointNames() override;
+	  
+	  virtual rrgz::JointPtr get_Joints(const std::string& ind) override;
 
-	  virtual RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > get_JointNames();
-	  virtual void set_JointNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value);
+	  virtual rrgz::PosePtr get_WorldPose() override {return EntityImpl::get_WorldPose();}
+	  virtual void set_WorldPose(rrgz::PosePtr value) override {EntityImpl::set_WorldPose(value);}
 
-	  virtual RR_SHARED_PTR<rrgz::Joint > get_Joints(std::string ind);
+	  virtual rrgz::PosePtr get_RelativePose() override {return EntityImpl::get_RelativePose();}
+	  virtual void set_RelativePose(rrgz::PosePtr value) override {EntityImpl::set_RelativePose(value);}
 
-	  virtual RR_SHARED_PTR<rrgz::Pose > get_WorldPose() {return EntityImpl::get_WorldPose(); }
-	  virtual void set_WorldPose(RR_SHARED_PTR<rrgz::Pose > value) { EntityImpl::set_WorldPose(value); }
+	  virtual RR::RRArrayPtr<double> get_WorldVelocity() override {return EntityImpl::get_WorldVelocity();}
 
-	  virtual RR_SHARED_PTR<rrgz::Pose > get_RelativePose() {return EntityImpl::get_RelativePose();}
-	  virtual void set_RelativePose(RR_SHARED_PTR<rrgz::Pose > value) {EntityImpl::set_RelativePose(value);}
+	  virtual RR::RRArrayPtr<double > get_RelativeVelocity() override {return EntityImpl::get_RelativeVelocity();}
+	  
+	  virtual RR::RRArrayPtr<double> get_WorldAcceleration() override {return EntityImpl::get_WorldAcceleration();}
+	  
+	  virtual RR::RRArrayPtr<double> get_RelativeAcceleration() override {return EntityImpl::get_RelativeAcceleration();}
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_WorldVelocity() {return EntityImpl::get_WorldVelocity();}
-	  virtual void set_WorldVelocity(RR_SHARED_PTR<RR::RRArray<double > > value) {EntityImpl::set_WorldVelocity(value);}
+	  virtual RR::WirePtr<rrgz::PosePtr> get_WorldPoseGetWire() override {return EntityImpl::get_WorldPoseGetWire();}
+	  virtual void set_WorldPoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override {EntityImpl::set_WorldPoseGetWire(value);}
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_RelativeVelocity() {return EntityImpl::get_RelativeVelocity();}
-	  virtual void set_RelativeVelocity(RR_SHARED_PTR<RR::RRArray<double > > value) {EntityImpl::set_RelativeVelocity(value);}
+	  virtual RR::WirePtr<rrgz::PosePtr> get_RelativePoseGetWire() override {return EntityImpl::get_RelativePoseGetWire();}
+	  virtual void set_RelativePoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override {EntityImpl::set_RelativePoseGetWire(value);}
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_WorldAcceleration() {return EntityImpl::get_WorldAcceleration();}
-	  virtual void set_WorldAcceleration(RR_SHARED_PTR<RR::RRArray<double > > value) {EntityImpl::set_WorldAcceleration(value);}
+	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldVelocityGetWire() override {return EntityImpl::get_WorldVelocityGetWire();}
+	  virtual void set_WorldVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override {EntityImpl::set_WorldVelocityGetWire(value);}
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_RelativeAcceleration() {return EntityImpl::get_RelativeAcceleration();}
-	  virtual void set_RelativeAcceleration(RR_SHARED_PTR<RR::RRArray<double > > value) {EntityImpl::set_RelativeAcceleration(value);}
+	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_RelativeVelocityGetWire() override {return EntityImpl::get_RelativeVelocityGetWire();}
+	  virtual void set_RelativeVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override {EntityImpl::set_RelativeVelocityGetWire(value);}
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > get_WorldPoseGetWire() {return EntityImpl::get_WorldPoseGetWire();}
-	  virtual void set_WorldPoseGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > value) {EntityImpl::set_WorldPoseGetWire(value);}
+	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldAccelerationGetWire() override {return EntityImpl::get_WorldAccelerationGetWire();}
+	  virtual void set_WorldAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override {EntityImpl::set_WorldAccelerationGetWire(value);}
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > get_RelativePoseGetWire() {return EntityImpl::get_RelativePoseGetWire();}
-	  virtual void set_RelativePoseGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > value) {EntityImpl::set_RelativePoseGetWire(value);}
+	  virtual RR::WirePtr<RR::RRArrayPtr<double > > get_RelativeAccelerationGetWire() override {return EntityImpl::get_RelativeAccelerationGetWire();}
+	  virtual void set_RelativeAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double > > value) override {EntityImpl::set_RelativeAccelerationGetWire(value);}
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_WorldVelocityGetWire() {return EntityImpl::get_WorldVelocityGetWire();}
-	  virtual void set_WorldVelocityGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value) {EntityImpl::set_WorldVelocityGetWire(value);}
+	  virtual void CreateJointController() override;
+	  virtual void DestroyJointController() override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_RelativeVelocityGetWire() {return EntityImpl::get_RelativeVelocityGetWire();}
-	  virtual void set_RelativeVelocityGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value) {EntityImpl::set_RelativeVelocityGetWire(value);}
-
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_WorldAccelerationGetWire() {return EntityImpl::get_WorldAccelerationGetWire();}
-	  virtual void set_WorldAccelerationGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value) {EntityImpl::set_WorldAccelerationGetWire(value);}
-
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_RelativeAccelerationGetWire() {return EntityImpl::get_RelativeAccelerationGetWire();}
-	  virtual void set_RelativeAccelerationGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value) {EntityImpl::set_RelativeAccelerationGetWire(value);}
-
-	  virtual void CreateJointController();
-	  virtual void DestroyJointController();
-
-	  virtual RR_SHARED_PTR<rrgz::JointController > get_JointController();
+	  virtual rrgz::JointControllerPtr get_JointController() override;
 
   protected:
 	  boost::weak_ptr<physics::Model> gz_model;

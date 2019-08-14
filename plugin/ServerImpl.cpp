@@ -36,52 +36,43 @@ namespace RobotRaconteurGazeboServerPlugin
 			if (!w) return;
 
 			RR_SHARED_PTR<WorldImpl> rr_w=RR_MAKE_SHARED<WorldImpl>(w);
-			rr_w->Init("GazeboServer.Worlds[" + RR::detail::encode_index(w->GetName()) +  "]");
-			rr_worlds.insert(std::make_pair(w->GetName(),rr_w));
+			rr_w->Init("GazeboServer.Worlds[" + RR::detail::encode_index(w->Name()) +  "]");
+			rr_worlds.insert(std::make_pair(w->Name(),rr_w));
 		}
 	}
 
-	RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > ServerImpl::get_WorldNames()
+	RR::RRListPtr<RR::RRArray<char> > ServerImpl::get_WorldNames()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		RR_SHARED_PTR<RR::RRList<RR::RRArray<char> > > o=RR_MAKE_SHARED<RR::RRList<RR::RRArray<char> > >();
+		RR::RRListPtr<RR::RRArray<char> > o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
 		for (auto e=rr_worlds.begin(); e!=rr_worlds.end(); e++)
 		{
-			o->list.push_back(RR::stringToRRArray(e->first));
+			o->push_back(RR::stringToRRArray(e->first));
 		}
 		return o;
 
 	}
-	void ServerImpl::set_WorldNames(RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<rrgz::World > ServerImpl::get_Worlds(std::string ind)
+	
+	rrgz::WorldPtr ServerImpl::get_Worlds(const std::string& ind)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (rr_worlds.count(ind)==0) throw std::invalid_argument("Invalid world");
 		return rr_worlds.at(ind);
 	}
 
-	RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > ServerImpl::get_SensorNames()
+	RR::RRListPtr<RR::RRArray<char> > ServerImpl::get_SensorNames()
 	{
 		sensors::Sensor_V s=sensors::SensorManager::Instance()->GetSensors();
-		auto o=RR_MAKE_SHARED<RR::RRList<RR::RRArray<char>  > >();
+		auto o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
 
 		for (auto e=s.begin(); e!=s.end(); e++)
 		{
-			o->list.push_back(RR::stringToRRArray((*e)->ScopedName()));
+			o->push_back(RR::stringToRRArray((*e)->ScopedName()));
 		}
 		return o;
 	}
-	void ServerImpl::set_SensorNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-
-	RR_SHARED_PTR<rrgz::Sensor > ServerImpl::get_Sensors(std::string ind)
+	
+	rrgz::SensorPtr ServerImpl::get_Sensors(const std::string& ind)
 	{
 		sensors::SensorPtr s=sensors::SensorManager::Instance()->GetSensor(ind);
 		if (!s) throw std::invalid_argument("Invalid sensor name");

@@ -32,13 +32,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		updateConnection=get_camera()->ConnectUpdated(boost::bind(&CameraImpl::OnUpdate,c));
 	}
 
-	RR_SHARED_PTR<rrgz::CameraImage > CameraImpl::CaptureImage()
+	rrgz::CameraImagePtr CameraImpl::CaptureImage()
 	{
 
 		sensors::CameraSensorPtr c=get_camera();
 		rendering::CameraPtr c2=c->Camera();
 		if (!c2->CaptureData()) throw std::runtime_error("Image not ready");
-		auto o=RR_MAKE_SHARED<rrgz::CameraImage>();
+		rrgz::CameraImagePtr o(new rrgz::CameraImage());
 		const uint8_t* image_bytes=c2->ImageData();
 		size_t image_byte_size=c2->ImageByteSize();
 		o->data=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
@@ -54,17 +54,17 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::CameraSensor>(get_sensor());
 	}
 
-	RR_SHARED_PTR<RR::Pipe<RR_SHARED_PTR<rrgz::CameraImage > > > CameraImpl::get_ImageStream()
+	RR::PipePtr<rrgz::CameraImagePtr> CameraImpl::get_ImageStream()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_ImageStream;
 	}
-	void CameraImpl::set_ImageStream(RR_SHARED_PTR<RR::Pipe<RR_SHARED_PTR<rrgz::CameraImage > > > value)
+	void CameraImpl::set_ImageStream(RR::PipePtr<rrgz::CameraImagePtr> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_ImageStream) throw std::runtime_error("Already set");
 		m_ImageStream=value;
-		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<RR_SHARED_PTR<rrgz::CameraImage > > >();
+		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<rrgz::CameraImagePtr> >();
 		m_ImageStream_b->Init(m_ImageStream,3);
 	}
 
@@ -78,7 +78,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void CameraImpl::OnUpdate1()
 	{
 
-		RR_SHARED_PTR<RR::PipeBroadcaster<RR_SHARED_PTR<rrgz::CameraImage > > > b;
+		RR::PipeBroadcasterPtr<rrgz::CameraImagePtr> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_ImageStream_b;

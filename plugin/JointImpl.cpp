@@ -27,7 +27,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		model_name=j->GetParent()->GetParentModel()->GetName();
 		gz_world=j->GetParent()->GetParentModel()->GetWorld();
 
-		axes_forces=RR::AllocateRRArray<double>(j->GetAngleCount());
+		axes_forces=RR::AllocateRRArray<double>(j->DOF());
 	}
 
 	void JointImpl::Init()
@@ -50,16 +50,16 @@ namespace RobotRaconteurGazeboServerPlugin
 		//std::cout << _info.simTime.Double() << std::endl;
 
 
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > axisangle_b;
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > axisvel_b;
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > ft_b;
+		RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > axisangle_b;
+		RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > axisvel_b;
+		RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > ft_b;
 
 		unsigned int axis_count;
 		physics::JointPtr j=get_joint();
 		{
 			boost::mutex::scoped_lock lock(this_lock);
 
-			axis_count=j->GetAngleCount();
+			axis_count=j->DOF();
 
 			try
 			{
@@ -67,8 +67,8 @@ namespace RobotRaconteurGazeboServerPlugin
 				{
 					if (m_AxisPositionSetWire_conn->GetInValueValid())
 					{
-						RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double> > > in_val=m_AxisPositionSetWire_conn->GetInValue();
-						for(std::map<int32_t,RR_SHARED_PTR<RR::RRArray<double> > >::iterator e=in_val->map.begin(); e!=in_val->map.end(); e++)
+						RR::RRMapPtr<int32_t,RR::RRArray<double> > in_val=m_AxisPositionSetWire_conn->GetInValue();
+						for(auto e=in_val->begin(); e!=in_val->end(); e++)
 						{
 							if (e->first < axis_count)
 							{
@@ -86,8 +86,8 @@ namespace RobotRaconteurGazeboServerPlugin
 				{
 					if (m_AxisVelocitySetWire_conn->GetInValueValid())
 					{
-						RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double> > > in_val=m_AxisVelocitySetWire_conn->GetInValue();
-						for(std::map<int32_t,RR_SHARED_PTR<RR::RRArray<double> > >::iterator e=in_val->map.begin(); e!=in_val->map.end(); e++)
+						RR::RRMapPtr<int32_t,RR::RRArray<double> > in_val=m_AxisVelocitySetWire_conn->GetInValue();
+						for(auto e=in_val->begin(); e!=in_val->end(); e++)
 						{
 							if (e->first < axis_count)
 							{
@@ -108,8 +108,8 @@ namespace RobotRaconteurGazeboServerPlugin
 					if (m_ForceSetWire_conn->GetInValueValid())
 					{
 						force_set=true;
-						RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double> > > in_val=m_ForceSetWire_conn->GetInValue();
-						for(std::map<int32_t,RR_SHARED_PTR<RR::RRArray<double> > >::iterator e=in_val->map.begin(); e!=in_val->map.end(); e++)
+						RR::RRMapPtr<int32_t,RR::RRArray<double> > in_val=m_ForceSetWire_conn->GetInValue();
+						for(auto e=in_val->begin(); e!=in_val->end(); e++)
 						{
 							if (e->first < axis_count)
 							{
@@ -139,14 +139,14 @@ namespace RobotRaconteurGazeboServerPlugin
 			ft_b=m_ForceTorqueGetWire_b;
 
 		}
-		RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > axisangle=RR_MAKE_SHARED<RR::RRMap<int32_t,RR::RRArray<double > > >();
-		RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > axisvel=RR_MAKE_SHARED<RR::RRMap<int32_t,RR::RRArray<double > > >();
-		RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > ft=RR_MAKE_SHARED<RR::RRMap<int32_t,RR::RRArray<double > > >();
+		RR::RRMapPtr<int32_t,RR::RRArray<double > > axisangle(new RR::RRMap<int32_t,RR::RRArray<double > >());
+		RR::RRMapPtr<int32_t,RR::RRArray<double > > axisvel(new RR::RRMap<int32_t,RR::RRArray<double > >());
+		RR::RRMapPtr<int32_t,RR::RRArray<double > > ft(new RR::RRMap<int32_t,RR::RRArray<double > >());
 
 		for (unsigned int i=0; i<axis_count; i++)
 		{
-			axisangle->map.insert(std::make_pair((int32_t)i,RR::ScalarToRRArray(GetAxisAngle(i))));
-			axisvel->map.insert(std::make_pair((int32_t)i,RR::ScalarToRRArray(GetAxisVelocity(i))));
+			axisangle->insert(std::make_pair((int32_t)i,RR::ScalarToRRArray(GetAxisAngle(i))));
+			axisvel->insert(std::make_pair((int32_t)i,RR::ScalarToRRArray(GetAxisVelocity(i))));
 		}
 
 		//TODO: Determine "Provide Feedback?"
@@ -172,65 +172,45 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return get_joint()->GetName();
 	}
-	void JointImpl::set_Name(std::string value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	std::string JointImpl::get_ScopedName()
 	{
 		return get_joint()->GetScopedName(true);
 	}
-	void JointImpl::set_ScopedName(std::string value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	std::string JointImpl::get_ParentLinkName()
 	{
 		return get_joint()->GetParent()->GetName();
 	}
-	void JointImpl::set_ParentLinkName(std::string value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	std::string JointImpl::get_ChildLinkName()
 	{
 		return get_joint()->GetChild()->GetName();
 	}
-	void JointImpl::set_ChildLinkName(std::string value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	int32_t JointImpl::get_AxisCount()
 	{
-		return get_joint()->GetAngleCount();
+		return get_joint()->DOF();
 	}
-	void JointImpl::set_AxisCount(int32_t value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > JointImpl::get_AxesAngles()
+	
+	RR::RRMapPtr<int32_t,RR::RRArray<double > > JointImpl::get_AxesAngles()
 	{
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
-		RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > o=RR_MAKE_SHARED<RR::RRMap<int32_t,RR::RRArray<double > > >();
+		int axis_count=j->DOF();
+		RR::RRMapPtr<int32_t,RR::RRArray<double > > o(new RR::RRMap<int32_t,RR::RRArray<double > >());
 		for (int32_t i=0; i<axis_count; i++)
 		{
-			double v=j->GetAngle(i).Radian();
-			o->map.insert(std::make_pair(i,RR::ScalarToRRArray(v)));
+			double v=j->Position(i);
+			o->insert(std::make_pair(i,RR::ScalarToRRArray(v)));
 		}
 		return o;
 	}
-	void JointImpl::set_AxesAngles(RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > value)
+	void JointImpl::set_AxesAngles(RR::RRMapPtr<int32_t,RR::RRArray<double > > value)
 	{
 		RR_NULL_CHECK(value);
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
-		for (std::map<int32_t,RR_SHARED_PTR<RR::RRArray<double > > >::iterator e=value->map.begin(); e!=value->map.end(); e++)
+		int axis_count=j->DOF();
+		for (auto e=value->begin(); e!=value->end(); e++)
 		{
 			RR_NULL_CHECK(e->second);
 			if (e->first > axis_count)
@@ -243,24 +223,24 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 
-	RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > JointImpl::get_AxesVelocities()
+	RR::RRMapPtr<int32_t,RR::RRArray<double > > JointImpl::get_AxesVelocities()
 	{
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
-		RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > o=RR_MAKE_SHARED<RR::RRMap<int32_t,RR::RRArray<double > > >();
+		int axis_count=j->DOF();
+		RR::RRMapPtr<int32_t,RR::RRArray<double > > o(new RR::RRMap<int32_t,RR::RRArray<double > >());
 		for (int32_t i=0; i<axis_count; i++)
 		{
 			double v=j->GetVelocity(i);
-			o->map.insert(std::make_pair(i,RR::ScalarToRRArray(v)));
+			o->insert(std::make_pair(i,RR::ScalarToRRArray(v)));
 		}
 		return o;
 	}
-	void JointImpl::set_AxesVelocities(RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > value)
+	void JointImpl::set_AxesVelocities(RR::RRMapPtr<int32_t,RR::RRArray<double > > value)
 	{
 		RR_NULL_CHECK(value);
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
-		for (std::map<int32_t,RR_SHARED_PTR<RR::RRArray<double > > >::iterator e=value->map.begin(); e!=value->map.end(); e++)
+		int axis_count=j->DOF();
+		for (auto e=value->begin(); e!=value->end(); e++)
 		{
 			RR_NULL_CHECK(e->second);
 			if (e->first > axis_count)
@@ -273,42 +253,42 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 
-	RR_SHARED_PTR<RR::RRArray<double > > JointImpl::GetGlobalAxis(int32_t axis)
+	RR::RRArrayPtr<double> JointImpl::GetGlobalAxis(int32_t axis)
 	{
-		RR_SHARED_PTR<RR::RRArray<double> > o=RR::AllocateRRArray<double>(3);
+		RR::RRArrayPtr<double> o=RR::AllocateRRArray<double>(3);
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
 
-		math::Vector3 v=j->GetGlobalAxis(axis);
-		(*o)[0]=v.x; (*o)[1]=v.y; (*o)[2]=v.z;
+		auto v=j->GlobalAxis(axis);
+		(*o)[0]=v.X(); (*o)[1]=v.Y(); (*o)[2]=v.Z();
 		return 0;
 	}
 
-	RR_SHARED_PTR<RR::RRArray<double > > JointImpl::GetLocalAxis(int32_t axis)
+	RR::RRArrayPtr<double> JointImpl::GetLocalAxis(int32_t axis)
 	{
-		RR_SHARED_PTR<RR::RRArray<double> > o=RR::AllocateRRArray<double>(3);
+		RR::RRArrayPtr<double> o=RR::AllocateRRArray<double>(3);
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
 
-		math::Vector3 v=j->GetLocalAxis(axis);
-		(*o)[0]=v.x; (*o)[1]=v.y; (*o)[2]=v.z;
+		auto v=j->LocalAxis(axis);
+		(*o)[0]=v.X(); (*o)[1]=v.Y(); (*o)[2]=v.Z();
 		return 0;
 	}
 
 	double JointImpl::GetAxisAngle(int32_t axis)
 	{
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-		return j->GetAngle(axis).Radian();
+		return j->Position(axis);
 	}
 
 	void JointImpl::SetAxisPosition(int32_t axis, double value)
 	{
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
 		j->SetPosition(axis,value);
 	}
@@ -316,7 +296,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	double JointImpl::GetAxisVelocity(int32_t axis)
 	{
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
 		return j->GetVelocity(axis);
 	}
@@ -324,7 +304,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void JointImpl::SetAxisVelocity(int32_t axis, double value)
 	{
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
 		j->SetVelocity(axis,value);
 	}
@@ -332,7 +312,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	double JointImpl::GetForce(int32_t axis)
 	{
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
 		return j->GetForce(axis);
 	}
@@ -341,12 +321,12 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		physics::JointPtr j=get_joint();
-		int axis_count=j->GetAngleCount();
+		int axis_count=j->DOF();
 		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
 
 		if (axes_forces->size() < axis_count)
 		{
-			RR_SHARED_PTR<RR::RRArray<double> > axes_forces1=RR::AllocateRRArray<double>(axis_count);
+			RR::RRArrayPtr<double> axes_forces1=RR::AllocateRRArray<double>(axis_count);
 			for (size_t i=0; i<axes_forces->size(); i++)
 			{
 				(*axes_forces1)[i]=(*axes_forces)[i];
@@ -357,21 +337,21 @@ namespace RobotRaconteurGazeboServerPlugin
 		(*axes_forces)[axis]=value;
 	}
 
-	RR_SHARED_PTR<RR::RRArray<double > > JointImpl::GetForceTorque(int32_t link)
+	RR::RRArrayPtr<double> JointImpl::GetForceTorque(int32_t link)
 	{
-		RR_SHARED_PTR<RR::RRArray<double> > o=RR::AllocateRRArray<double>(6);
+		RR::RRArrayPtr<double> o=RR::AllocateRRArray<double>(6);
 
 		physics::JointWrench a=get_joint()->GetForceTorque(0);
 
 		if (link==0)
 		{
-			(*o)[0]=a.body1Torque.x; (*o)[1]=a.body1Torque.y; (*o)[2]=a.body1Torque.z;
-			(*o)[3]=a.body1Force.x; (*o)[4]=a.body1Force.y; (*o)[5]=a.body1Force.z;
+			(*o)[0]=a.body1Torque.X(); (*o)[1]=a.body1Torque.Y(); (*o)[2]=a.body1Torque.Z();
+			(*o)[3]=a.body1Force.X(); (*o)[4]=a.body1Force.Y(); (*o)[5]=a.body1Force.Z();
 		}
 		else if (link==1)
 		{
-			(*o)[0]=a.body2Torque.x; (*o)[1]=a.body2Torque.y; (*o)[2]=a.body2Torque.z;
-			(*o)[3]=a.body2Force.x; (*o)[4]=a.body2Force.y; (*o)[5]=a.body2Force.z;
+			(*o)[0]=a.body2Torque.X(); (*o)[1]=a.body2Torque.Y(); (*o)[2]=a.body2Torque.Z();
+			(*o)[3]=a.body2Force.X(); (*o)[4]=a.body2Force.Y(); (*o)[5]=a.body2Force.Z();
 		}
 		else
 		{
@@ -380,54 +360,54 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > JointImpl::get_AxisAngleGetWire()
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > JointImpl::get_AxisAngleGetWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_AxisAngleGetWire;
 	}
-	void JointImpl::set_AxisAngleGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value)
+	void JointImpl::set_AxisAngleGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_AxisAngleGetWire) throw std::runtime_error("Already set");
 		m_AxisAngleGetWire=value;
-		m_AxisAngleGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > > >();
+		m_AxisAngleGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<int32_t,RR::RRArray<double > > > >();
 		m_AxisAngleGetWire_b->Init(m_AxisAngleGetWire);
 	}
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > JointImpl::get_AxisVelocityGetWire()
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > JointImpl::get_AxisVelocityGetWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_AxisVelocityGetWire;
 	}
-	void JointImpl::set_AxisVelocityGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value)
+	void JointImpl::set_AxisVelocityGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_AxisVelocityGetWire) throw std::runtime_error("Already set");
 		m_AxisVelocityGetWire=value;
-		m_AxisVelocityGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > > >();
+		m_AxisVelocityGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<int32_t,RR::RRArray<double> > > >();
 		m_AxisVelocityGetWire_b->Init(m_AxisVelocityGetWire);
 	}
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > JointImpl::get_ForceTorqueGetWire()
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_ForceTorqueGetWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_ForceTorqueGetWire;
 	}
-	void JointImpl::set_ForceTorqueGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value)
+	void JointImpl::set_ForceTorqueGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_ForceTorqueGetWire) throw std::runtime_error("Already set");
 		m_ForceTorqueGetWire=value;
-		m_ForceTorqueGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double > > > > >();
+		m_ForceTorqueGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<int32_t,RR::RRArray<double> > > >();
 		m_ForceTorqueGetWire_b->Init(m_ForceTorqueGetWire);
 	}
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > JointImpl::get_AxisPositionSetWire()
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_AxisPositionSetWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_AxisPositionSetWire;
 	}
-	void JointImpl::set_AxisPositionSetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value)
+	void JointImpl::set_AxisPositionSetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_AxisPositionSetWire) throw std::runtime_error("Already set");
@@ -436,12 +416,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		m_AxisPositionSetWire->SetWireConnectCallback(boost::bind(&JointImpl::OnAxisPositionSetWireConnect,l,_1));
 	}
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > JointImpl::get_AxisVelocitySetWire()
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_AxisVelocitySetWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_AxisVelocitySetWire;
 	}
-	void JointImpl::set_AxisVelocitySetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value)
+	void JointImpl::set_AxisVelocitySetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_AxisVelocitySetWire) throw std::runtime_error("Already set");
@@ -450,12 +430,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		m_AxisVelocitySetWire->SetWireConnectCallback(boost::bind(&JointImpl::OnAxisVelocitySetWireConnect,l,_1));
 	}
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > JointImpl::get_ForceSetWire()
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_ForceSetWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_ForceSetWire;
 	}
-	void JointImpl::set_ForceSetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value)
+	void JointImpl::set_ForceSetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_ForceSetWire) throw std::runtime_error("Already set");
@@ -464,7 +444,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		m_ForceSetWire->SetWireConnectCallback(boost::bind(&JointImpl::OnForceSetWireConnect,l,_1));
 	}
 
-	void JointImpl::OnAxisPositionSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection)
+	void JointImpl::OnAxisPositionSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<JointImpl> l1=l.lock();
 		if (!l1) return;
@@ -474,7 +454,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		l1->m_AxisPositionSetWire_conn->SetWireConnectionClosedCallback(boost::bind(&JointImpl::OnAxisPositionSetWireDisconnect,l,_1));
 
 	}
-	void JointImpl::OnAxisPositionSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection)
+	void JointImpl::OnAxisPositionSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<JointImpl> l1=l.lock();
 		if (!l1) return;
@@ -484,7 +464,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			l1->m_AxisPositionSetWire_conn.reset();
 		}
 	}
-	void JointImpl::OnAxisVelocitySetWireConnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection)
+	void JointImpl::OnAxisVelocitySetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<JointImpl> l1=l.lock();
 		if (!l1) return;
@@ -494,7 +474,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		l1->m_AxisVelocitySetWire_conn->SetWireConnectionClosedCallback(boost::bind(&JointImpl::OnAxisVelocitySetWireDisconnect,l,_1));
 
 	}
-	void JointImpl::OnAxisVelocitySetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection)
+	void JointImpl::OnAxisVelocitySetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<JointImpl> l1=l.lock();
 		if (!l1) return;
@@ -504,7 +484,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			l1->m_AxisVelocitySetWire_conn.reset();
 		}
 	}
-	void JointImpl::OnForceSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection)
+	void JointImpl::OnForceSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<JointImpl> l1=l.lock();
 		if (!l1) return;
@@ -513,7 +493,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		l1->m_ForceSetWire_conn=connection;
 		l1->m_ForceSetWire_conn->SetWireConnectionClosedCallback(boost::bind(&JointImpl::OnForceSetWireDisconnect,l,_1));
 	}
-	void JointImpl::OnForceSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection)
+	void JointImpl::OnForceSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<JointImpl> l1=l.lock();
 		if (!l1) return;

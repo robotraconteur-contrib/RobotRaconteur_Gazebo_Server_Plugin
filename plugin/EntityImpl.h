@@ -33,73 +33,68 @@ namespace RobotRaconteurGazeboServerPlugin
 class EntityImpl : public virtual rrgz::Entity, public RR_ENABLE_SHARED_FROM_THIS<EntityImpl>
 {
 public:
-	  virtual std::string get_Name();
-	  virtual void set_Name(std::string value);
-	  virtual std::string get_ScopedName();
-	  virtual void set_ScopedName(std::string value);
-
+	  virtual std::string get_Name() override;
+	  
+	  virtual std::string get_ScopedName() override;
+	  
 	  virtual void Init(const std::string& rr_path);
 
 	  virtual std::string GetRRPath();
 
 	  static void OnUpdate(RR_WEAK_PTR<EntityImpl> j, const common::UpdateInfo & _info);
 
-	  virtual RR_SHARED_PTR<rrgz::Pose > get_WorldPose();
-	  virtual void set_WorldPose(RR_SHARED_PTR<rrgz::Pose > value);
+	  virtual rrgz::PosePtr get_WorldPose() override;
+	  virtual void set_WorldPose(rrgz::PosePtr value) override;
 
-	  virtual RR_SHARED_PTR<rrgz::Pose > get_RelativePose();
-	  virtual void set_RelativePose(RR_SHARED_PTR<rrgz::Pose > value);
+	  virtual rrgz::PosePtr get_RelativePose() override;
+	  virtual void set_RelativePose(rrgz::PosePtr value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_WorldVelocity();
-	  virtual void set_WorldVelocity(RR_SHARED_PTR<RR::RRArray<double > > value);
+	  virtual RR::RRArrayPtr<double> get_WorldVelocity() override;	  
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_RelativeVelocity();
-	  virtual void set_RelativeVelocity(RR_SHARED_PTR<RR::RRArray<double > > value);
+	  virtual RR::RRArrayPtr<double > get_RelativeVelocity() override;
+	  
+	  virtual RR::RRArrayPtr<double> get_WorldAcceleration() override;
+	  
+	  virtual RR::RRArrayPtr<double> get_RelativeAcceleration() override;	  
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_WorldAcceleration();
-	  virtual void set_WorldAcceleration(RR_SHARED_PTR<RR::RRArray<double > > value);
+	  virtual RR::WirePtr<rrgz::PosePtr> get_WorldPoseGetWire() override;
+	  virtual void set_WorldPoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > get_RelativeAcceleration();
-	  virtual void set_RelativeAcceleration(RR_SHARED_PTR<RR::RRArray<double > > value);
+	  virtual RR::WirePtr<rrgz::PosePtr> get_RelativePoseGetWire() override;
+	  virtual void set_RelativePoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > get_WorldPoseGetWire();
-	  virtual void set_WorldPoseGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > value);
+	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldVelocityGetWire() override;
+	  virtual void set_WorldVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > get_RelativePoseGetWire();
-	  virtual void set_RelativePoseGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > value);
+	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_RelativeVelocityGetWire() override;
+	  virtual void set_RelativeVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_WorldVelocityGetWire();
-	  virtual void set_WorldVelocityGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value);
+	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldAccelerationGetWire() override;
+	  virtual void set_WorldAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_RelativeVelocityGetWire();
-	  virtual void set_RelativeVelocityGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value);
-
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_WorldAccelerationGetWire();
-	  virtual void set_WorldAccelerationGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value);
-
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > get_RelativeAccelerationGetWire();
-	  virtual void set_RelativeAccelerationGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > value);
+	  virtual RR::WirePtr<RR::RRArrayPtr<double > > get_RelativeAccelerationGetWire() override;
+	  virtual void set_RelativeAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double > > value) override;
 
 
 protected:
 	  virtual physics::EntityPtr get_entity()=0;
 	  boost::mutex this_lock;
 
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > m_WorldPoseGetWire;
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::Pose > > > m_RelativePoseGetWire;
+	  RR::WirePtr<rrgz::PosePtr > m_WorldPoseGetWire;
+	  RR::WirePtr<rrgz::PosePtr > m_RelativePoseGetWire;
 
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > m_WorldVelocityGetWire;
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > m_RelativeVelocityGetWire;
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > m_WorldAccelerationGetWire;
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double > > > > m_RelativeAccelerationGetWire;
+	  RR::WirePtr<RR::RRArrayPtr<double > > m_WorldVelocityGetWire;
+	  RR::WirePtr<RR::RRArrayPtr<double > > m_RelativeVelocityGetWire;
+	  RR::WirePtr<RR::RRArrayPtr<double > > m_WorldAccelerationGetWire;
+	  RR::WirePtr<RR::RRArrayPtr<double > > m_RelativeAccelerationGetWire;
 
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<rrgz::Pose > > > m_WorldPoseGetWire_b;
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<rrgz::Pose > > > m_RelativePoseGetWire_b;
+	  RR::WireBroadcasterPtr<rrgz::PosePtr> m_WorldPoseGetWire_b;
+	  RR::WireBroadcasterPtr<rrgz::PosePtr> m_RelativePoseGetWire_b;
 
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double > > > > m_WorldVelocityGetWire_b;
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double > > > > m_RelativeVelocityGetWire_b;
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double > > > > m_WorldAccelerationGetWire_b;
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double > > > > m_RelativeAccelerationGetWire_b;
+	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_WorldVelocityGetWire_b;
+	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_RelativeVelocityGetWire_b;
+	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_WorldAccelerationGetWire_b;
+	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_RelativeAccelerationGetWire_b;
 
 	  virtual void OnUpdate1(const common::UpdateInfo & _info);
 

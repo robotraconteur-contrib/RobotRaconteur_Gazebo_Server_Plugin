@@ -39,17 +39,13 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual void Init();
 
-	  virtual RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > get_WorldNames();
-	  virtual void set_WorldNames(RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > value);
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_WorldNames() override;	  
 
-	  virtual RR_SHARED_PTR<rrgz::World > get_Worlds(std::string ind);
+	  virtual rrgz::WorldPtr get_Worlds(const std::string& ind) override;
 
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_SensorNames() override;
 
-	  virtual RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > get_SensorNames();
-	  virtual void set_SensorNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value);
-
-
-	  virtual RR_SHARED_PTR<rrgz::Sensor > get_Sensors(std::string ind);
+	  virtual rrgz::SensorPtr get_Sensors(const std::string& ind);
 
   protected:
 

@@ -29,49 +29,32 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return get_sensor()->ScopedName();
 	}
-	void SensorImpl::set_Name(std::string value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	std::string SensorImpl::get_Type()
 	{
 		return get_sensor()->Type();
 	}
-
-	void SensorImpl::set_Type(std::string value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	std::string SensorImpl::get_ParentName()
 	{
 		return get_sensor()->ParentName();
 	}
-	void SensorImpl::set_ParentName(std::string value)
+	
+	rrgz::PosePtr SensorImpl::get_Pose()
 	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<rrgz::Pose > SensorImpl::get_Pose()
-	{
-		math::Pose p=get_sensor()->Pose();
-		RR_SHARED_PTR<rrgz::Pose > o=RR_MAKE_SHARED<rrgz::Pose>();
+		auto p=get_sensor()->Pose();
+		rrgz::PosePtr o(new rrgz::Pose());
 		o->Position=RR::AllocateRRArray<double>(3);
 		o->Orientation=RR::AllocateRRArray<double>(4);
 
-		for (uint32_t i=0; i<3; i++) (*o->Position)[i]=p.pos[i];
-		(*o->Orientation)[0]=p.rot.w;
-		(*o->Orientation)[1]=p.rot.x;
-		(*o->Orientation)[2]=p.rot.y;
-		(*o->Orientation)[3]=p.rot.z;
+		for (uint32_t i=0; i<3; i++) (*o->Position)[i]=p.Pos()[i];
+		(*o->Orientation)[0]=p.Rot().W();
+		(*o->Orientation)[1]=p.Rot().X();
+		(*o->Orientation)[2]=p.Rot().Y();
+		(*o->Orientation)[3]=p.Rot().Z();
 		return o;
 	}
-	void SensorImpl::set_Pose(RR_SHARED_PTR<rrgz::Pose > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	sensors::SensorPtr SensorImpl::get_sensor()
 	{
 		sensors::SensorPtr s=gz_sensor.lock();
@@ -105,17 +88,9 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return get_sensor()->LastUpdateTime().Double();
 	}
-	void SensorImpl::set_LastUpdateTime(double value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
+	
 	double SensorImpl::get_LastMeasurementTime()
 	{
 		return get_sensor()->LastMeasurementTime().Double();
-	}
-	void SensorImpl::set_LastMeasurementTime(double value)
-	{
-		throw std::runtime_error("Read only property");
-	}
+	}	
 }

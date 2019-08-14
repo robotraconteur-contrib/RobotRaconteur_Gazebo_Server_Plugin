@@ -40,62 +40,57 @@ namespace RobotRaconteurGazeboServerPlugin
 	  static void OnUpdate(RR_WEAK_PTR<JointImpl> j, const common::UpdateInfo & _info);
 
 
-	  virtual std::string get_Name();
-	  virtual void set_Name(std::string value);
-	  virtual std::string get_ScopedName();
-	  virtual void set_ScopedName(std::string value);
+	  virtual std::string get_Name() override; 
+	  virtual std::string get_ScopedName() override;  
 
-	  virtual std::string get_ParentLinkName();
-	  virtual void set_ParentLinkName(std::string value);
+	  virtual std::string get_ParentLinkName() override;	  
 
-	  virtual std::string get_ChildLinkName();
-	  virtual void set_ChildLinkName(std::string value);
+	  virtual std::string get_ChildLinkName() override;	  
 
-	  virtual int32_t get_AxisCount();
-	  virtual void set_AxisCount(int32_t value);
+	  virtual int32_t get_AxisCount() override;
+	  
+	  virtual RR::RRMapPtr<int32_t,RR::RRArray<double > > get_AxesAngles() override;
+	  virtual void set_AxesAngles(RR::RRMapPtr<int32_t,RR::RRArray<double > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > get_AxesAngles();
-	  virtual void set_AxesAngles(RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > value);
+	  virtual RR::RRMapPtr<int32_t,RR::RRArray<double > > get_AxesVelocities() override;
+	  virtual void set_AxesVelocities(RR::RRMapPtr<int32_t,RR::RRArray<double > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > get_AxesVelocities();
-	  virtual void set_AxesVelocities(RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > value);
+	  virtual RR::RRArrayPtr<double > GetGlobalAxis(int32_t axis) override;
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > GetGlobalAxis(int32_t axis);
-
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > GetLocalAxis(int32_t axis);
+	  virtual RR::RRArrayPtr<double > GetLocalAxis(int32_t axis) override;
 
 
-	  virtual double GetAxisAngle(int32_t axis);
+	  virtual double GetAxisAngle(int32_t axis) override;
 
-	  virtual void SetAxisPosition(int32_t axis, double value);
+	  virtual void SetAxisPosition(int32_t axis, double value) override;
 
-	  virtual double GetAxisVelocity(int32_t axis);
+	  virtual double GetAxisVelocity(int32_t axis) override;
 
-	  virtual void SetAxisVelocity(int32_t axis, double value);
+	  virtual void SetAxisVelocity(int32_t axis, double value) override;
 
-	  virtual double GetForce(int32_t axis);
+	  virtual double GetForce(int32_t axis) override;
 
-	  virtual void SetForce(int32_t axis, double value);
+	  virtual void SetForce(int32_t axis, double value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRArray<double > > GetForceTorque(int32_t link);
+	  virtual RR::RRArrayPtr<double > GetForceTorque(int32_t link) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > get_AxisAngleGetWire();
-	  virtual void set_AxisAngleGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > get_AxisAngleGetWire() override;
+	  virtual void set_AxisAngleGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > get_AxisVelocityGetWire();
-	  virtual void set_AxisVelocityGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > get_AxisVelocityGetWire() override;
+	  virtual void set_AxisVelocityGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > get_ForceTorqueGetWire();
-	  virtual void set_ForceTorqueGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > get_ForceTorqueGetWire() override;
+	  virtual void set_ForceTorqueGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > get_AxisPositionSetWire();
-	  virtual void set_AxisPositionSetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > get_AxisPositionSetWire() override;
+	  virtual void set_AxisPositionSetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > get_AxisVelocitySetWire();
-	  virtual void set_AxisVelocitySetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > get_AxisVelocitySetWire() override;
+	  virtual void set_AxisVelocitySetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > get_ForceSetWire();
-	  virtual void set_ForceSetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > get_ForceSetWire() override;
+	  virtual void set_ForceSetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > value) override;
 
 
   protected:
@@ -111,30 +106,30 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  event::ConnectionPtr updateConnection;
 
-  	  RR_SHARED_PTR<RR::RRArray<double> > axes_forces;
+  	  RR::RRArrayPtr<double> axes_forces;
   	  boost::mutex this_lock;
 
-  	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisAngleGetWire;
-  	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisVelocityGetWire;
-  	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_ForceTorqueGetWire;
-  	RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisAngleGetWire_b;
-  	RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisVelocityGetWire_b;
-  	RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_ForceTorqueGetWire_b;
+  	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisAngleGetWire;
+  	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisVelocityGetWire;
+  	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_ForceTorqueGetWire;
+  	RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisAngleGetWire_b;
+  	RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisVelocityGetWire_b;
+  	RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_ForceTorqueGetWire_b;
 
-  	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisPositionSetWire;
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisVelocitySetWire;
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_ForceSetWire;
+  	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisPositionSetWire;
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisVelocitySetWire;
+	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_ForceSetWire;
 
-	RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisPositionSetWire_conn;
-	RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_AxisVelocitySetWire_conn;
-	RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > m_ForceSetWire_conn;
+	RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisPositionSetWire_conn;
+	RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_AxisVelocitySetWire_conn;
+	RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double >  > > m_ForceSetWire_conn;
 
-	static void OnAxisPositionSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection);
-	static void OnAxisPositionSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection);
-	static void OnAxisVelocitySetWireConnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection);
-	static void OnAxisVelocitySetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection);
-	static void OnForceSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection);
-	static void OnForceSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<int32_t,RR::RRArray<double >  > > > > connection);
+	static void OnAxisPositionSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > connection);
+	static void OnAxisPositionSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection);
+	static void OnAxisVelocitySetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection);
+	static void OnAxisVelocitySetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection);
+	static void OnForceSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection);
+	static void OnForceSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection);
   };
 
 }

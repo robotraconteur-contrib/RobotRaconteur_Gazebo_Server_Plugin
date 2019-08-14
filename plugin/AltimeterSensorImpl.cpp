@@ -15,7 +15,7 @@
  *
 */
 
-#include "RaySensorImpl.h"
+#include "AltimeterSensorImpl.h"
 #include "robotraconteur_gazebo_server_plugin.h"
 #include <gazebo/rendering/rendering.hh>
 
@@ -46,17 +46,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		sensors::AltimeterSensorPtr c=get_altimetersensor();
 		return c->Altitude();
 	}
-	void AltimeterSensorImpl::set_Altitude(double value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<RR::Wire<double> > AltimeterSensorImpl::get_AltitudeWire()
+	
+	RR::WirePtr<double> AltimeterSensorImpl::get_AltitudeWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_AltitudeWire;
 	}
-	void AltimeterSensorImpl::set_AltitudeWire(RR_SHARED_PTR<RR::Wire<double> > value)
+	void AltimeterSensorImpl::set_AltitudeWire(RR::WirePtr<double> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		m_AltitudeWire=value;

@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 project(RobotRaconteurGazeboPlugin)
+
+set (CMAKE_CXX_STANDARD 11)
 
 find_package(gazebo REQUIRED)
 include_directories(${GAZEBO_INCLUDE_DIRS})
@@ -12,7 +14,13 @@ find_package(Boost COMPONENTS date_time filesystem system regex chrono atomic th
 find_package(OpenSSL REQUIRED)
 find_package(RobotRaconteur REQUIRED)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/experimental__gazebo_stubskel.cpp COMMAND ${RobotRaconteur_GEN} ARGS --thunksource --lang=cpp ${CMAKE_CURRENT_SOURCE_DIR}/experimental.gazebo.robdef WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/experimental.gazebo.robdef)
+include_directories(${RobotRaconteur_INCLUDE_DIR})
+
+ROBOTRACONTEUR_GENERATE_THUNK(RR_THUNK_SRCS RR_THUNK_HDRS 
+	experimental.gazebo.robdef
+	MASTER_HEADER
+	IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+	)
 
 add_library(robotraconteur_gazebo_server_plugin SHARED 
 	robotraconteur_gazebo_server_plugin.cpp
@@ -40,5 +48,5 @@ add_library(robotraconteur_gazebo_server_plugin SHARED
 	ImuSensorImpl.cpp
 	LightImpl.cpp
 	)
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/experimental__gazebo_stubskel.cpp PROPERTIES GENERATED 1)
-target_link_libraries(robotraconteur_gazebo_server_plugin ${GAZEBO_LIBRARIES} ${RobotRaconteur_LIBRARY} ${Boost_LIBRARIES} ${RobotRaconteur_EXTRA_LIBRARIES})
+
+target_link_libraries(robotraconteur_gazebo_server_plugin ${GAZEBO_LIBRARIES} RobotRaconteurCore ${Boost_LIBRARIES} ${RobotRaconteur_EXTRA_LIBRARIES})

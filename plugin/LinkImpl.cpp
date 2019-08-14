@@ -39,12 +39,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		return boost::dynamic_pointer_cast<physics::Entity>(get_link());
 	}
 
-	RR_SHARED_PTR<RR::RRList<RR::RRArray<double >  > > LinkImpl::get_AppliedWrenches()
+	RR::RRListPtr<RR::RRArray<double > > LinkImpl::get_AppliedWrenches()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return applied_wrenches;
 	}
-	void LinkImpl::set_AppliedWrenches(RR_SHARED_PTR<RR::RRList<RR::RRArray<double >  > > value)
+	void LinkImpl::set_AppliedWrenches(RR::RRListPtr<RR::RRArray<double > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (!value)
@@ -52,7 +52,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			applied_wrenches=value;
 			return;
 		}
-		for (std::vector<RR_SHARED_PTR<RR::RRArray<double > > >::iterator e=value->list.begin(); e!=value->list.end(); e++)
+		for (auto e=value->begin(); e!=value->end(); e++)
 		{
 			RR_NULL_CHECK(*e);
 			if ((*e)->size()!=6) throw std::invalid_argument("Invalid vector length");
@@ -67,10 +67,10 @@ namespace RobotRaconteurGazeboServerPlugin
 		physics::LinkPtr l=get_link();
 		if (applied_wrenches)
 		{
-			for (std::vector<RR_SHARED_PTR<RR::RRArray<double > > >::iterator e=applied_wrenches->list.begin(); e!=applied_wrenches->list.end(); e++)
+			for (auto e=applied_wrenches->begin(); e!=applied_wrenches->end(); e++)
 			{
-				math::Vector3 torque((**e)[0], (**e)[1], (**e)[2]);
-				math::Vector3 force((**e)[3], (**e)[4], (**e)[5]);
+				ignition::math::Vector3d torque((**e)[0], (**e)[1], (**e)[2]);
+				ignition::math::Vector3d force((**e)[3], (**e)[4], (**e)[5]);
 				l->AddRelativeForce(force);
 				l->AddRelativeTorque(torque);
 			}
@@ -82,15 +82,15 @@ namespace RobotRaconteurGazeboServerPlugin
 			{
 				if (m_AppliedWrenchesSetWire_conn->GetInValueValid())
 				{
-					RR_SHARED_PTR<RR::RRList<RR::RRArray<double > > > inval=m_AppliedWrenchesSetWire_conn->GetInValue();
+					auto inval=m_AppliedWrenchesSetWire_conn->GetInValue();
 					if (inval)
 					{
-						for (std::vector<RR_SHARED_PTR<RR::RRArray<double > > >::iterator e=inval->list.begin(); e!=inval->list.end(); e++)
+						for (auto e=inval->begin(); e!=inval->end(); e++)
 						{
 							if (!*e) continue;
 							if (!(*e)->size()!=6) continue;
-							math::Vector3 torque((**e)[0], (**e)[1], (**e)[2]);
-							math::Vector3 force((**e)[3], (**e)[4], (**e)[5]);
+							ignition::math::Vector3d torque((**e)[0], (**e)[1], (**e)[2]);
+							ignition::math::Vector3d force((**e)[3], (**e)[4], (**e)[5]);
 							l->AddRelativeForce(force);
 							l->AddRelativeTorque(torque);
 						}
@@ -101,12 +101,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		catch (std::exception&) {}
 	}
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRList<RR::RRArray<double >  > > > > LinkImpl::get_AppliedWrenchesSetWire()
+	RR::WirePtr<RR::RRListPtr<RR::RRArray<double> > > LinkImpl::get_AppliedWrenchesSetWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_AppliedWrenchesSetWire;
 	}
-	void LinkImpl::set_AppliedWrenchesSetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRList<RR::RRArray<double >  > > > > value)
+	void LinkImpl::set_AppliedWrenchesSetWire(RR::WirePtr<RR::RRListPtr<RR::RRArray<double > > > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (m_AppliedWrenchesSetWire) throw std::runtime_error("Read only property");
@@ -115,7 +115,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		m_AppliedWrenchesSetWire->SetWireConnectCallback(boost::bind(&LinkImpl::OnAppliedWrenchesSetWireConnect,l,_1));
 	}
 
-	void LinkImpl::OnAppliedWrenchesSetWireConnect(RR_WEAK_PTR<LinkImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRList<RR::RRArray<double >  > > > > connection)
+	void LinkImpl::OnAppliedWrenchesSetWireConnect(RR_WEAK_PTR<LinkImpl> l, RR::WireConnectionPtr<RR::RRListPtr<RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<LinkImpl> l1=l.lock();
 		if (!l1) return;
@@ -125,7 +125,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		l1->m_AppliedWrenchesSetWire_conn->SetWireConnectionClosedCallback(boost::bind(&LinkImpl::OnAppliedWrenchesSetWireDisconnect,l,_1));
 	}
 
-	void LinkImpl::OnAppliedWrenchesSetWireDisconnect(RR_WEAK_PTR<LinkImpl> l, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRList<RR::RRArray<double >  > > > > connection)
+	void LinkImpl::OnAppliedWrenchesSetWireDisconnect(RR_WEAK_PTR<LinkImpl> l, RR::WireConnectionPtr<RR::RRListPtr<RR::RRArray<double> > > connection)
 	{
 		RR_SHARED_PTR<LinkImpl> l1=l.lock();
 		if (!l1) return;
@@ -136,20 +136,16 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 
-	RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > LinkImpl::get_SensorNames()
+	RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char> > LinkImpl::get_SensorNames()
 	{
-		auto o=RR_MAKE_SHARED<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >();
+		auto o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
 		auto l=get_link();
 		auto n=l->GetSensorCount();
 		for (unsigned int i=0; i<n; i++)
 		{
-			o->list.push_back(RR::stringToRRArray(l->GetSensorName(i)));
+			o->push_back(RR::stringToRRArray(l->GetSensorName(i)));
 		}
 		return o;
-	}
-	void LinkImpl::set_SensorNames(RR_SHARED_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
+	}	
 
 }

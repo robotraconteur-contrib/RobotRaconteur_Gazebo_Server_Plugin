@@ -26,8 +26,6 @@ import time
 import cv2
 import numpy as np
 
-RRN.UseNumPy=True
-
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
 w=server.get_Worlds('default')
 print w.LightNames

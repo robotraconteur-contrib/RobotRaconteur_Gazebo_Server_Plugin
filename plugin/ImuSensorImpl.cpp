@@ -39,11 +39,11 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 
 
-	RR_SHARED_PTR<rrgz::ImuState > ImuSensorImpl::get_ReadState()
+	rrgz::ImuStatePtr ImuSensorImpl::get_ReadState()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		sensors::ImuSensorPtr c=get_imusensor();
-		auto o=RR_MAKE_SHARED<rrgz::ImuState>();
+		rrgz::ImuStatePtr o(new rrgz::ImuState());
 		auto a_v=RR::AllocateRRArray<double>(3);
 		auto l_a=RR::AllocateRRArray<double>(3);
 		auto o_p=RR::AllocateRRArray<double>(4);
@@ -67,21 +67,17 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		return o;
 	}
-	void ImuSensorImpl::set_ReadState(RR_SHARED_PTR<rrgz::ImuState> value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::ImuState > > > ImuSensorImpl::get_StateWire()
+	
+	RR::WirePtr<rrgz::ImuStatePtr> ImuSensorImpl::get_StateWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_StateWire;
 	}
-	void ImuSensorImpl::set_StateWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::ImuState > > > value)
+	void ImuSensorImpl::set_StateWire(RR::WirePtr<rrgz::ImuStatePtr> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		m_StateWire=value;
-		m_StateWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<rrgz::ImuState> > >();
+		m_StateWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<rrgz::ImuStatePtr> >();
 		m_StateWire_b->Init(m_StateWire);
 	}
 
@@ -97,7 +93,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ImuSensorImpl::OnUpdate1()
 	{
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<rrgz::ImuState > > > b;
+		RR::WireBroadcasterPtr<rrgz::ImuStatePtr> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_StateWire_b;

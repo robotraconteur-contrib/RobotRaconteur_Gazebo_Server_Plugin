@@ -24,8 +24,6 @@ import time
 import cv2
 import numpy as np
 
-RRN.UseNumPy=True
-
 current_frame=None
 current_depth=None
 
@@ -64,7 +62,8 @@ while True:
         cv2.imshow("Image",current_frame)
     if (not current_depth is None):
         cv2.imshow("Depth", current_depth)
-    if cv2.waitKey(50)!=-1:
+    ret = cv2.waitKey(50)
+    if ret!=-1 and ret!=255:
         break
 cv2.destroyAllWindows()
 

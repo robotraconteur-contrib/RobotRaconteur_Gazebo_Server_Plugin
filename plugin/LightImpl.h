@@ -33,23 +33,19 @@ public:
 
 	virtual void Init() {};
 
-	virtual std::string get_Name();
-	virtual void set_Name(std::string value);
+	virtual std::string get_Name() override;	
 
-	virtual std::string get_Type();
-	virtual void set_Type(std::string value);
+	virtual std::string get_Type() override;	
 
-	virtual RR_SHARED_PTR<rrgz::Pose > get_Pose();
-	virtual void set_Pose(RR_SHARED_PTR<rrgz::Pose > value);
+	virtual rrgz::PosePtr get_Pose() override;
+	
+	virtual RR::RRArrayPtr<double > get_Direction() override;
+	
+	virtual rrgz::ColorPtr get_DiffuseColor() override;
+	virtual void set_DiffuseColor(rrgz::ColorPtr value) override;
 
-	virtual RR_SHARED_PTR<RobotRaconteur::RRArray<double > > get_Direction();
-	virtual void set_Direction(RR_SHARED_PTR<RobotRaconteur::RRArray<double > > value);
-
-	virtual RR_SHARED_PTR<rrgz::Color > get_DiffuseColor();
-	virtual void set_DiffuseColor(RR_SHARED_PTR<rrgz::Color > value);
-
-	virtual RR_SHARED_PTR<rrgz::Color > get_SpecularColor();
-	virtual void set_SpecularColor(RR_SHARED_PTR<rrgz::Color > value);
+	virtual rrgz::ColorPtr get_SpecularColor() override;
+	virtual void set_SpecularColor(rrgz::ColorPtr value) override;
 
 protected:
 	boost::weak_ptr<rendering::Light> light;

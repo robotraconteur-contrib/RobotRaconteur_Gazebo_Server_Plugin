@@ -39,11 +39,11 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 
 
-	RR_SHARED_PTR<rrgz::GpsState > GpsSensorImpl::get_ReadState()
+	rrgz::GpsStatePtr GpsSensorImpl::get_ReadState()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		sensors::GpsSensorPtr c=get_gpssensor();
-		auto o=RR_MAKE_SHARED<rrgz::GpsState>();
+		rrgz::GpsStatePtr o(new rrgz::GpsState());
 		o->altitude=c->Altitude();
 		o->latitude_deg=c->Latitude().Degree();
 		o->longitude_deg=c->Longitude().Degree();
@@ -54,21 +54,17 @@ namespace RobotRaconteurGazeboServerPlugin
 		o->velocity_up=0.0;
 		return o;
 	}
-	void GpsSensorImpl::set_ReadState(RR_SHARED_PTR<rrgz::GpsState> value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::GpsState > > > GpsSensorImpl::get_StateWire()
+	
+	RR::WirePtr<rrgz::GpsStatePtr> GpsSensorImpl::get_StateWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_StateWire;
 	}
-	void GpsSensorImpl::set_StateWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<rrgz::GpsState > > > value)
+	void GpsSensorImpl::set_StateWire(RR::WirePtr<rrgz::GpsStatePtr> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		m_StateWire=value;
-		m_StateWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<rrgz::GpsState> > >();
+		m_StateWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<rrgz::GpsStatePtr> >();
 		m_StateWire_b->Init(m_StateWire);
 	}
 
@@ -79,7 +75,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void GpsSensorImpl::OnUpdate1()
 	{
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<rrgz::GpsState > > > b;
+		RR::WireBroadcasterPtr<rrgz::GpsStatePtr> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_StateWire_b;

@@ -38,10 +38,10 @@ namespace RobotRaconteurGazeboServerPlugin
 		c1->OnUpdate1();
 	}
 
-	RR_SHARED_PTR<RR::RRList<rrgz::Contact  > > ContactSensorImpl::CaptureContacts()
+	RR::RRListPtr<rrgz::Contact> ContactSensorImpl::CaptureContacts()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		auto o=RR_MAKE_SHARED<RR::RRList<rrgz::Contact  > >();
+		auto o=RR::AllocateEmptyRRList<rrgz::Contact>();
 		sensors::ContactSensorPtr c=get_contactsensor();
 
 
@@ -50,25 +50,25 @@ namespace RobotRaconteurGazeboServerPlugin
 		for (int i=0; i<count; i++)
 		{
 			msgs::Contact contact=contacts.contact(i);
-			auto o_i=RR_MAKE_SHARED<rrgz::Contact>();
+			rrgz::ContactPtr o_i(new rrgz::Contact());
 			o_i->contactName1=contact.collision1();
 			o_i->contactName2=contact.collision2();
-			o->list.push_back(o_i);
+			o->push_back(o_i);
 		}
 
 		return o;
 }
 
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRList<rrgz::Contact  > > > > ContactSensorImpl::get_ContactWire()
+	RR::WirePtr<RR::RRListPtr<rrgz::Contact> > ContactSensorImpl::get_ContactWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_ContactWire;
 	}
-	void ContactSensorImpl::set_ContactWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRList<rrgz::Contact  > > > > value)
+	void ContactSensorImpl::set_ContactWire(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		m_ContactWire=value;
-		m_ContactWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRList<rrgz::Contact  > > > >();
+		m_ContactWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRListPtr<rrgz::Contact> > >();
 		m_ContactWire_b->Init(m_ContactWire);
 	}
 
@@ -79,7 +79,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ContactSensorImpl::OnUpdate1()
 	{
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRList<rrgz::Contact  > > > > b;
+		RR::WireBroadcasterPtr<RR::RRListPtr<rrgz::Contact> > b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_ContactWire_b;

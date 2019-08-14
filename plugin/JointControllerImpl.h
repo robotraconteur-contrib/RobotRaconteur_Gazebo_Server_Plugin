@@ -39,41 +39,37 @@ public:
 
 	  virtual void Init();
 
-	  virtual RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > get_JointNames();
-	  virtual void set_JointNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value);
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_JointNames() override;	  
 
-	  virtual RR_SHARED_PTR<RR::RRMap<std::string,rrgz::PIDParam  > > get_PositionPIDs();
-	  virtual void set_PositionPIDs(RR_SHARED_PTR<RR::RRMap<std::string,rrgz::PIDParam  > > value);
+	  virtual RR::RRMapPtr<std::string,rrgz::PIDParam> get_PositionPIDs() override;
 
-	  virtual RR_SHARED_PTR<RR::RRMap<std::string,rrgz::PIDParam  > > get_VelocityPIDs();
-	  virtual void set_VelocityPIDs(RR_SHARED_PTR<RR::RRMap<std::string,rrgz::PIDParam  > > value);
+	  virtual RR::RRMapPtr<std::string,rrgz::PIDParam> get_VelocityPIDs() override;	  
 
-	  virtual RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > get_JointTargetPositions();
-	  virtual void set_JointTargetPositions(RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > value);
+	  virtual RR::RRMapPtr<std::string,RR::RRArray<double >  > get_JointTargetPositions() override;
+	  virtual void set_JointTargetPositions(RR::RRMapPtr<std::string,RR::RRArray<double > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > get_JointTargetVelocities();
-	  virtual void set_JointTargetVelocities(RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > value);
+	  virtual RR::RRMapPtr<std::string,RR::RRArray<double > > get_JointTargetVelocities() override;
+	  virtual void set_JointTargetVelocities(RR::RRMapPtr<std::string,RR::RRArray<double > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > get_JointForces();
-	  virtual void set_JointForces(RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > value);
+	  virtual RR::RRMapPtr<std::string,RR::RRArray<double > > get_JointForces() override;
+	  
+	  virtual void AddJoint(const std::string& name) override;
 
-	  virtual void AddJoint(std::string name);
+	  virtual void SetPositionPID(const std::string& name, rrgz::PIDParamPtr pid) override;
 
-	  virtual void SetPositionPID(std::string name, RR_SHARED_PTR<rrgz::PIDParam > pid);
+	  virtual void SetVelocityPID(const std::string& name, rrgz::PIDParamPtr pid) override;
 
-	  virtual void SetVelocityPID(std::string name, RR_SHARED_PTR<rrgz::PIDParam > pid);
+	  virtual RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > >  get_JointTargetPositionsSetWire() override;
+	  virtual void set_JointTargetPositionsSetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > get_JointTargetPositionsSetWire();
-	  virtual void set_JointTargetPositionsSetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > >  get_JointTargetVelocitiesSetWire() override;
+	  virtual void set_JointTargetVelocitiesSetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > get_JointTargetVelocitiesSetWire();
-	  virtual void set_JointTargetVelocitiesSetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > get_JointActualPositionsGetWire() override;
+	  virtual void set_JointActualPositionsGetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > value) override;
 
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > get_JointActualPositionsGetWire();
-	  virtual void set_JointActualPositionsGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > value);
-
-	  virtual RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > get_JointActualVelocitiesGetWire();
-	  virtual void set_JointActualVelocitiesGetWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > value);
+	  virtual RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > get_JointActualVelocitiesGetWire() override;
+	  virtual void set_JointActualVelocitiesGetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > value) override;
 
 
 protected:
@@ -84,22 +80,22 @@ protected:
 	  boost::mutex this_lock;
 	  virtual physics::ModelPtr get_model();
 
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointActualPositionsGetWire;
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointActualVelocitiesGetWire;
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointActualPositionsGetWire_b;
-	  RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointActualVelocitiesGetWire_b;
+	  RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointActualPositionsGetWire;
+	  RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointActualVelocitiesGetWire;
+	  RR::WireBroadcasterPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointActualPositionsGetWire_b;
+	  RR::WireBroadcasterPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointActualVelocitiesGetWire_b;
 
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointTargetPositionsSetWire;
-	  RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointTargetVelocitiesSetWire;
+	  RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointTargetPositionsSetWire;
+	  RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointTargetVelocitiesSetWire;
 
-	  RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointTargetPositionsSetWire_c;
-	  RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > m_JointTargetVelocitiesSetWire_c;
+	  RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointTargetPositionsSetWire_c;
+	  RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > m_JointTargetVelocitiesSetWire_c;
 
-	  static void OnJointTargetPositionsSetWireConnect(RR_WEAK_PTR<JointControllerImpl> c, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > connection);
-	  static void OnJointTargetPositionsSetWireDisconnect(RR_WEAK_PTR<JointControllerImpl> c, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > connection);
+	  static void OnJointTargetPositionsSetWireConnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > connection);
+	  static void OnJointTargetPositionsSetWireDisconnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > connection);
 
-	  static void OnJointTargetVelocitiesSetWireConnect(RR_WEAK_PTR<JointControllerImpl> c, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > connection);
-	  static void OnJointTargetVelocitiesSetWireDisconnect(RR_WEAK_PTR<JointControllerImpl> c, RR_SHARED_PTR<RR::WireConnection<RR_SHARED_PTR<RR::RRMap<std::string,RR::RRArray<double >  > > > > connection);
+	  static void OnJointTargetVelocitiesSetWireConnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > >  connection);
+	  static void OnJointTargetVelocitiesSetWireDisconnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double >  > > connection);
 
 	  static void OnUpdate(RR_WEAK_PTR<JointControllerImpl> j, const common::UpdateInfo& _info);
 	  void OnUpdate1(const common::UpdateInfo& _info);

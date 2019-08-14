@@ -39,7 +39,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 
 
-	RR_SHARED_PTR<RR::RRArray<double> > ForceTorqueSensorImpl::get_ForceTorque()
+	RR::RRArrayPtr<double> ForceTorqueSensorImpl::get_ForceTorque()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		sensors::ForceTorqueSensorPtr c=get_forcetorquesensor();
@@ -54,21 +54,17 @@ namespace RobotRaconteurGazeboServerPlugin
 		(*o)[5]=f[2];
 		return o;
 	}
-	void ForceTorqueSensorImpl::set_ForceTorque(RR_SHARED_PTR<RR::RRArray<double> > value)
-	{
-		throw std::runtime_error("Read only property");
-	}
-
-	RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double> > > > ForceTorqueSensorImpl::get_ForceTorqueWire()
+	
+	RR::WirePtr<RR::RRArrayPtr<double> > ForceTorqueSensorImpl::get_ForceTorqueWire()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return m_ForceTorqueWire;
 	}
-	void ForceTorqueSensorImpl::set_ForceTorqueWire(RR_SHARED_PTR<RR::Wire<RR_SHARED_PTR<RR::RRArray<double> > > > value)
+	void ForceTorqueSensorImpl::set_ForceTorqueWire(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		m_ForceTorqueWire=value;
-		m_ForceTorqueWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double> > > >();
+		m_ForceTorqueWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRArrayPtr<double> > >();
 		m_ForceTorqueWire_b->Init(m_ForceTorqueWire);
 	}
 
@@ -79,7 +75,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ForceTorqueSensorImpl::OnUpdate1()
 	{
-		RR_SHARED_PTR<RR::WireBroadcaster<RR_SHARED_PTR<RR::RRArray<double> > > > b;
+		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
 		b=m_ForceTorqueWire_b;

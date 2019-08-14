@@ -37,37 +37,30 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual void Init(const std::string& rr_path);
 
-	  virtual std::string get_Name();
-	  virtual void set_Name(std::string value);
+	  virtual std::string get_Name() override;	  
 
 	  static void OnUpdate(RR_WEAK_PTR<WorldImpl> j, const common::UpdateInfo & _info);
 
-	  virtual double get_SimTime();
-	  virtual void set_SimTime(double value);
+	  virtual double get_SimTime() override;
+	  
+	  virtual double get_RealTime() override;
+	  
+	  virtual double get_WallTime() override;	  
 
-	  virtual double get_RealTime();
-	  virtual void set_RealTime(double value);
+	  virtual double get_StartTime() override;
+	  
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_ModelNames() override;	  
 
-	  virtual double get_WallTime();
-	  virtual void set_WallTime(double value);
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_LightNames() override;
 
-	  virtual double get_StartTime();
-	  virtual void set_StartTime(double value);
+	  virtual RR::WirePtr<double > get_SimTimeWire() override;
+	  virtual void set_SimTimeWire(RR::WirePtr<double> value) override;
 
-	  virtual RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > get_ModelNames();
-	  virtual void set_ModelNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value);
+	  virtual RR::WirePtr<double> get_RealTimeWire() override;
+	  virtual void set_RealTimeWire(RR::WirePtr<double> value);
 
-	  virtual RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > get_LightNames();
-	  virtual void set_LightNames(RR_SHARED_PTR<RR::RRList<RR::RRArray<char>  > > value);
-
-	  virtual RR_SHARED_PTR<RR::Wire<double > > get_SimTimeWire();
-	  virtual void set_SimTimeWire(RR_SHARED_PTR<RR::Wire<double > > value);
-
-	  virtual RR_SHARED_PTR<RR::Wire<double > > get_RealTimeWire();
-	  virtual void set_RealTimeWire(RR_SHARED_PTR<RR::Wire<double > > value);
-
-	  virtual RR_SHARED_PTR<rrgz::Model> get_Models(std::string ind);
-	  virtual RR_SHARED_PTR<rrgz::Light> get_Lights(std::string ind);
+	  virtual rrgz::ModelPtr get_Models(const std::string& ind) override;
+	  virtual rrgz::LightPtr get_Lights(const std::string& ind) override;
 
 	  physics::WorldPtr get_world();
 
@@ -76,11 +69,11 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
 	  boost::weak_ptr<physics::World> gz_world;
 
-	  RR_SHARED_PTR<RR::Wire<double > > m_SimTimeWire;
-	  RR_SHARED_PTR<RR::Wire<double > > m_RealTimeWire;
+	  RR::WirePtr<double> m_SimTimeWire;
+	  RR::WirePtr<double> m_RealTimeWire;
 
-	  RR_SHARED_PTR<RR::WireBroadcaster<double > > m_SimTimeWire_b;
-	  RR_SHARED_PTR<RR::WireBroadcaster<double > > m_RealTimeWire_b;
+	  RR::WireBroadcasterPtr<double > m_SimTimeWire_b;
+	  RR::WireBroadcasterPtr<double > m_RealTimeWire_b;
 
 	  boost::mutex this_lock;
 
