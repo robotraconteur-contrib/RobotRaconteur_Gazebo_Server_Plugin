@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>gazebo_robotraconteur_server_plugin</name>
+  <version>0.1.0</version>
+  <description>Gazebo server plugin for Robot Raconteur</description>
+
+  <maintainer email="wason@wasontech.com">John Wason</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <url type="website">http://robotraconteur.com</url>
+
+  <author email="wason@wasontech.com">John Wason</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>robotraconteur</depend>
+  <depend>gazebo</depend>
+      
+  <export>    
+    <build_type>cmake</build_type>
+  </export>
+</package>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
-project(RobotRaconteurGazeboPlugin)
+project(gazebo_robotraconteur_server_plugin)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -22,7 +22,7 @@ ROBOTRACONTEUR_GENERATE_THUNK(RR_THUNK_SRCS RR_THUNK_HDRS
 	IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
 	)
 
-add_library(robotraconteur_gazebo_server_plugin SHARED 
+add_library(gazebo_robotraconteur_server_plugin SHARED 
 	robotraconteur_gazebo_server_plugin.cpp
 	robotraconteur_gazebo_server_plugin.h
 	${CMAKE_CURRENT_BINARY_DIR}/experimental__gazebo_stubskel.cpp
@@ -49,4 +49,8 @@ add_library(robotraconteur_gazebo_server_plugin SHARED
 	LightImpl.cpp
 	)
 
-target_link_libraries(robotraconteur_gazebo_server_plugin ${GAZEBO_LIBRARIES} RobotRaconteurCore ${Boost_LIBRARIES} ${RobotRaconteur_EXTRA_LIBRARIES})
+target_link_libraries(gazebo_robotraconteur_server_plugin ${GAZEBO_LIBRARIES} RobotRaconteurCore ${Boost_LIBRARIES} ${RobotRaconteur_EXTRA_LIBRARIES})
+
+include(GNUInstallDirs)
+
+install(TARGETS gazebo_robotraconteur_server_plugin DESTINATION ${CMAKE_INSTALL_LIBDIR})

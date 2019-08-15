@@ -1,0 +1,18 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <node name="gazebo" pkg="gazebo_ros" type="gzserver"
+      respawn="false" output="screen"
+      args="--verbose $(find gazebo_robotraconteur_server_plugin_examples)/worlds/rip_sensors_world.world -s libgazebo_robotraconteur_server_plugin.so --robotraconteur-server-tcp-port=11346" />
+
+  <group if="$(arg gui)">
+    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
+  </group>
+
+  <node name="rip_balance" pkg="gazebo_robotraconteur_server_plugin_examples"
+      type="rip_joint_controller.py" respawn="true" respawn_delay="5" output="screen"/>
+
+  <node name="gazebo_camera_client" pkg="gazebo_robotraconteur_server_plugin_examples"
+      type="gazebo_camera_client.py" respawn="true" respawn_delay="5" output="screen"/>
+
+</launch>
