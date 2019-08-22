@@ -22,6 +22,11 @@ ROBOTRACONTEUR_GENERATE_THUNK(RR_THUNK_SRCS RR_THUNK_HDRS
 	IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
 	)
 
+if (MSVC)
+   add_definitions(-D_USE_MATH_DEFINES)
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif()
+
 add_library(gazebo_robotraconteur_server_plugin SHARED 
 	robotraconteur_gazebo_server_plugin.cpp
 	robotraconteur_gazebo_server_plugin.h
