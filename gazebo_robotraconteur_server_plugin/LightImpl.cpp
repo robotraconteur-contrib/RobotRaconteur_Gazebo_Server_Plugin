@@ -37,68 +37,68 @@ namespace RobotRaconteurGazeboServerPlugin
 		return get_light()->Type();
 	}
 	
-	rrgz::PosePtr LightImpl::get_Pose()
+	geometry::Pose LightImpl::get_Pose()
 	{
-		auto p=get_light()->Position();
-		auto o_p=get_light()->Rotation();
-		rrgz::PosePtr o(new rrgz::Pose());
-		o->Position=RR::AllocateRRArray<double>(3);
-		o->Orientation=RR::AllocateRRArray<double>(4);
+		auto pos = get_light()->Position();
+		auto rot = get_light()->Rotation();
+		geometry::Pose o;
 
-		for (uint32_t i=0; i<3; i++) (*o->Position)[i]=p[i];
-		(*o->Orientation)[0]=o_p.W();
-		(*o->Orientation)[1]=o_p.X();
-		(*o->Orientation)[2]=o_p.Y();
-		(*o->Orientation)[3]=o_p.Z();
+		o.s.position.s.x = pos.X();
+		o.s.position.s.y = pos.Y();
+		o.s.position.s.z = pos.Z();
+
+		o.s.orientation.s.w = rot.W();
+		o.s.orientation.s.x = rot.X();
+		o.s.orientation.s.y = rot.Y();
+		o.s.orientation.s.z = rot.Z();
+
 		return o;
 	}
 	
-	RobotRaconteur::RRArrayPtr<double> LightImpl::get_Direction()
+	geometry::Vector3 LightImpl::get_Direction()
 	{
 		auto d=get_light()->Direction();
-		auto o=RR::AllocateRRArray<double>(3);
-		(*o)[0]=d[0];
-		(*o)[1]=d[1];
-		(*o)[2]=d[2];
+		geometry::Vector3 o;
+		o.s.x = d.X();
+		o.s.y = d.Y();
+		o.s.z = d.Z();
 		return o;
 	}
 	
-	rrgz::ColorPtr LightImpl::get_DiffuseColor()
+	color::ColorRGBAf LightImpl::get_DiffuseColor()
 	{
 		auto c=get_light()->DiffuseColor();
-		rrgz::ColorPtr o(new rrgz::Color());
-		o->a=c.A();
-		o->b=c.B();
-		o->g=c.G();
-		o->r=c.R();
+		color::ColorRGBAf o;
+		o.s.a = c.A();
+		o.s.b = c.B();
+		o.s.g = c.G();
+		o.s.r = c.R();
 		return o;
 	}
-	void LightImpl::set_DiffuseColor(rrgz::ColorPtr value)
+	void LightImpl::set_DiffuseColor(const color::ColorRGBAf& value)
 	{
 		//TODO: This update doesn't apply to the gzclient viewer.
-		//It does work with the cameras sensors.
-		RR_NULL_CHECK(value);
-		ignition::math::Color c(value->r, value->g, value->b, value->a);
+		//It does work with the cameras sensors.		
+		ignition::math::Color c(value.s.r, value.s.g, value.s.b, value.s.a);
 		auto l=get_light();
 		l->SetDiffuseColor(c);
 	}
 
-	rrgz::ColorPtr LightImpl::get_SpecularColor()
+	color::ColorRGBAf LightImpl::get_SpecularColor()
 	{
-		ignition::math::Color c=get_light()->SpecularColor();
-		rrgz::ColorPtr o(new rrgz::Color());
-		o->a=c.A();
-		o->b=c.B();
-		o->g=c.G();
-		o->r=c.R();
+		auto c=get_light()->SpecularColor();
+		color::ColorRGBAf o;
+		o.s.a = c.A();
+		o.s.b = c.B();
+		o.s.g = c.G();
+		o.s.r = c.R();
 		return o;
 	}
-	void LightImpl::set_SpecularColor(rrgz::ColorPtr value)
+	void LightImpl::set_SpecularColor(const color::ColorRGBAf& value)
 	{
 		//TODO: This update doesn't apply to the gzclient viewer.
-		//It does work with the cameras sensors.
-		RR_NULL_CHECK(value);
-		ignition::math::Color c(value->r, value->g, value->b, value->a);
+		//It does work with the cameras sensors.		
+		ignition::math::Color c(value.s.r, value.s.g, value.s.b, value.s.a);
 		auto l=get_light();
 		l->SetSpecularColor(c);
 	}

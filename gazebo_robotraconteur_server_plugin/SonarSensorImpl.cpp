@@ -53,24 +53,17 @@ namespace RobotRaconteurGazeboServerPlugin
 		return get_sonarsensor()->Radius();
 	}
 	
-	double SonarSensorImpl::get_Range()
+	void SonarSensorImpl::set_Range(RR::WirePtr<double> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		sensors::SonarSensorPtr c=get_sonarsensor();
-		return c->Range();
-	}
-	
-	RR::WirePtr<double> SonarSensorImpl::get_RangeWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_RangeWire;
-	}
-	void SonarSensorImpl::set_RangeWire(RR::WirePtr<double> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		m_RangeWire=value;
-		m_RangeWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<double> >();
-		m_RangeWire_b->Init(m_RangeWire);
+		SonarSensor_default_impl::set_Range(value);
+		boost::weak_ptr<SonarSensorImpl> weak_this = RR::rr_cast<SonarSensorImpl>(shared_from_this());
+		this->rrvar_Range->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				return this_->get_sonarsensor()->Range();
+			}
+		);
 	}
 
 	sensors::SonarSensorPtr SonarSensorImpl::get_sonarsensor()
@@ -82,12 +75,12 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::WireBroadcasterPtr<double> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_RangeWire_b;
+		boost::mutex::scoped_lock lock(SonarSensor_default_impl::this_lock);
+		b=rrvar_Range;
 		}
 		if (b)
 		{
-			auto i=get_Range();
+			auto i = get_sonarsensor()->Range();
 			b->SetOutValue(i);
 		}
 	}

@@ -54,37 +54,27 @@ namespace RobotRaconteurGazeboServerPlugin
 	  
 	  virtual rrgz::JointPtr get_Joints(const std::string& ind) override;
 
-	  virtual rrgz::PosePtr get_WorldPose() override {return EntityImpl::get_WorldPose();}
-	  virtual void set_WorldPose(rrgz::PosePtr value) override {EntityImpl::set_WorldPose(value);}
+	  virtual void SetWorldPose(const geometry::Pose& value) override { EntityImpl::SetWorldPose(value); }
 
-	  virtual rrgz::PosePtr get_RelativePose() override {return EntityImpl::get_RelativePose();}
-	  virtual void set_RelativePose(rrgz::PosePtr value) override {EntityImpl::set_RelativePose(value);}
+	  virtual void SetRelativePose(const geometry::Pose& value) override { EntityImpl::SetRelativePose(value); }
 
-	  virtual RR::RRArrayPtr<double> get_WorldVelocity() override {return EntityImpl::get_WorldVelocity();}
+	  virtual RR::WirePtr<geometry::Pose> get_WorldPose() override { return EntityImpl::get_WorldPose(); }
+	  virtual void set_WorldPose(RR::WirePtr<geometry::Pose> value) override { EntityImpl::set_WorldPose(value); }
 
-	  virtual RR::RRArrayPtr<double > get_RelativeVelocity() override {return EntityImpl::get_RelativeVelocity();}
-	  
-	  virtual RR::RRArrayPtr<double> get_WorldAcceleration() override {return EntityImpl::get_WorldAcceleration();}
-	  
-	  virtual RR::RRArrayPtr<double> get_RelativeAcceleration() override {return EntityImpl::get_RelativeAcceleration();}
+	  virtual RR::WirePtr<geometry::Pose> get_RelativePose() override { return EntityImpl::get_RelativePose(); }
+	  virtual void set_RelativePose(RR::WirePtr<geometry::Pose> value) override { EntityImpl::set_RelativePose(value); }
 
-	  virtual RR::WirePtr<rrgz::PosePtr> get_WorldPoseGetWire() override {return EntityImpl::get_WorldPoseGetWire();}
-	  virtual void set_WorldPoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override {EntityImpl::set_WorldPoseGetWire(value);}
+	  virtual RR::WirePtr<geometry::SpatialVelocity> get_WorldVelocity() override { return EntityImpl::get_WorldVelocity(); }
+	  virtual void set_WorldVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override { EntityImpl::set_WorldVelocity(value); }
 
-	  virtual RR::WirePtr<rrgz::PosePtr> get_RelativePoseGetWire() override {return EntityImpl::get_RelativePoseGetWire();}
-	  virtual void set_RelativePoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override {EntityImpl::set_RelativePoseGetWire(value);}
+	  virtual RR::WirePtr<geometry::SpatialVelocity> get_RelativeVelocity() override { return EntityImpl::get_RelativeVelocity(); }
+	  virtual void set_RelativeVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override { EntityImpl::set_RelativeVelocity(value); }
 
-	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldVelocityGetWire() override {return EntityImpl::get_WorldVelocityGetWire();}
-	  virtual void set_WorldVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override {EntityImpl::set_WorldVelocityGetWire(value);}
+	  virtual RR::WirePtr<geometry::SpatialAcceleration> get_WorldAcceleration() override { return EntityImpl::get_WorldAcceleration(); }
+	  virtual void set_WorldAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override { EntityImpl::set_WorldAcceleration(value); }
 
-	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_RelativeVelocityGetWire() override {return EntityImpl::get_RelativeVelocityGetWire();}
-	  virtual void set_RelativeVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override {EntityImpl::set_RelativeVelocityGetWire(value);}
-
-	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldAccelerationGetWire() override {return EntityImpl::get_WorldAccelerationGetWire();}
-	  virtual void set_WorldAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override {EntityImpl::set_WorldAccelerationGetWire(value);}
-
-	  virtual RR::WirePtr<RR::RRArrayPtr<double > > get_RelativeAccelerationGetWire() override {return EntityImpl::get_RelativeAccelerationGetWire();}
-	  virtual void set_RelativeAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double > > value) override {EntityImpl::set_RelativeAccelerationGetWire(value);}
+	  virtual RR::WirePtr<geometry::SpatialAcceleration> get_RelativeAcceleration() override { return EntityImpl::get_RelativeAcceleration(); }
+	  virtual void set_RelativeAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override { EntityImpl::set_RelativeAcceleration(value); }
 
 	  virtual void CreateJointController() override;
 	  virtual void DestroyJointController() override;

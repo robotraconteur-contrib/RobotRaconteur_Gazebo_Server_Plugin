@@ -39,46 +39,42 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 
 
-	rrgz::ImuStatePtr ImuSensorImpl::get_ReadState()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		sensors::ImuSensorPtr c=get_imusensor();
-		rrgz::ImuStatePtr o(new rrgz::ImuState());
-		auto a_v=RR::AllocateRRArray<double>(3);
-		auto l_a=RR::AllocateRRArray<double>(3);
-		auto o_p=RR::AllocateRRArray<double>(4);
+	static imu::ImuStatePtr gz_to_rr_imustate(sensors::ImuSensorPtr& c)
+	{		
+		imu::ImuStatePtr o(new imu::ImuState());
+		
+		auto a_v1 = c->AngularVelocity();
+		auto l_a1 = c->LinearAcceleration();
+		auto o_p1 = c->Orientation();
 
-		auto a_v1=c->AngularVelocity();
-		auto l_a1=c->LinearAcceleration();
-		auto o_p1=c->Orientation();
+		o->angular_velocity.s.x = a_v1.X();
+		o->angular_velocity.s.y = a_v1.Y();
+		o->angular_velocity.s.z = a_v1.Z();
 
-		(*a_v)[0]=a_v1[0];
-		(*a_v)[1]=a_v1[1];
-		(*a_v)[2]=a_v1[2];
+		o->linear_acceleration.s.x = l_a1.X();
+		o->linear_acceleration.s.y = l_a1.Y();
+		o->linear_acceleration.s.z = l_a1.Z();
 
-		(*l_a)[0]=l_a1[0];
-		(*l_a)[1]=l_a1[1];
-		(*l_a)[2]=l_a1[2];
-
-		(*o_p)[0]=o_p1.W();
-		(*o_p)[1]=o_p1.X();
-		(*o_p)[2]=o_p1.Y();
-		(*o_p)[3]=o_p1.Z();
-
+		o->orientation.s.w = o_p1.W();
+		o->orientation.s.x = o_p1.X();
+		o->orientation.s.y = o_p1.Y();
+		o->orientation.s.z = o_p1.Z();
+		
 		return o;
 	}
-	
-	RR::WirePtr<rrgz::ImuStatePtr> ImuSensorImpl::get_StateWire()
+		
+	void ImuSensorImpl::set_State(RR::WirePtr<imu::ImuStatePtr> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_StateWire;
-	}
-	void ImuSensorImpl::set_StateWire(RR::WirePtr<rrgz::ImuStatePtr> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		m_StateWire=value;
-		m_StateWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<rrgz::ImuStatePtr> >();
-		m_StateWire_b->Init(m_StateWire);
+		ImuSensor_default_impl::set_State(value);
+		boost::weak_ptr<ImuSensorImpl> weak_this = RR::rr_cast<ImuSensorImpl>(shared_from_this());
+		this->rrvar_State->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				auto s = this_->get_imusensor();
+				return gz_to_rr_imustate(s);
+			}
+		);
 	}
 
 	void ImuSensorImpl::SetReferencePose()
@@ -93,14 +89,15 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ImuSensorImpl::OnUpdate1()
 	{
-		RR::WireBroadcasterPtr<rrgz::ImuStatePtr> b;
+		RR::WireBroadcasterPtr<imu::ImuStatePtr> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_StateWire_b;
+		boost::mutex::scoped_lock lock(ImuSensor_default_impl::this_lock);
+		b=rrvar_State;
 		}
 		if (b)
 		{
-			auto i=get_ReadState();
+			auto s = get_imusensor();
+			auto i = gz_to_rr_imustate(s);
 			b->SetOutValue(i);
 		}
 	}

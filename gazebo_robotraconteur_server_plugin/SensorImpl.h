@@ -27,6 +27,8 @@
 using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
+namespace geometry = com::robotraconteur::geometry;
+namespace datetime = com::robotraconteur::datetime;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
@@ -41,17 +43,17 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual std::string get_ParentName() override;	  
 
-	  virtual rrgz::PosePtr get_Pose() override;	  
+	  virtual geometry::Pose get_Pose() override;	  
 
-	  virtual uint8_t get_Active() override;
-	  virtual void set_Active(uint8_t value) override;
+	  virtual RR::rr_bool get_Active() override;
+	  virtual void set_Active(RR::rr_bool value) override;
 
 	  virtual double get_UpdateRate() override;
 	  virtual void set_UpdateRate(double value) override;
 
-	  virtual double get_LastUpdateTime() override;  
+	  virtual datetime::Duration get_LastUpdateTime() override;  
 
-	  virtual double get_LastMeasurementTime() override;	  
+	  virtual datetime::Duration get_LastMeasurementTime() override;	  
 
   protected:
 

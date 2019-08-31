@@ -26,8 +26,9 @@ namespace RobotRaconteurGazeboServerPlugin
 		link_name=j->GetParent()->GetName();
 		model_name=j->GetParent()->GetParentModel()->GetName();
 		gz_world=j->GetParent()->GetParentModel()->GetWorld();
-
+		
 		axes_forces=RR::AllocateRRArray<double>(j->DOF());
+		j->SetProvideFeedback(true);
 	}
 
 	void JointImpl::Init()
@@ -36,6 +37,73 @@ namespace RobotRaconteurGazeboServerPlugin
 		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
 		          boost::bind(&JointImpl::OnUpdate, j1, _1));
 	}
+
+	static geometry::Vector3 gz_vector_to_rr_vector(const ignition::math::Vector3d& v)
+	{
+		geometry::Vector3 o;
+		o.s.x = v.X();
+		o.s.y = v.Y();
+		o.s.z = v.Z();
+		return o;
+	}
+
+	static RR::RRArrayPtr<double> _get_axes_Positions(const physics::JointPtr& j)
+	{
+		size_t axis_count = j->DOF();
+		auto o = RR::AllocateRRArray<double>(axis_count);
+		for (int32_t i = 0; i < axis_count; i++)
+		{
+			o->at(i) = j->Position(i);
+		}
+		return o;
+	}
+
+	static RR::RRArrayPtr<double> _get_axes_velocities(const physics::JointPtr& j)
+	{
+		size_t axis_count = j->DOF();
+		auto o = RR::AllocateRRArray<double>(axis_count);
+		for (int32_t i = 0; i < axis_count; i++)
+		{
+			o->at(i) = j->GetVelocity(i);
+		}
+		return o;
+	}
+
+	static RR::RRArrayPtr<double> _get_axes_force(const physics::JointPtr& j)
+	{
+		size_t axis_count = j->DOF();
+		auto o = RR::AllocateRRArray<double>(axis_count);
+		for (int32_t i = 0; i < axis_count; i++)
+		{
+			o->at(i) = j->GetForce(i);
+		}
+		return o;
+	}
+
+	static geometry::Wrench gz_to_wrench(const ignition::math::Vector3d& m, const ignition::math::Vector3d& f)
+	{
+		geometry::Wrench o;
+		o.s.torque.s.x = m.X();
+		o.s.torque.s.y = m.Y();
+		o.s.torque.s.z = m.Z();
+		o.s.force.s.x = f.X();
+		o.s.force.s.y = f.Y();
+		o.s.force.s.z = f.Z();
+		return o;
+	}
+
+	static rrgz::JointWrench _get_force_torque(const physics::JointPtr& j)
+	{
+		rrgz::JointWrench o;
+
+		physics::JointWrench a = j->GetForceTorque(0);
+
+		o.s.body1_wrench = gz_to_wrench(a.body1Torque, a.body1Force);
+		o.s.body2_wrench = gz_to_wrench(a.body2Torque, a.body2Force);
+
+		return o;
+	}
+
 
 	void JointImpl::OnUpdate(RR_WEAK_PTR<JointImpl> j, const common::UpdateInfo & _info)
     {
@@ -50,115 +118,43 @@ namespace RobotRaconteurGazeboServerPlugin
 		//std::cout << _info.simTime.Double() << std::endl;
 
 
-		RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > axisangle_b;
-		RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > axisvel_b;
-		RR::WireBroadcasterPtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > ft_b;
-
-		unsigned int axis_count;
+		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > axesPositions_b;
+		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > axesvel_b;
+		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > axesforce_b;
+		RR::WireBroadcasterPtr<rrgz::JointWrench> ft_b;
+				
+		size_t axis_count;		
 		physics::JointPtr j=get_joint();
+		axis_count = j->DOF();
 		{
 			boost::mutex::scoped_lock lock(this_lock);
 
-			axis_count=j->DOF();
-
-			try
-			{
-				if (m_AxisPositionSetWire_conn)
-				{
-					if (m_AxisPositionSetWire_conn->GetInValueValid())
-					{
-						RR::RRMapPtr<int32_t,RR::RRArray<double> > in_val=m_AxisPositionSetWire_conn->GetInValue();
-						for(auto e=in_val->begin(); e!=in_val->end(); e++)
-						{
-							if (e->first < axis_count)
-							{
-								j->SetPosition(e->first, RR::RRArrayToScalar(e->second));
-							}
-						}
-					}
-				}
-			}
-			catch (std::exception&) {}
-
-			try
-			{
-				if (m_AxisVelocitySetWire_conn)
-				{
-					if (m_AxisVelocitySetWire_conn->GetInValueValid())
-					{
-						RR::RRMapPtr<int32_t,RR::RRArray<double> > in_val=m_AxisVelocitySetWire_conn->GetInValue();
-						for(auto e=in_val->begin(); e!=in_val->end(); e++)
-						{
-							if (e->first < axis_count)
-							{
-								j->SetVelocity(e->first, RR::RRArrayToScalar(e->second));
-							}
-						}
-					}
-				}
-			}
-			catch (std::exception&) {}
-
-			bool force_set=false;
-
-			try
-			{
-				if (m_ForceSetWire_conn)
-				{
-					if (m_ForceSetWire_conn->GetInValueValid())
-					{
-						force_set=true;
-						RR::RRMapPtr<int32_t,RR::RRArray<double> > in_val=m_ForceSetWire_conn->GetInValue();
-						for(auto e=in_val->begin(); e!=in_val->end(); e++)
-						{
-							if (e->first < axis_count)
-							{
-								j->SetForce(e->first, RR::RRArrayToScalar(e->second));
-							}
-						}
-					}
-				}
-			}
-			catch (std::exception&) {}
-
-
-
-			if (!force_set)
-			{
-				for (unsigned int i=0; i < axes_forces->size(); i++ )
-				{
-					if (i<axis_count)
-					{
-						j->SetForce(i, (*axes_forces)[i]);
-					}
-				}
-			}
-
-			axisangle_b=m_AxisAngleGetWire_b;
-			axisvel_b=m_AxisVelocityGetWire_b;
-			ft_b=m_ForceTorqueGetWire_b;
-
+			
+			axesPositions_b=rrvar_AxesPositions;
+			axesvel_b=rrvar_AxesVelocities;
+			axesforce_b = rrvar_AxesForce;
+			ft_b=rrvar_ForceTorque;
 		}
-		RR::RRMapPtr<int32_t,RR::RRArray<double > > axisangle(new RR::RRMap<int32_t,RR::RRArray<double > >());
-		RR::RRMapPtr<int32_t,RR::RRArray<double > > axisvel(new RR::RRMap<int32_t,RR::RRArray<double > >());
-		RR::RRMapPtr<int32_t,RR::RRArray<double > > ft(new RR::RRMap<int32_t,RR::RRArray<double > >());
-
-		for (unsigned int i=0; i<axis_count; i++)
+		
+		if (axesPositions_b)
 		{
-			axisangle->insert(std::make_pair((int32_t)i,RR::ScalarToRRArray(GetAxisAngle(i))));
-			axisvel->insert(std::make_pair((int32_t)i,RR::ScalarToRRArray(GetAxisVelocity(i))));
+			axesPositions_b->SetOutValue(_get_axes_Positions(j));
+		}
+		
+		if (axesvel_b)
+		{
+			axesvel_b->SetOutValue(_get_axes_velocities(j));
 		}
 
-		//TODO: Determine "Provide Feedback?"
-		//ft->map.insert(std::make_pair(0,GetForceTorque(0)));
-		//ft->map.insert(std::make_pair(1,GetForceTorque(1)));
+		if (axesforce_b)
+		{
+			axesforce_b->SetOutValue(_get_axes_force(j));
+		}
 
-
-
-		if (axisangle_b) axisangle_b->SetOutValue(axisangle);
-		if (axisvel_b) axisvel_b->SetOutValue(axisvel);
-		//if (ft_b) ft_b->SetOutValue(ft);
-
+		if (ft_b)
+		{
+			ft_b->SetOutValue(_get_force_torque(j));
+		}		
 	}
 
 	physics::JointPtr JointImpl::get_joint()
@@ -188,27 +184,15 @@ namespace RobotRaconteurGazeboServerPlugin
 		return get_joint()->GetChild()->GetName();
 	}
 	
-	int32_t JointImpl::get_AxisCount()
+	uint32_t JointImpl::get_AxisCount()
 	{
 		return get_joint()->DOF();
 	}
 	
-	RR::RRMapPtr<int32_t,RR::RRArray<double > > JointImpl::get_AxesAngles()
+	
+	static void _set_axes_Positions(RR::RRMapPtr<int32_t,RR::RRArray<double > > value, const physics::JointPtr& j)
 	{
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		RR::RRMapPtr<int32_t,RR::RRArray<double > > o(new RR::RRMap<int32_t,RR::RRArray<double > >());
-		for (int32_t i=0; i<axis_count; i++)
-		{
-			double v=j->Position(i);
-			o->insert(std::make_pair(i,RR::ScalarToRRArray(v)));
-		}
-		return o;
-	}
-	void JointImpl::set_AxesAngles(RR::RRMapPtr<int32_t,RR::RRArray<double > > value)
-	{
-		RR_NULL_CHECK(value);
-		physics::JointPtr j=get_joint();
+		RR_NULL_CHECK(value);		
 		int axis_count=j->DOF();
 		for (auto e=value->begin(); e!=value->end(); e++)
 		{
@@ -223,22 +207,10 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 
-	RR::RRMapPtr<int32_t,RR::RRArray<double > > JointImpl::get_AxesVelocities()
+	
+	static void _set_axes_force(RR::RRMapPtr<int32_t,RR::RRArray<double > > value, const physics::JointPtr& j)
 	{
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		RR::RRMapPtr<int32_t,RR::RRArray<double > > o(new RR::RRMap<int32_t,RR::RRArray<double > >());
-		for (int32_t i=0; i<axis_count; i++)
-		{
-			double v=j->GetVelocity(i);
-			o->insert(std::make_pair(i,RR::ScalarToRRArray(v)));
-		}
-		return o;
-	}
-	void JointImpl::set_AxesVelocities(RR::RRMapPtr<int32_t,RR::RRArray<double > > value)
-	{
-		RR_NULL_CHECK(value);
-		physics::JointPtr j=get_joint();
+		RR_NULL_CHECK(value);		
 		int axis_count=j->DOF();
 		for (auto e=value->begin(); e!=value->end(); e++)
 		{
@@ -249,258 +221,108 @@ namespace RobotRaconteurGazeboServerPlugin
 			}
 			double v=0;
 			v=RR::RRArrayToScalar(e->second);
-			j->SetVelocity((unsigned int)e->first, v);
+			j->SetForce((unsigned int)e->first, v);
 		}
 	}
-
-	RR::RRArrayPtr<double> JointImpl::GetGlobalAxis(int32_t axis)
-	{
-		RR::RRArrayPtr<double> o=RR::AllocateRRArray<double>(3);
+	
+	RR::RRNamedArrayPtr<geometry::Vector3> JointImpl::GetGlobalAxes()
+	{		
 		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-
-		auto v=j->GlobalAxis(axis);
-		(*o)[0]=v.X(); (*o)[1]=v.Y(); (*o)[2]=v.Z();
-		return 0;
-	}
-
-	RR::RRArrayPtr<double> JointImpl::GetLocalAxis(int32_t axis)
-	{
-		RR::RRArrayPtr<double> o=RR::AllocateRRArray<double>(3);
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-
-		auto v=j->LocalAxis(axis);
-		(*o)[0]=v.X(); (*o)[1]=v.Y(); (*o)[2]=v.Z();
-		return 0;
-	}
-
-	double JointImpl::GetAxisAngle(int32_t axis)
-	{
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-		return j->Position(axis);
-	}
-
-	void JointImpl::SetAxisPosition(int32_t axis, double value)
-	{
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-		j->SetPosition(axis,value);
-	}
-
-	double JointImpl::GetAxisVelocity(int32_t axis)
-	{
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-		return j->GetVelocity(axis);
-	}
-
-	void JointImpl::SetAxisVelocity(int32_t axis, double value)
-	{
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-		j->SetVelocity(axis,value);
-	}
-
-	double JointImpl::GetForce(int32_t axis)
-	{
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-		return j->GetForce(axis);
-	}
-
-	void JointImpl::SetForce(int32_t axis, double value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		physics::JointPtr j=get_joint();
-		int axis_count=j->DOF();
-		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
-
-		if (axes_forces->size() < axis_count)
+		size_t axis_count=j->DOF();
+		RR::RRNamedArrayPtr<geometry::Vector3> o = RR::AllocateEmptyRRNamedArray<geometry::Vector3>(axis_count);
+		for (size_t i = 0; i < axis_count; i++)
 		{
-			RR::RRArrayPtr<double> axes_forces1=RR::AllocateRRArray<double>(axis_count);
-			for (size_t i=0; i<axes_forces->size(); i++)
-			{
-				(*axes_forces1)[i]=(*axes_forces)[i];
-			}
-			axes_forces=axes_forces1;
-		}
+			auto v = j->GlobalAxis(i);
+			o->at(i) = gz_vector_to_rr_vector(v);
 
-		(*axes_forces)[axis]=value;
+		}		
+		return o;
 	}
 
-	RR::RRArrayPtr<double> JointImpl::GetForceTorque(int32_t link)
+	RR::RRNamedArrayPtr<geometry::Vector3> JointImpl::GetLocalAxes()
 	{
-		RR::RRArrayPtr<double> o=RR::AllocateRRArray<double>(6);
+		physics::JointPtr j = get_joint();
+		size_t axis_count = j->DOF();
+		RR::RRNamedArrayPtr<geometry::Vector3> o = RR::AllocateEmptyRRNamedArray<geometry::Vector3>(axis_count);
+		for (size_t i = 0; i < axis_count; i++)
+		{
+			auto v = j->LocalAxis(i);
+			o->at(i) = gz_vector_to_rr_vector(v);
 
-		physics::JointWrench a=get_joint()->GetForceTorque(0);
-
-		if (link==0)
-		{
-			(*o)[0]=a.body1Torque.X(); (*o)[1]=a.body1Torque.Y(); (*o)[2]=a.body1Torque.Z();
-			(*o)[3]=a.body1Force.X(); (*o)[4]=a.body1Force.Y(); (*o)[5]=a.body1Force.Z();
-		}
-		else if (link==1)
-		{
-			(*o)[0]=a.body2Torque.X(); (*o)[1]=a.body2Torque.Y(); (*o)[2]=a.body2Torque.Z();
-			(*o)[3]=a.body2Force.X(); (*o)[4]=a.body2Force.Y(); (*o)[5]=a.body2Force.Z();
-		}
-		else
-		{
-			throw std::invalid_argument("Invalid link");
 		}
 		return o;
 	}
 
-	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > JointImpl::get_AxisAngleGetWire()
+	void JointImpl::set_AxesPositions(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_AxisAngleGetWire;
+		Joint_default_impl::set_AxesPositions(value);
+		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
+		this->rrvar_AxesPositions->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				auto j = this_->get_joint();			
+				return _get_axes_Positions(j);
+			}
+		);
 	}
-	void JointImpl::set_AxisAngleGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > value)
+	
+	void JointImpl::set_AxesVelocities(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_AxisAngleGetWire) throw std::runtime_error("Already set");
-		m_AxisAngleGetWire=value;
-		m_AxisAngleGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<int32_t,RR::RRArray<double > > > >();
-		m_AxisAngleGetWire_b->Init(m_AxisAngleGetWire);
+		Joint_default_impl::set_AxesVelocities(value);
+		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
+		this->rrvar_AxesVelocities->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				auto j = this_->get_joint();
+				return _get_axes_velocities(j);
+			}
+		);
 	}
-
-	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double > > > JointImpl::get_AxisVelocityGetWire()
+	
+	void JointImpl::set_AxesForce(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_AxisVelocityGetWire;
+		Joint_default_impl::set_AxesForce(value);
+		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
+		this->rrvar_AxesForce->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				auto j = this_->get_joint();
+				return _get_axes_force(j);
+			}
+		);
 	}
-	void JointImpl::set_AxisVelocityGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
+		
+	void JointImpl::set_ForceTorque(RR::WirePtr<rrgz::JointWrench> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_AxisVelocityGetWire) throw std::runtime_error("Already set");
-		m_AxisVelocityGetWire=value;
-		m_AxisVelocityGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<int32_t,RR::RRArray<double> > > >();
-		m_AxisVelocityGetWire_b->Init(m_AxisVelocityGetWire);
-	}
-
-	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_ForceTorqueGetWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_ForceTorqueGetWire;
-	}
-	void JointImpl::set_ForceTorqueGetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_ForceTorqueGetWire) throw std::runtime_error("Already set");
-		m_ForceTorqueGetWire=value;
-		m_ForceTorqueGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<int32_t,RR::RRArray<double> > > >();
-		m_ForceTorqueGetWire_b->Init(m_ForceTorqueGetWire);
-	}
-
-	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_AxisPositionSetWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_AxisPositionSetWire;
-	}
-	void JointImpl::set_AxisPositionSetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_AxisPositionSetWire) throw std::runtime_error("Already set");
-		m_AxisPositionSetWire=value;
-		RR_WEAK_PTR<JointImpl> l=boost::dynamic_pointer_cast<JointImpl>(shared_from_this());
-		m_AxisPositionSetWire->SetWireConnectCallback(boost::bind(&JointImpl::OnAxisPositionSetWireConnect,l,_1));
-	}
-
-	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_AxisVelocitySetWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_AxisVelocitySetWire;
-	}
-	void JointImpl::set_AxisVelocitySetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_AxisVelocitySetWire) throw std::runtime_error("Already set");
-		m_AxisVelocitySetWire=value;
-		RR_WEAK_PTR<JointImpl> l=boost::dynamic_pointer_cast<JointImpl>(shared_from_this());
-		m_AxisVelocitySetWire->SetWireConnectCallback(boost::bind(&JointImpl::OnAxisVelocitySetWireConnect,l,_1));
+		Joint_default_impl::set_ForceTorque(value);
+		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
+		this->rrvar_ForceTorque->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				auto j = this_->get_joint();
+				return _get_force_torque(j);
+			}
+		);
 	}
 
-	RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > JointImpl::get_ForceSetWire()
+	void JointImpl::SetAxisPosition(uint32_t axis, double value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_ForceSetWire;
-	}
-	void JointImpl::set_ForceSetWire(RR::WirePtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_ForceSetWire) throw std::runtime_error("Already set");
-		m_ForceSetWire=value;
-		RR_WEAK_PTR<JointImpl> l=boost::dynamic_pointer_cast<JointImpl>(shared_from_this());
-		m_ForceSetWire->SetWireConnectCallback(boost::bind(&JointImpl::OnForceSetWireConnect,l,_1));
+		physics::JointPtr j = get_joint();
+		int axis_count = j->DOF();
+		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
+		j->SetPosition(axis, value);
 	}
 
-	void JointImpl::OnAxisPositionSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
+	void JointImpl::SetAxisVelocity(uint32_t axis, double value)
 	{
-		RR_SHARED_PTR<JointImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		//if(l1->m_AxisPositionSetWire_conn) throw std::runtime_error("Wire in use");
-		l1->m_AxisPositionSetWire_conn=connection;
-		l1->m_AxisPositionSetWire_conn->SetWireConnectionClosedCallback(boost::bind(&JointImpl::OnAxisPositionSetWireDisconnect,l,_1));
+		physics::JointPtr j = get_joint();
+		int axis_count = j->DOF();
+		if (axis > axis_count) throw std::invalid_argument("Invalid axis");
+		j->SetVelocity(axis, value);
+	}
 
-	}
-	void JointImpl::OnAxisPositionSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<JointImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		if(l1->m_AxisPositionSetWire_conn==connection)
-		{
-			l1->m_AxisPositionSetWire_conn.reset();
-		}
-	}
-	void JointImpl::OnAxisVelocitySetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<JointImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		//if(l1->m_AxisVelocitySetWire_conn) throw std::runtime_error("Wire in use");
-		l1->m_AxisVelocitySetWire_conn=connection;
-		l1->m_AxisVelocitySetWire_conn->SetWireConnectionClosedCallback(boost::bind(&JointImpl::OnAxisVelocitySetWireDisconnect,l,_1));
-
-	}
-	void JointImpl::OnAxisVelocitySetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<JointImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		if(l1->m_AxisVelocitySetWire_conn==connection)
-		{
-			l1->m_AxisVelocitySetWire_conn.reset();
-		}
-	}
-	void JointImpl::OnForceSetWireConnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<JointImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		//if(l1->m_ForceSetWire_conn) throw std::runtime_error("Wire in use");
-		l1->m_ForceSetWire_conn=connection;
-		l1->m_ForceSetWire_conn->SetWireConnectionClosedCallback(boost::bind(&JointImpl::OnForceSetWireDisconnect,l,_1));
-	}
-	void JointImpl::OnForceSetWireDisconnect(RR_WEAK_PTR<JointImpl> l, RR::WireConnectionPtr<RR::RRMapPtr<int32_t,RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<JointImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		if(l1->m_ForceSetWire_conn==connection)
-		{
-			l1->m_ForceSetWire_conn.reset();
-		}
-	}
 }

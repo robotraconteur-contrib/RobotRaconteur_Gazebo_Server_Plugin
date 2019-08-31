@@ -32,20 +32,67 @@ namespace RobotRaconteurGazeboServerPlugin
 		updateConnection=get_camera()->ConnectUpdated(boost::bind(&CameraImpl::OnUpdate,c));
 	}
 
-	rrgz::CameraImagePtr CameraImpl::CaptureImage()
+	namespace detail
+	{
+
+		image::ImageEncoding::ImageEncoding gz_image_enconding_to_rr_encoding(const std::string& format)
+		{
+			using namespace image::ImageEncoding;
+			if (format == "L8" || format == "L_INT8")
+			{
+				return mono8;
+			}
+			else if (format == "L16" || format == "L_INT16")
+			{
+				return mono16;
+			}
+			else if (format == "R8G8B8" || format == "RGB_INT8")
+			{
+				return rgb8;
+			}
+			else if (format == "B8G8R8" || format == "BGR_INT8")
+			{
+				return bgr8;
+			}
+			else if (format == "BAYER_RGGB8")
+			{
+				return bayer_rggb8;
+			}
+			else if (format == "BAYER_BGGR8")
+			{
+				return bayer_bggr8;
+			}
+			else if (format == "BAYER_GBRG8")
+			{
+				return bayer_gbrg8;
+			}
+			else if (format == "BAYER_GRBG8")
+			{
+				return bayer_grbg8;
+			}
+			else
+			{
+				return unknown;
+			}
+		}
+	}
+
+	image::ImagePtr CameraImpl::CaptureImage()
 	{
 
 		sensors::CameraSensorPtr c=get_camera();
 		rendering::CameraPtr c2=c->Camera();
 		if (!c2->CaptureData()) throw std::runtime_error("Image not ready");
-		rrgz::CameraImagePtr o(new rrgz::CameraImage());
+		image::ImagePtr o(new image::Image());
+		o->image_info = new image::ImageInfo();
+		o->image_info->data_header = new com::robotraconteur::sensordata::SensorDataHeader();
 		const uint8_t* image_bytes=c2->ImageData();
 		size_t image_byte_size=c2->ImageByteSize();
 		o->data=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
-		o->format=c2->ImageFormat();
-		o->width=c2->ImageWidth();
-		o->height=c2->ImageHeight();
-
+		o->image_info->encoding = detail::gz_image_enconding_to_rr_encoding(c2->ImageFormat());
+		o->image_info->width=c2->ImageWidth();
+		o->image_info->height=c2->ImageHeight();
+		o->image_info->step = c2->ImageWidth() * c2->ImageDepth();
 		return o;
 	}
 
@@ -53,19 +100,12 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return std::dynamic_pointer_cast<sensors::CameraSensor>(get_sensor());
 	}
-
-	RR::PipePtr<rrgz::CameraImagePtr> CameraImpl::get_ImageStream()
+		
+	void CameraImpl::set_ImageStream(RR::PipePtr<image::ImagePtr> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_ImageStream;
-	}
-	void CameraImpl::set_ImageStream(RR::PipePtr<rrgz::CameraImagePtr> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_ImageStream) throw std::runtime_error("Already set");
-		m_ImageStream=value;
-		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<rrgz::CameraImagePtr> >();
-		m_ImageStream_b->Init(m_ImageStream,3);
+		boost::mutex::scoped_lock lock(CameraSensor_default_impl::this_lock);
+		rrvar_ImageStream = RR_MAKE_SHARED<RR::PipeBroadcaster<image::ImagePtr> >();
+		rrvar_ImageStream->Init(value, 3);
 	}
 
 	void CameraImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -78,17 +118,15 @@ namespace RobotRaconteurGazeboServerPlugin
 	void CameraImpl::OnUpdate1()
 	{
 
-		RR::PipeBroadcasterPtr<rrgz::CameraImagePtr> b;
+		RR::PipeBroadcasterPtr<image::ImagePtr> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_ImageStream_b;
+		boost::mutex::scoped_lock lock(CameraSensor_default_impl::this_lock);
+		b=rrvar_ImageStream;
 		}
 		if (b)
 		{
-
 			auto i=CaptureImage();
 			b->AsyncSendPacket(i, []() {});
 		}
-
 	}
 }

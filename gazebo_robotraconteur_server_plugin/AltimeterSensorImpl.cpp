@@ -38,26 +38,21 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (!c1) return;
 		c1->OnUpdate1();
 	}
-
-
-	double AltimeterSensorImpl::get_Altitude()
+		
+	void AltimeterSensorImpl::set_Altitude(RR::WirePtr<double> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		sensors::AltimeterSensorPtr c=get_altimetersensor();
-		return c->Altitude();
-	}
-	
-	RR::WirePtr<double> AltimeterSensorImpl::get_AltitudeWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_AltitudeWire;
-	}
-	void AltimeterSensorImpl::set_AltitudeWire(RR::WirePtr<double> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		m_AltitudeWire=value;
-		m_AltitudeWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<double> >();
-		m_AltitudeWire_b->Init(m_AltitudeWire);
+		boost::mutex::scoped_lock lock(rrgz::AltimeterSensor_default_impl::this_lock);
+		AltimeterSensor_default_impl::set_Altitude(value);
+		boost::weak_ptr<AltimeterSensorImpl> weak_this = RR::rr_cast<AltimeterSensorImpl>(shared_from_this());
+		this->rrvar_Altitude->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Sensor has been released");
+				auto j = this_->get_altimetersensor();
+				return j->Altitude();
+			}
+		);
+		
 	}
 
 	sensors::AltimeterSensorPtr AltimeterSensorImpl::get_altimetersensor()
@@ -69,13 +64,12 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR_SHARED_PTR<RR::WireBroadcaster<double> > b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_AltitudeWire_b;
+		boost::mutex::scoped_lock lock(rrgz::AltimeterSensor_default_impl::this_lock);
+		b=rrvar_Altitude;
 		}
 		if (b)
-		{
-			auto i=get_Altitude();
-			b->SetOutValue(i);
+		{			
+			b->SetOutValue(get_altimetersensor()->Altitude());
 		}
 	}
 

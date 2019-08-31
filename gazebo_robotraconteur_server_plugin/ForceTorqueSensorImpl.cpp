@@ -39,33 +39,32 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 
 
-	RR::RRArrayPtr<double> ForceTorqueSensorImpl::get_ForceTorque()
+	static geometry::Wrench gz_forcetorque_to_rr_wrench(const sensors::ForceTorqueSensorPtr& ft)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		sensors::ForceTorqueSensorPtr c=get_forcetorquesensor();
-		auto t=c->Torque();
-		auto f= c->Force();
-		auto o=RR::AllocateRRArray<double>(6);
-		(*o)[0]=t[0];
-		(*o)[1]=t[1];
-		(*o)[2]=t[2];
-		(*o)[3]=f[0];
-		(*o)[4]=f[1];
-		(*o)[5]=f[2];
+		auto t = ft->Torque();
+		auto f = ft->Force();
+
+		geometry::Wrench o;
+		o.s.force.s.x = t.X();
+		o.s.force.s.y = t.Y();
+		o.s.force.s.z = t.Z();
+		o.s.torque.s.x = t.X();
+		o.s.torque.s.y = t.Y();
+		o.s.torque.s.z = t.Z();
 		return o;
 	}
-	
-	RR::WirePtr<RR::RRArrayPtr<double> > ForceTorqueSensorImpl::get_ForceTorqueWire()
+
+	void ForceTorqueSensorImpl::set_ForceTorque(RR::WirePtr<geometry::Wrench> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_ForceTorqueWire;
-	}
-	void ForceTorqueSensorImpl::set_ForceTorqueWire(RR::WirePtr<RR::RRArrayPtr<double> > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		m_ForceTorqueWire=value;
-		m_ForceTorqueWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRArrayPtr<double> > >();
-		m_ForceTorqueWire_b->Init(m_ForceTorqueWire);
+		ForceTorqueSensor_default_impl::set_ForceTorque(value);
+		boost::weak_ptr<ForceTorqueSensorImpl> weak_this = RR::rr_cast<ForceTorqueSensorImpl>(shared_from_this());
+		this->rrvar_ForceTorque->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				return gz_forcetorque_to_rr_wrench(this_->get_forcetorquesensor());
+			}
+		);
 	}
 
 	sensors::ForceTorqueSensorPtr ForceTorqueSensorImpl::get_forcetorquesensor()
@@ -75,15 +74,15 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ForceTorqueSensorImpl::OnUpdate1()
 	{
-		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > b;
+		RR::WireBroadcasterPtr<geometry::Wrench> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_ForceTorqueWire_b;
+		boost::mutex::scoped_lock lock(ForceTorqueSensor_default_impl::this_lock);
+		b=rrvar_ForceTorque;
 		}
 		if (b)
 		{
 			auto i=get_ForceTorque();
-			b->SetOutValue(i);
+			b->SetOutValue(gz_forcetorque_to_rr_wrench(get_forcetorquesensor()));
 		}
 	}
 

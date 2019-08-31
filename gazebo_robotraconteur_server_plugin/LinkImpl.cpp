@@ -39,103 +39,42 @@ namespace RobotRaconteurGazeboServerPlugin
 		return boost::dynamic_pointer_cast<physics::Entity>(get_link());
 	}
 
-	RR::RRListPtr<RR::RRArray<double > > LinkImpl::get_AppliedWrenches()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return applied_wrenches;
-	}
-	void LinkImpl::set_AppliedWrenches(RR::RRListPtr<RR::RRArray<double > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (!value)
-		{
-			applied_wrenches=value;
-			return;
-		}
-		for (auto e=value->begin(); e!=value->end(); e++)
-		{
-			RR_NULL_CHECK(*e);
-			if ((*e)->size()!=6) throw std::invalid_argument("Invalid vector length");
-		}
-
-		applied_wrenches=value;
-	}
 	void LinkImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
-		EntityImpl::OnUpdate1(_info);
-		boost::mutex::scoped_lock lock(this_lock);
+		EntityImpl::OnUpdate1(_info);		
 		physics::LinkPtr l=get_link();
-		if (applied_wrenches)
+		
+		RR::WireUnicastReceiverPtr<RR::RRListPtr<RR::RRNamedArray<geometry::Wrench> > > appliedft_u;
 		{
-			for (auto e=applied_wrenches->begin(); e!=applied_wrenches->end(); e++)
-			{
-				ignition::math::Vector3d torque((**e)[0], (**e)[1], (**e)[2]);
-				ignition::math::Vector3d force((**e)[3], (**e)[4], (**e)[5]);
-				l->AddRelativeForce(force);
-				l->AddRelativeTorque(torque);
-			}
+			boost::mutex::scoped_lock lock(Link_default_impl::this_lock);
+			appliedft_u = rrvar_AppliedWrenches;
 		}
 
-		try
+		if (appliedft_u)
 		{
-			if (m_AppliedWrenchesSetWire_conn)
+			RR::RRListPtr<RR::RRNamedArray<geometry::Wrench> > ft;
+			RR::TimeSpec ts;
+			uint32_t ep;
+			if (appliedft_u->TryGetInValue(ft, ts, ep))
 			{
-				if (m_AppliedWrenchesSetWire_conn->GetInValueValid())
+				if (ft)
 				{
-					auto inval=m_AppliedWrenchesSetWire_conn->GetInValue();
-					if (inval)
+					for (auto e : *ft)
 					{
-						for (auto e=inval->begin(); e!=inval->end(); e++)
-						{
-							if (!*e) continue;
-							if (!(*e)->size()!=6) continue;
-							ignition::math::Vector3d torque((**e)[0], (**e)[1], (**e)[2]);
-							ignition::math::Vector3d force((**e)[3], (**e)[4], (**e)[5]);
-							l->AddRelativeForce(force);
-							l->AddRelativeTorque(torque);
-						}
+						if (!e) continue;
+						auto e2 = RR::RRNamedArrayToScalar(e);
+						
+						if (!(e)->size() != 1) continue;
+						ignition::math::Vector3d torque(e2.s.torque.s.x, e2.s.torque.s.y, e2.s.torque.s.z);
+						ignition::math::Vector3d force(e2.s.force.s.x, e2.s.force.s.y, e2.s.force.s.z);
+						l->AddRelativeForce(force);
+						l->AddRelativeTorque(torque);
 					}
 				}
 			}
 		}
-		catch (std::exception&) {}
 	}
-
-	RR::WirePtr<RR::RRListPtr<RR::RRArray<double> > > LinkImpl::get_AppliedWrenchesSetWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_AppliedWrenchesSetWire;
-	}
-	void LinkImpl::set_AppliedWrenchesSetWire(RR::WirePtr<RR::RRListPtr<RR::RRArray<double > > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_AppliedWrenchesSetWire) throw std::runtime_error("Read only property");
-		m_AppliedWrenchesSetWire=value;
-		RR_WEAK_PTR<LinkImpl> l=boost::dynamic_pointer_cast<LinkImpl>(shared_from_this());
-		m_AppliedWrenchesSetWire->SetWireConnectCallback(boost::bind(&LinkImpl::OnAppliedWrenchesSetWireConnect,l,_1));
-	}
-
-	void LinkImpl::OnAppliedWrenchesSetWireConnect(RR_WEAK_PTR<LinkImpl> l, RR::WireConnectionPtr<RR::RRListPtr<RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<LinkImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		//if(l1->m_AppliedWrenchesSetWire_conn) throw std::runtime_error("Wire in use");
-		l1->m_AppliedWrenchesSetWire_conn=connection;
-		l1->m_AppliedWrenchesSetWire_conn->SetWireConnectionClosedCallback(boost::bind(&LinkImpl::OnAppliedWrenchesSetWireDisconnect,l,_1));
-	}
-
-	void LinkImpl::OnAppliedWrenchesSetWireDisconnect(RR_WEAK_PTR<LinkImpl> l, RR::WireConnectionPtr<RR::RRListPtr<RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<LinkImpl> l1=l.lock();
-		if (!l1) return;
-		boost::mutex::scoped_lock lock(l1->this_lock);
-		if(l1->m_AppliedWrenchesSetWire_conn==connection)
-		{
-			l1->m_AppliedWrenchesSetWire_conn.reset();
-		}
-	}
-
+		
 	RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char> > LinkImpl::get_SensorNames()
 	{
 		auto o=RR::AllocateEmptyRRList<RR::RRArray<char> >();

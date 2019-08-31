@@ -27,12 +27,13 @@
 using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
+namespace laserscan = com::robotraconteur::laserscan;
 
 #include "SensorImpl.h"
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class RaySensorImpl : public virtual rrgz::RaySensor, public virtual SensorImpl
+  class RaySensorImpl : public virtual rrgz::RaySensor_default_impl, public virtual SensorImpl
   {
   public:
 	  RaySensorImpl(sensors::RaySensorPtr gz_camera);
@@ -47,30 +48,26 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual std::string get_ParentName() override {return SensorImpl::get_ParentName();}	  
 
-	  virtual rrgz::PosePtr get_Pose() override {return SensorImpl::get_Pose();}   	  
+	  virtual geometry::Pose get_Pose() override { return SensorImpl::get_Pose(); }
 
-	  virtual uint8_t get_Active() override {return SensorImpl::get_Active();}
-	  virtual void set_Active(uint8_t value) override {SensorImpl::set_Active(value);}
+	  virtual RR::rr_bool get_Active() override { return SensorImpl::get_Active(); }
+	  virtual void set_Active(RR::rr_bool value) override { SensorImpl::set_Active(value); }
 
-	  virtual double get_UpdateRate() override {return SensorImpl::get_UpdateRate();}
-	  virtual void set_UpdateRate(double value) override {SensorImpl::set_UpdateRate(value);}
+	  virtual double get_UpdateRate() override { return SensorImpl::get_UpdateRate(); }
+	  virtual void set_UpdateRate(double value) override { SensorImpl::set_UpdateRate(value); }
 
-	  virtual double get_LastUpdateTime() override {return SensorImpl::get_LastUpdateTime();}	  
+	  virtual datetime::Duration get_LastUpdateTime() override { return SensorImpl::get_LastUpdateTime(); }
 
-	  virtual double get_LastMeasurementTime() override {return SensorImpl::get_LastMeasurementTime();}
+	  virtual datetime::Duration get_LastMeasurementTime() override { return SensorImpl::get_LastMeasurementTime(); }
 
-	  virtual rrgz::LaserScanPtr CaptureScan() override;
-
-	  virtual RR::PipePtr<rrgz::LaserScanPtr> get_ScanStream() override;
-	  virtual void set_ScanStream(RR::PipePtr<rrgz::LaserScanPtr> value) override;
-
-
+	  virtual laserscan::LaserScanPtr CaptureScan() override;
+	  	  
+	  virtual void set_ScanStream(RR::PipePtr<laserscan::LaserScanPtr> value) override;
+	  
 	  virtual std::string RRType() {return "experimental.gazebo.RaySensor";  }
   protected:
 	  sensors::RaySensorPtr get_raysensor();
-	  RR::PipePtr<rrgz::LaserScanPtr> m_ImageStream;
-	  RR::PipeBroadcasterPtr<rrgz::LaserScanPtr> m_ImageStream_b;
-
+	  
 	  void OnUpdate1();
 
 	  event::ConnectionPtr updateConnection;

@@ -37,31 +37,25 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (!c1) return;
 		c1->OnUpdate1();
 	}
-
-
-	RR::RRArrayPtr<double> MagnetometerSensorImpl::get_MagneticField()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		sensors::MagnetometerSensorPtr c=get_magnetometersensor();
-		auto v= c->MagneticField();
-		auto o=RR::AllocateRRArray<double>(3);
-		(*o)[0]=v[0];
-		(*o)[1]=v[1];
-		(*o)[2]=v[2];
-		return o;
-	}
 	
-	RR::WirePtr<RR::RRArrayPtr<double> > MagnetometerSensorImpl::get_MagneticFieldWire()
+	void MagnetometerSensorImpl::set_MagneticField(RR::WirePtr<geometry::Vector3> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_MagneticFieldWire;
-	}
-	void MagnetometerSensorImpl::set_MagneticFieldWire(RR::WirePtr<RR::RRArrayPtr<double> > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		m_MagneticFieldWire=value;
-		m_MagneticFieldWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRArrayPtr<double> > >();
-		m_MagneticFieldWire_b->Init(m_MagneticFieldWire);
+		boost::mutex::scoped_lock lock(rrgz::MagnetometerSensor_default_impl::this_lock);
+		MagnetometerSensor_default_impl::set_MagneticField(value);
+		boost::weak_ptr<MagnetometerSensorImpl> weak_this = RR::rr_cast<MagnetometerSensorImpl>(shared_from_this());
+		this->rrvar_MagneticField->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Sensor has been released");
+				auto j = this_->get_magnetometersensor();
+				auto v = j->MagneticField();
+				geometry::Vector3 o;
+				o.s.x = v.X();
+				o.s.y = v.Y();
+				o.s.y = v.Z();
+				return o;
+			}
+		);
 	}
 
 	sensors::MagnetometerSensorPtr MagnetometerSensorImpl::get_magnetometersensor()
@@ -71,16 +65,20 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void MagnetometerSensorImpl::OnUpdate1()
 	{
-		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > b;
+		RR::WireBroadcasterPtr<geometry::Vector3> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_MagneticFieldWire_b;
+		boost::mutex::scoped_lock lock(MagnetometerSensor_default_impl::this_lock);
+		b=rrvar_MagneticField;
 		}
 		if (b)
 		{
-			auto i=get_MagneticField();
-			b->SetOutValue(i);
+			auto j = get_magnetometersensor();
+			auto v = j->MagneticField();
+			geometry::Vector3 o;
+			o.s.x = v.X();
+			o.s.y = v.Y();
+			o.s.y = v.Z();
+			b->SetOutValue(o);
 		}
 	}
-
 }

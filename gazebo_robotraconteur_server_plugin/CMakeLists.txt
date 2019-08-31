@@ -13,13 +13,25 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 find_package(Boost COMPONENTS date_time filesystem system regex chrono atomic thread program_options REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(RobotRaconteur REQUIRED)
+find_package(RobotRaconteur_standard_robdef_cpp REQUIRED)
 
 include_directories(${RobotRaconteur_INCLUDE_DIR})
 
-ROBOTRACONTEUR_GENERATE_THUNK(RR_THUNK_SRCS RR_THUNK_HDRS 
-	experimental.gazebo.robdef
+ROBOTRACONTEUR_GENERATE_THUNK(RR_THUNK_SRCS RR_THUNK_HDRS
+    experimental.gazebo.robdef	
+    com.robotraconteur.geometry.robdef
+	com.robotraconteur.image.robdef
+	com.robotraconteur.color.robdef
+	com.robotraconteur.datetime.robdef
+	com.robotraconteur.sensordata.robdef
+	com.robotraconteur.uuid.robdef
+	com.robotraconteur.laserscan.robdef
+	com.robotraconteur.pid.robdef
+	com.robotraconteur.sensordata.robdef
+	com.robotraconteur.gps.robdef
+	com.robotraconteur.imu.robdef
 	MASTER_HEADER
-	IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+	IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${RobotRaconteur_STANDARD_ROBDEF_DIRS}
 	)
 
 if (MSVC)
@@ -52,6 +64,8 @@ add_library(gazebo_robotraconteur_server_plugin SHARED
 	GpsSensorImpl.cpp
 	ImuSensorImpl.cpp
 	LightImpl.cpp
+	${RR_THUNK_HDRS}
+	${RR_THUNK_SRCS}
 	)
 
 target_link_libraries(gazebo_robotraconteur_server_plugin ${GAZEBO_LIBRARIES} RobotRaconteurCore ${Boost_LIBRARIES} ${RobotRaconteur_EXTRA_LIBRARIES})

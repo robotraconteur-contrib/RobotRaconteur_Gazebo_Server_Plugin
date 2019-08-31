@@ -2,76 +2,34 @@ service experimental.gazebo
 
 stdver 0.9
 
-struct Pose
-	field double[4] Orientation
-	field double[3] Position	
-end struct
+import com.robotraconteur.geometry
+import com.robotraconteur.image
+import com.robotraconteur.color
+import com.robotraconteur.datetime
+import com.robotraconteur.laserscan
+import com.robotraconteur.pid
+import com.robotraconteur.gps
+import com.robotraconteur.imu
 
-struct PIDParam
-	field double p
-	field double i
-	field double d
-	field double imax
-	field double imin
-	field double cmdMax
-	field double cmdMin
-end struct
-
-struct CameraImage
-	field int32 width
-	field int32 height
-	field string format
-	field uint8[] data	
-end struct
-
-struct DepthCameraImage
-	field int32 width
-	field int32 height
-	field string imageFormat
-	field uint8[] imageData
-	field single[] depthData		
-end struct
-
-struct LaserScan
-	field double angleMax
-	field double angleMin
-	field double angleStep
-	field uint32 count
-	field double verticalAngleMax
-	field double verticalAngleMin
-	field double verticalAngleStep
-	field uint32 verticalCount	
-	field double rangeResolution
-	field double[] intensities
-	field double[] ranges
-	field int32[] fiducial	
-end struct
+using com.robotraconteur.geometry.Vector3
+using com.robotraconteur.geometry.Quaternion
+using com.robotraconteur.geometry.Pose
+using com.robotraconteur.geometry.SpatialVelocity
+using com.robotraconteur.geometry.SpatialAcceleration
+using com.robotraconteur.geometry.Wrench
+using com.robotraconteur.image.Image
+using com.robotraconteur.image.DepthImage
+using com.robotraconteur.color.ColorRGBAf as Color
+using com.robotraconteur.datetime.DateTimeUTC
+using com.robotraconteur.datetime.Duration
+using com.robotraconteur.laserscan.LaserScan
+using com.robotraconteur.pid.PIDParam
+using com.robotraconteur.gps.GpsState
+using com.robotraconteur.imu.ImuState
 
 struct Contact
 	field string contactName1
 	field string contactName2
-end struct
-
-struct GpsState
-	field double altitude
-	field double latitude_deg
-	field double longitude_deg
-	field double velocity_east
-	field double velocity_north
-	field double velocity_up
-end struct
-
-struct ImuState
-	field double[3] angular_velocity
-	field double[3] linear_acceleration
-	field double[4] orientation
-end struct
-
-struct Color
-	field single a
-	field single b
-	field single g
-	field single r
 end struct
 
 object Base
@@ -87,22 +45,25 @@ object Server
 	objref Sensor{string} Sensors
 end object
 
+struct WorldTimes
+    field Duration SimTime
+	field Duration RealTime
+	field DateTimeUTC WallTime
+	field DateTimeUTC StartTime
+end
+
 object World
 	property string Name [readonly]
 
-	property double SimTime [readonly]
-	property double RealTime [readonly]
-	property double WallTime [readonly]
-	property double StartTime [readonly]
-
+	wire Duration SimTime [readonly]
+	wire WorldTimes Time [readonly]	
+	
 	property string{list} ModelNames [readonly]
 	objref Model{string} Models
 	
 	property string{list} LightNames [readonly]
 	objref Light{string} Lights
 
-	wire double SimTimeWire [readonly]
-	wire double RealTimeWire [readonly]
 end object
 
 object Entity
@@ -110,21 +71,15 @@ object Entity
 	property string Name [readonly]
 	property string ScopedName [readonly]
 
-	property Pose WorldPose
-	property Pose RelativePose
+	wire Pose WorldPose [readonly]
+	wire Pose RelativePose [readonly]
+	function void SetWorldPose(Pose pose)
+	function void SetRelativePose(Pose pose)
 
-	property double[6] WorldVelocity [readonly]
-	property double[6] RelativeVelocity [readonly]
-	property double[6] WorldAcceleration [readonly]
-	property double[6] RelativeAcceleration [readonly]
-
-	wire Pose WorldPoseGetWire [readonly]
-	wire Pose RelativePoseGetWire [readonly]
-
-	wire double[6] WorldVelocityGetWire [readonly]
-	wire double[6] RelativeVelocityGetWire [readonly]
-	wire double[6] WorldAccelerationGetWire [readonly]
-	wire double[6] RelativeAccelerationGetWire [readonly]
+	wire SpatialVelocity WorldVelocity [readonly]
+	wire SpatialVelocity RelativeVelocity [readonly]
+	wire SpatialAcceleration WorldAcceleration [readonly]
+	wire SpatialAcceleration RelativeAcceleration [readonly]
 end object
 
 object Model
@@ -142,21 +97,15 @@ object Model
 	property string{list} JointNames [readonly]
 	objref Joint{string} Joints
 
-	property Pose WorldPose
-	property Pose RelativePose
+	wire Pose WorldPose [readonly]
+	wire Pose RelativePose [readonly]
+	function void SetWorldPose(Pose pose)
+	function void SetRelativePose(Pose pose)
 
-	property double[6] WorldVelocity [readonly]
-	property double[6] RelativeVelocity [readonly]
-	property double[6] WorldAcceleration [readonly]
-	property double[6] RelativeAcceleration [readonly]
-
-	wire Pose WorldPoseGetWire [readonly]
-	wire Pose RelativePoseGetWire [readonly]
-
-	wire double[6] WorldVelocityGetWire [readonly]
-	wire double[6] RelativeVelocityGetWire [readonly]
-	wire double[6] WorldAccelerationGetWire [readonly]
-	wire double[6] RelativeAccelerationGetWire [readonly]
+	wire SpatialVelocity WorldVelocity [readonly]
+	wire SpatialVelocity RelativeVelocity [readonly]
+	wire SpatialAcceleration WorldAcceleration [readonly]
+	wire SpatialAcceleration RelativeAcceleration [readonly]
 
 	function void CreateJointController()
 	function void DestroyJointController()
@@ -172,26 +121,23 @@ object Link
 
 	property string{list} SensorNames [readonly]
 
-	property Pose WorldPose 
-	property Pose RelativePose
+	wire Pose WorldPose [readonly]
+	wire Pose RelativePose [readonly]
+	function void SetWorldPose(Pose pose)
+	function void SetRelativePose(Pose pose)
 
-	property double[6] WorldVelocity [readonly]
-	property double[6] RelativeVelocity [readonly]
-	property double[6] WorldAcceleration [readonly]
-	property double[6] RelativeAcceleration [readonly]
-
-	wire Pose WorldPoseGetWire [readonly]
-	wire Pose RelativePoseGetWire [readonly]
-
-	wire double[6] WorldVelocityGetWire [readonly]
-	wire double[6] RelativeVelocityGetWire [readonly]
-	wire double[6] WorldAccelerationGetWire [readonly]
-	wire double[6] RelativeAccelerationGetWire [readonly]
-
-	property double[6]{list} AppliedWrenches
-
-	wire double[6]{list} AppliedWrenchesSetWire	[writeonly]
+	wire SpatialVelocity WorldVelocity [readonly]
+	wire SpatialVelocity RelativeVelocity [readonly]
+	wire SpatialAcceleration WorldAcceleration [readonly]
+	wire SpatialAcceleration RelativeAcceleration [readonly]
+		
+	wire Wrench{list} AppliedWrenches [writeonly]
 end object
+
+namedarray JointWrench
+    field Wrench body1_wrench
+	field Wrench body2_wrench
+end
 
 object Joint
 	implements Base
@@ -202,49 +148,35 @@ object Joint
 	property string ParentLinkName [readonly]
 	property string ChildLinkName [readonly]
 
-	property int32 AxisCount [readonly]
+	property uint32 AxisCount [readonly]
 
-	function double[3] GetGlobalAxis(int32 axis)
-	function double[3] GetLocalAxis(int32 axis)
+	function Vector3[] GetGlobalAxes()
+	function Vector3[] GetLocalAxes()
 
-	property double{int32} AxesAngles
-	function double GetAxisAngle(int32 axis)
-	function void SetAxisPosition(int32 axis, double value)
-	property double{int32} AxesVelocities
-	function double GetAxisVelocity(int32 axis)
-	function void SetAxisVelocity(int32 axis, double value)
-
-	function double GetForce(int32 axis)
-	function void SetForce(int32 axis, double value)
-
-	function double[6] GetForceTorque(int32 link)
-
-	wire double{int32} AxisAngleGetWire	[readonly]
-	wire double{int32} AxisVelocityGetWire	[readonly]
-	wire double[]{int32} ForceTorqueGetWire [readonly]
-
-	wire double{int32} AxisPositionSetWire [writeonly]
-	wire double{int32} AxisVelocitySetWire [writeonly]
-	wire double{int32} ForceSetWire	 [writeonly]
+	wire double[] AxesPositions [readonly]		
+	wire double[] AxesVelocities [readonly]	
+	wire double[] AxesForce [readonly]
+	
+	function void SetAxisPosition(uint32 axis, double position)
+	function void SetAxisVelocity(uint32 axis, double vel)	
+		
+	wire JointWrench ForceTorque [readonly]
 end object
 
 object JointController
 	property string{list} JointNames [readonly]
 	property PIDParam{string} PositionPIDs [readonly]
 	property PIDParam{string} VelocityPIDs [readonly]
-	property double{string} JointTargetPositions
-	property double{string} JointTargetVelocities
+	wire double{string} JointPositions [readonly]
+	wire double{string} JointVelocities [readonly]
+	wire double{string} JointPositionsCommand [writeonly]
+	wire double{string} JointVelocitiesCommand [writeonly]
 	
-	property double{string} JointForces [readonly]
+	wire double{string} JointForces [readonly]
 	
 	function void AddJoint(string name)
 	function void SetPositionPID(string name, PIDParam pid)
 	function void SetVelocityPID(string name, PIDParam pid)
-
-	wire double{string} JointTargetPositionsSetWire [writeonly]
-	wire double{string} JointTargetVelocitiesSetWire [writeonly]
-	wire double{string} JointActualPositionsGetWire [readonly]
-	wire double{string} JointActualVelocitiesGetWire [readonly]
 end object
 
 object Sensor
@@ -253,10 +185,10 @@ object Sensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime	[readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime	[readonly]
 end object
 
 object CameraSensor
@@ -266,13 +198,13 @@ object CameraSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime	[readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime	[readonly]
 	
-	function CameraImage CaptureImage()
-	pipe CameraImage ImageStream [readonly]
+	function Image CaptureImage()
+	pipe Image ImageStream [readonly]
 end object
 
 object MultiCameraSensor
@@ -282,14 +214,14 @@ object MultiCameraSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active 
+	property bool Active 
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime	[readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime	[readonly]
 	
 	property int32 CameraCount [readonly]
-	function CameraImage CaptureImage(int32 ind)
-	pipe CameraImage{int32} ImageStream [readonly]
+	function Image CaptureImage(int32 ind)
+	pipe Image{int32} ImageStream [readonly]
 end object
 
 object DepthCameraSensor
@@ -299,13 +231,13 @@ object DepthCameraSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime	[readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime	[readonly]
 	
-	function DepthCameraImage CaptureImage()
-	pipe DepthCameraImage ImageStream [readonly]
+	function DepthImage CaptureImage()
+	pipe DepthImage ImageStream [readonly]
 end object
 
 object RaySensor
@@ -315,10 +247,10 @@ object RaySensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime	[readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime	[readonly]
 	
 	function LaserScan CaptureScan()
 	pipe LaserScan ScanStream [readonly]
@@ -331,10 +263,10 @@ object ContactSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime [readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime [readonly]
 	
 	function Contact{list} CaptureContacts()
 	wire Contact{list} ContactWire [readonly]
@@ -347,13 +279,12 @@ object AltimeterSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime [readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime [readonly]
 	
-	property double Altitude [readonly]
-	wire double AltitudeWire [readonly]
+	wire double Altitude [readonly]	
 end object
 
 object SonarSensor
@@ -363,17 +294,16 @@ object SonarSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime [readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime [readonly]
 	
 	property double RangeMin [readonly]
 	property double RangeMax [readonly]
 	property double Radius [readonly]
 	
-	property double Range [readonly]
-	wire double RangeWire [readonly]
+	wire double Range [readonly]	
 end object
 
 object MagnetometerSensor
@@ -383,13 +313,12 @@ object MagnetometerSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime [readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime [readonly]
 	
-	property double[3] MagneticField [readonly]
-	wire double[3] MagneticFieldWire [readonly]
+	wire Vector3 MagneticField [readonly]	
 end object
 
 object ForceTorqueSensor
@@ -399,13 +328,12 @@ object ForceTorqueSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime [readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime [readonly]
 	
-	property double[6] ForceTorque [readonly]
-	wire double[6] ForceTorqueWire [readonly]
+	wire Wrench ForceTorque [readonly]	
 end object
 
 object GpsSensor
@@ -415,13 +343,12 @@ object GpsSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime [readonly]
-	
-	property GpsState ReadState [readonly]
-	wire GpsState StateWire [readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime [readonly]
+		
+	wire GpsState State [readonly]
 end object
 
 object ImuSensor
@@ -431,22 +358,21 @@ object ImuSensor
 	property string ParentName [readonly]
 	property Pose Pose [readonly]
 	
-	property uint8 Active
+	property bool Active
 	property double UpdateRate
-	property double LastUpdateTime [readonly]
-	property double LastMeasurementTime [readonly]
+	property Duration LastUpdateTime [readonly]
+	property Duration LastMeasurementTime [readonly]
 	
 	function void SetReferencePose()
-	
-	property ImuState ReadState [readonly]
-	wire ImuState StateWire [readonly]
+		
+	wire ImuState State [readonly]
 end object
 
 object Light
 	property string Name [readonly]
 	property string Type [readonly]
 	property Pose Pose [readonly]
-	property double[3] Direction [readonly]
+	property Vector3 Direction [readonly]
 	
 	property Color DiffuseColor
 	property Color SpecularColor

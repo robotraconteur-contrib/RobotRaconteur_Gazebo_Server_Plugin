@@ -18,6 +18,8 @@
 #include "robotraconteur_gazebo_server_plugin.h"
 #include <gazebo/rendering/rendering.hh>
 
+#include "CameraImpl.h"
+
 namespace RobotRaconteurGazeboServerPlugin
 {
 	DepthCameraSensorImpl::DepthCameraSensorImpl(sensors::DepthCameraSensorPtr gz_camera) : SensorImpl(gz_camera)
@@ -31,24 +33,39 @@ namespace RobotRaconteurGazeboServerPlugin
 		updateConnection=get_camera()->ConnectUpdated(boost::bind(&DepthCameraSensorImpl::OnUpdate,c));
 	}
 
-	rrgz::DepthCameraImagePtr DepthCameraSensorImpl::CaptureImage()
+	image::DepthImagePtr DepthCameraSensorImpl::CaptureImage()
 	{
 
 		sensors::DepthCameraSensorPtr c=get_camera();
 		rendering::DepthCameraPtr c2=c->DepthCamera();
 		if (!c2->CaptureData()) throw std::runtime_error("Image not ready");
-		rrgz::DepthCameraImagePtr o(new rrgz::DepthCameraImage());
+		image::DepthImagePtr o(new image::DepthImage());
+		o->depth_ticks_per_meter = 1;
+
+		image::ImagePtr o1(new image::Image());
+
 		const uint8_t* image_bytes=c2->ImageData();
 		size_t image_byte_size=c2->ImageByteSize();
-		o->imageData=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
-		o->imageFormat=c2->ImageFormat();
-		o->width=c2->ImageWidth();
-		o->height=c2->ImageHeight();
+		o1->data=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
+		o1->image_info = new image::ImageInfo();
+		o1->image_info->encoding=detail::gz_image_enconding_to_rr_encoding(c2->ImageFormat());
+		o1->image_info->width=c2->ImageWidth();
+		o1->image_info->height=c2->ImageHeight();
+		o1->image_info->step = c2->ImageWidth() * c2->ImageDepth();
+		o->intensity_image = o1;
 
 		const float* depth_data=c2->DepthData();
 		if (depth_data)
 		{
-			o->depthData=RR::AttachRRArrayCopy(depth_data,o->width * o->height);
+			image::ImagePtr o2(new image::Image());
+			o2->image_info = new image::ImageInfo();
+			o2->image_info->encoding = detail::gz_image_enconding_to_rr_encoding(c2->ImageFormat());
+			o2->image_info->width = c2->ImageWidth();
+			o2->image_info->height = c2->ImageHeight();
+			o2->image_info->step = c2->ImageWidth() * c2->ImageDepth();
+			o2->image_info->encoding = image::ImageEncoding::depth_f32;
+			o2->data=RR::AttachRRArrayCopy(reinterpret_cast<const uint8_t*>(depth_data),o2->image_info->width * o2->image_info->height * sizeof(float));
+			o->depth_image = o2;
 		}
 
 		return o;
@@ -58,19 +75,12 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return std::dynamic_pointer_cast<sensors::DepthCameraSensor>(get_sensor());
 	}
-
-	RR::PipePtr<rrgz::DepthCameraImagePtr> DepthCameraSensorImpl::get_ImageStream()
+		
+	void DepthCameraSensorImpl::set_ImageStream(RR::PipePtr<image::DepthImagePtr> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_ImageStream;
-	}
-	void DepthCameraSensorImpl::set_ImageStream(RR::PipePtr<rrgz::DepthCameraImagePtr> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_ImageStream) throw std::runtime_error("Already set");
-		m_ImageStream=value;
-		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<rrgz::DepthCameraImagePtr> >();
-		m_ImageStream_b->Init(m_ImageStream,3);
+		boost::mutex::scoped_lock lock(DepthCameraSensor_default_impl::this_lock);				
+		rrvar_ImageStream=RR_MAKE_SHARED<RR::PipeBroadcaster<image::DepthImagePtr> >();
+		rrvar_ImageStream->Init(value,3);
 	}
 
 	void DepthCameraSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -83,14 +93,13 @@ namespace RobotRaconteurGazeboServerPlugin
 	void DepthCameraSensorImpl::OnUpdate1()
 	{
 
-		RR::PipeBroadcasterPtr<rrgz::DepthCameraImagePtr> b;
+		RR::PipeBroadcasterPtr<image::DepthImagePtr> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_ImageStream_b;
+		boost::mutex::scoped_lock lock(DepthCameraSensor_default_impl::this_lock);
+		b=rrvar_ImageStream;
 		}
 		if (b)
 		{
-
 			auto i=CaptureImage();
 			b->AsyncSendPacket(i, []() {});
 		}

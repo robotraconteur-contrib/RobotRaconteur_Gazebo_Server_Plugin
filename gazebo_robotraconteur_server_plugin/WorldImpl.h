@@ -27,10 +27,11 @@
 using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
+namespace datetime = com::robotraconteur::datetime;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class WorldImpl : public rrgz::World, public RR_ENABLE_SHARED_FROM_THIS<WorldImpl>
+  class WorldImpl : public rrgz::World_default_impl, public RR_ENABLE_SHARED_FROM_THIS<WorldImpl>
   {
   public:
 	  WorldImpl(physics::WorldPtr w);
@@ -41,23 +42,13 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  static void OnUpdate(RR_WEAK_PTR<WorldImpl> j, const common::UpdateInfo & _info);
 
-	  virtual double get_SimTime() override;
-	  
-	  virtual double get_RealTime() override;
-	  
-	  virtual double get_WallTime() override;	  
-
-	  virtual double get_StartTime() override;
-	  
 	  virtual RR::RRListPtr<RR::RRArray<char> > get_ModelNames() override;	  
 
 	  virtual RR::RRListPtr<RR::RRArray<char> > get_LightNames() override;
+	  	  
+	  virtual void set_Time(RR::WirePtr<rrgz::WorldTimesPtr> value) override;
 
-	  virtual RR::WirePtr<double > get_SimTimeWire() override;
-	  virtual void set_SimTimeWire(RR::WirePtr<double> value) override;
-
-	  virtual RR::WirePtr<double> get_RealTimeWire() override;
-	  virtual void set_RealTimeWire(RR::WirePtr<double> value);
+	  virtual void set_SimTime(RR::WirePtr<datetime::Duration> value) override;
 
 	  virtual rrgz::ModelPtr get_Models(const std::string& ind) override;
 	  virtual rrgz::LightPtr get_Lights(const std::string& ind) override;
@@ -68,15 +59,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   protected:
 	  boost::weak_ptr<physics::World> gz_world;
-
-	  RR::WirePtr<double> m_SimTimeWire;
-	  RR::WirePtr<double> m_RealTimeWire;
-
-	  RR::WireBroadcasterPtr<double > m_SimTimeWire_b;
-	  RR::WireBroadcasterPtr<double > m_RealTimeWire_b;
-
-	  boost::mutex this_lock;
-
+	  	  
 	  virtual void OnUpdate1(const common::UpdateInfo & _info);
 
 	  event::ConnectionPtr updateConnection;

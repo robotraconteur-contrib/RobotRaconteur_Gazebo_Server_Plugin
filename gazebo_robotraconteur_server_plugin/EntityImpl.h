@@ -27,10 +27,11 @@
 using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
+namespace geometry = com::robotraconteur::geometry;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-class EntityImpl : public virtual rrgz::Entity, public RR_ENABLE_SHARED_FROM_THIS<EntityImpl>
+class EntityImpl : public virtual rrgz::Entity_default_impl, public RR_ENABLE_SHARED_FROM_THIS<EntityImpl>
 {
 public:
 	  virtual std::string get_Name() override;
@@ -43,58 +44,25 @@ public:
 
 	  static void OnUpdate(RR_WEAK_PTR<EntityImpl> j, const common::UpdateInfo & _info);
 
-	  virtual rrgz::PosePtr get_WorldPose() override;
-	  virtual void set_WorldPose(rrgz::PosePtr value) override;
-
-	  virtual rrgz::PosePtr get_RelativePose() override;
-	  virtual void set_RelativePose(rrgz::PosePtr value) override;
-
-	  virtual RR::RRArrayPtr<double> get_WorldVelocity() override;	  
-
-	  virtual RR::RRArrayPtr<double > get_RelativeVelocity() override;
+	  virtual void SetWorldPose(const geometry::Pose& value) override;
+	  	  
+	  virtual void SetRelativePose(const geometry::Pose& value) override;
+	  		  
+	  virtual void set_WorldPose(RR::WirePtr<geometry::Pose> value) override;
+	  	  
+	  virtual void set_RelativePose(RR::WirePtr<geometry::Pose> value) override;
+	  	  
+	  virtual void set_WorldVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override;
+	  	  
+	  virtual void set_RelativeVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override;
+	  	  
+	  virtual void set_WorldAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override;
 	  
-	  virtual RR::RRArrayPtr<double> get_WorldAcceleration() override;
-	  
-	  virtual RR::RRArrayPtr<double> get_RelativeAcceleration() override;	  
-
-	  virtual RR::WirePtr<rrgz::PosePtr> get_WorldPoseGetWire() override;
-	  virtual void set_WorldPoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override;
-
-	  virtual RR::WirePtr<rrgz::PosePtr> get_RelativePoseGetWire() override;
-	  virtual void set_RelativePoseGetWire(RR::WirePtr<rrgz::PosePtr> value) override;
-
-	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldVelocityGetWire() override;
-	  virtual void set_WorldVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
-
-	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_RelativeVelocityGetWire() override;
-	  virtual void set_RelativeVelocityGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
-
-	  virtual RR::WirePtr<RR::RRArrayPtr<double> > get_WorldAccelerationGetWire() override;
-	  virtual void set_WorldAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
-
-	  virtual RR::WirePtr<RR::RRArrayPtr<double > > get_RelativeAccelerationGetWire() override;
-	  virtual void set_RelativeAccelerationGetWire(RR::WirePtr<RR::RRArrayPtr<double > > value) override;
-
+	  virtual void set_RelativeAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override;
 
 protected:
 	  virtual physics::EntityPtr get_entity()=0;
 	  boost::mutex this_lock;
-
-	  RR::WirePtr<rrgz::PosePtr > m_WorldPoseGetWire;
-	  RR::WirePtr<rrgz::PosePtr > m_RelativePoseGetWire;
-
-	  RR::WirePtr<RR::RRArrayPtr<double > > m_WorldVelocityGetWire;
-	  RR::WirePtr<RR::RRArrayPtr<double > > m_RelativeVelocityGetWire;
-	  RR::WirePtr<RR::RRArrayPtr<double > > m_WorldAccelerationGetWire;
-	  RR::WirePtr<RR::RRArrayPtr<double > > m_RelativeAccelerationGetWire;
-
-	  RR::WireBroadcasterPtr<rrgz::PosePtr> m_WorldPoseGetWire_b;
-	  RR::WireBroadcasterPtr<rrgz::PosePtr> m_RelativePoseGetWire_b;
-
-	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_WorldVelocityGetWire_b;
-	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_RelativeVelocityGetWire_b;
-	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_WorldAccelerationGetWire_b;
-	  RR::WireBroadcasterPtr<RR::RRArrayPtr<double > > m_RelativeAccelerationGetWire_b;
 
 	  virtual void OnUpdate1(const common::UpdateInfo & _info);
 

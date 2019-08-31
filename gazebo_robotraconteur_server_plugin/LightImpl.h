@@ -23,6 +23,8 @@
 using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
+namespace geometry = com::robotraconteur::geometry;
+namespace color = com::robotraconteur::color;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
@@ -37,15 +39,15 @@ public:
 
 	virtual std::string get_Type() override;	
 
-	virtual rrgz::PosePtr get_Pose() override;
+	virtual geometry::Pose get_Pose() override;
 	
-	virtual RR::RRArrayPtr<double > get_Direction() override;
+	virtual geometry::Vector3 get_Direction() override;
 	
-	virtual rrgz::ColorPtr get_DiffuseColor() override;
-	virtual void set_DiffuseColor(rrgz::ColorPtr value) override;
+	virtual color::ColorRGBAf get_DiffuseColor() override;
+	virtual void set_DiffuseColor(const color::ColorRGBAf& value) override;
 
-	virtual rrgz::ColorPtr get_SpecularColor() override;
-	virtual void set_SpecularColor(rrgz::ColorPtr value) override;
+	virtual color::ColorRGBAf get_SpecularColor() override;
+	virtual void set_SpecularColor(const color::ColorRGBAf& value) override;
 
 protected:
 	boost::weak_ptr<rendering::Light> light;

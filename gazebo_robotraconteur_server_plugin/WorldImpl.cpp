@@ -46,26 +46,6 @@ std::string WorldImpl::get_Name()
 	return get_world()->Name();
 }
 
-double WorldImpl::get_SimTime()
-{
-	return get_world()->SimTime().Double();
-}
-
-double WorldImpl::get_RealTime()
-{
-	return get_world()->RealTime().Double();
-}
-
-double WorldImpl::get_WallTime()
-{
-	return common::Time::GetWallTime().Double();
-}
-
-double WorldImpl::get_StartTime()
-{
-	return get_world()->StartTime().Double();
-}
-
 RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_ModelNames()
 {
 	RR::RRListPtr<RR::RRArray<char> > o( new RR::RRList<RR::RRArray<char> >());
@@ -112,32 +92,63 @@ rrgz::LightPtr WorldImpl::get_Lights(const std::string& ind)
 	return l_impl;
 }
 
-RR::WirePtr<double> WorldImpl::get_SimTimeWire()
+static datetime::Duration gz_time_to_rr_duration(const gazebo::common::Time& t)
 {
-	boost::mutex::scoped_lock lock(this_lock);
-	return m_SimTimeWire;
-}
-void WorldImpl::set_SimTimeWire(RR::WirePtr<double> value)
-{
-	boost::mutex::scoped_lock lock(this_lock);
-	if (m_SimTimeWire) throw std::runtime_error("Already set");
-	m_SimTimeWire=value;
-	m_SimTimeWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<double> >();
-	m_SimTimeWire_b->Init(m_SimTimeWire);
+	datetime::Duration o;
+	o.clock_info.clock_type = datetime::ClockTypeCode::sim_clock_scaled;
+	o.seconds = t.sec;
+	o.nanoseconds = t.nsec;
+	return o;
 }
 
-RR_SHARED_PTR<RR::Wire<double > > WorldImpl::get_RealTimeWire()
+static datetime::DateTimeUTC gz_time_to_rr_datetimeutc(const gazebo::common::Time& t)
 {
-	boost::mutex::scoped_lock lock(this_lock);
-	return m_RealTimeWire;
+	datetime::DateTimeUTC o;
+	o.clock_info.clock_type = datetime::ClockTypeCode::sim_clock_scaled;
+	o.seconds = t.sec;
+	o.nanoseconds = t.nsec;
+	return o;
 }
-void WorldImpl::set_RealTimeWire(RR_SHARED_PTR<RR::Wire<double > > value)
+
+static rrgz::WorldTimesPtr gz_to_rr_worldtimes(gazebo::physics::WorldPtr& world)
 {
-	boost::mutex::scoped_lock lock(this_lock);
-	if (m_RealTimeWire) throw std::runtime_error("Already set");
-	m_RealTimeWire=value;
-	m_RealTimeWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<double> >();
-	m_RealTimeWire_b->Init(m_RealTimeWire);
+	rrgz::WorldTimesPtr t(new rrgz::WorldTimes());
+
+	t->SimTime = gz_time_to_rr_duration(world->SimTime());
+	t->RealTime = gz_time_to_rr_duration(world->RealTime());
+	t->WallTime = gz_time_to_rr_datetimeutc(common::Time::GetWallTime());
+	t->StartTime = gz_time_to_rr_datetimeutc(world->StartTime());
+	return t;
+}
+
+void WorldImpl::set_SimTime(RR::WirePtr<datetime::Duration> value)
+{
+	rrgz::World_default_impl::set_SimTime(value);
+	RR_WEAK_PTR<WorldImpl> weak_this = shared_from_this();
+	rrvar_SimTime->GetWire()->SetPeekInValueCallback(
+		[weak_this](const uint32_t&)
+		{
+			auto this_ = weak_this.lock();
+			if (!this_) throw RR::InvalidOperationException("Gazebo world object not found");
+			return gz_time_to_rr_duration(this_->get_world()->SimTime());
+		}
+	);
+}
+
+void WorldImpl::set_Time(RR::WirePtr<rrgz::WorldTimesPtr> value)
+{
+	rrgz::World_default_impl::set_Time(value);
+	RR_WEAK_PTR<WorldImpl> weak_this = shared_from_this();
+	rrvar_Time->GetWire()->SetPeekInValueCallback(
+		[weak_this](const uint32_t&)
+		{
+			auto this_ = weak_this.lock();
+			if (!this_) throw RR::InvalidOperationException("Gazebo world object not found");
+			physics::WorldPtr w = this_->get_world();			
+			
+			return gz_to_rr_worldtimes(w);
+		}
+	);
 }
 
 void WorldImpl::OnUpdate(RR_WEAK_PTR<WorldImpl> j, const common::UpdateInfo & _info)
@@ -149,19 +160,19 @@ void WorldImpl::OnUpdate(RR_WEAK_PTR<WorldImpl> j, const common::UpdateInfo & _i
 
 void WorldImpl::OnUpdate1(const common::UpdateInfo & _info)
 {
-	RR_SHARED_PTR<RR::WireBroadcaster<double > > simtime_b;
-	RR_SHARED_PTR<RR::WireBroadcaster<double > > realtime_b;
+	RR_SHARED_PTR<RR::WireBroadcaster<rrgz::WorldTimesPtr > > time_b;
+	RR_SHARED_PTR<RR::WireBroadcaster<datetime::Duration > > simtime_b;
+	
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		simtime_b=m_SimTimeWire_b;
-		realtime_b=m_RealTimeWire_b;
+		time_b = rrvar_Time;
+		simtime_b = rrvar_SimTime;
 	}
+	
+	physics::WorldPtr w = get_world();
 
-	double simtime=get_SimTime();
-	double realtime=get_RealTime();
-
-	if (simtime_b) simtime_b->SetOutValue(simtime);
-	if (realtime_b) realtime_b->SetOutValue(realtime);
+	if (simtime_b) simtime_b->SetOutValue(gz_time_to_rr_duration(w->SimTime()));
+	if (time_b) time_b->SetOutValue(gz_to_rr_worldtimes(w));
 }
 
 physics::WorldPtr WorldImpl::get_world()

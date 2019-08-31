@@ -27,12 +27,13 @@
 using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
+namespace imu = com::robotraconteur::imu;
 
 #include "SensorImpl.h"
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class ImuSensorImpl : public virtual rrgz::ImuSensor, public virtual SensorImpl
+  class ImuSensorImpl : public virtual rrgz::ImuSensor_default_impl, public virtual SensorImpl
   {
   public:
   	  ImuSensorImpl(sensors::ImuSensorPtr gz_imu);
@@ -47,22 +48,19 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual std::string get_ParentName() override {return SensorImpl::get_ParentName();}	  
 
-	  virtual rrgz::PosePtr get_Pose() override {return SensorImpl::get_Pose();}   	  
+	  virtual geometry::Pose get_Pose() override { return SensorImpl::get_Pose(); }
 
-	  virtual uint8_t get_Active() override {return SensorImpl::get_Active();}
-	  virtual void set_Active(uint8_t value) override {SensorImpl::set_Active(value);}
+	  virtual RR::rr_bool get_Active() override { return SensorImpl::get_Active(); }
+	  virtual void set_Active(RR::rr_bool value) override { SensorImpl::set_Active(value); }
 
-	  virtual double get_UpdateRate() override {return SensorImpl::get_UpdateRate();}
-	  virtual void set_UpdateRate(double value) override {SensorImpl::set_UpdateRate(value);}
+	  virtual double get_UpdateRate() override { return SensorImpl::get_UpdateRate(); }
+	  virtual void set_UpdateRate(double value) override { SensorImpl::set_UpdateRate(value); }
 
-	  virtual double get_LastUpdateTime() override {return SensorImpl::get_LastUpdateTime();}	  
+	  virtual datetime::Duration get_LastUpdateTime() override { return SensorImpl::get_LastUpdateTime(); }
 
-	  virtual double get_LastMeasurementTime() override {return SensorImpl::get_LastMeasurementTime();}
+	  virtual datetime::Duration get_LastMeasurementTime() override { return SensorImpl::get_LastMeasurementTime(); }
 
-  	  virtual rrgz::ImuStatePtr get_ReadState() override;  	  
-
-  	  virtual RR::WirePtr<rrgz::ImuStatePtr> get_StateWire() override;
-  	  virtual void set_StateWire(RR::WirePtr<rrgz::ImuStatePtr> value) override;
+  	  virtual void set_State(RR::WirePtr<imu::ImuStatePtr> value) override;
 
   	  virtual void SetReferencePose() override;
 
@@ -72,9 +70,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
       void OnUpdate1();
       event::ConnectionPtr updateConnection;
-
-      RR::WirePtr<rrgz::ImuStatePtr> m_StateWire;
-      RR::WireBroadcasterPtr<rrgz::ImuStatePtr> m_StateWire_b;
   };
 
 

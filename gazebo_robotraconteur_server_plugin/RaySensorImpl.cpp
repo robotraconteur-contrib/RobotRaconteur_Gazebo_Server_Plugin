@@ -32,30 +32,35 @@ namespace RobotRaconteurGazeboServerPlugin
 		updateConnection=get_raysensor()->ConnectUpdated(boost::bind(&RaySensorImpl::OnUpdate,c));
 	}
 
-	rrgz::LaserScanPtr RaySensorImpl::CaptureScan()
-	{
-
-		boost::mutex::scoped_lock lock(this_lock);
-		rrgz::LaserScanPtr o(new rrgz::LaserScan());
+	laserscan::LaserScanPtr RaySensorImpl::CaptureScan()
+	{				
+		laserscan::LaserScanPtr o(new laserscan::LaserScan());
+		laserscan::LaserScanInfoPtr info(new laserscan::LaserScanInfo());
+		o->scan_info = info;
 		sensors::RaySensorPtr c=get_raysensor();
 
 		bool a=c->IsActive();
 		c->SetActive(false);
 
-		o->angleMax=c->AngleMax().Radian();
-		o->angleMin=c->AngleMin().Radian();
-		o->angleStep=c->AngleResolution();
-		o->count=c->RayCount();
-		o->verticalAngleMax=c->VerticalAngleMax().Radian();
-		o->verticalAngleMin=c->VerticalAngleMin().Radian();
-		o->verticalAngleStep=c->VerticalAngleResolution();
-		o->verticalCount=c->VerticalRayCount();
-		o->rangeResolution=c->RangeResolution();
+		info->angle_max=c->AngleMax().Radian();
+		info->angle_min=c->AngleMin().Radian();
+		info->angle_increment=c->AngleResolution();
+		info->angle_count=c->RayCount();
+		info->vertical_angle_max=c->VerticalAngleMax().Radian();
+		info->vertical_angle_min=c->VerticalAngleMin().Radian();
+		info->vertical_angle_increment=c->VerticalAngleResolution();
+		info->vertical_angle_count=c->VerticalRayCount();
+		info->range_min = c->RangeMin();
+		info->range_max = c->RangeMax();
+		info->range_resolution=c->RangeResolution();
+		info->scan_time = 0;
+		info->time_increment = 0;
 
-		size_t sample_count=o->count*o->verticalCount;
+		size_t sample_count=info->angle_count*info->vertical_angle_count;
 		o->intensities=RR::AllocateRRArray<double>(sample_count);
 		o->ranges=RR::AllocateRRArray<double>(sample_count);
 		o->fiducial=RR::AllocateRRArray<int32_t>(sample_count);
+		o->color = RR::AllocateEmptyRRNamedArray<com::robotraconteur::image::PixelRGB>(0);
 
 		auto i=&o->intensities->at(0);
 		auto r=&o->ranges->at(0);
@@ -66,7 +71,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			r[j]=c->Range(j);
 			f[j]=c->Fiducial(j);
 		}
-
+		
 		c->SetActive(a);
 
 		return o;
@@ -76,19 +81,12 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return std::dynamic_pointer_cast<sensors::RaySensor>(get_sensor());
 	}
-
-	RR::PipePtr<rrgz::LaserScanPtr> RaySensorImpl::get_ScanStream()
+		
+	void RaySensorImpl::set_ScanStream(RR::PipePtr<laserscan::LaserScanPtr> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_ImageStream;
-	}
-	void RaySensorImpl::set_ScanStream(RR::PipePtr<rrgz::LaserScanPtr> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_ImageStream) throw std::runtime_error("Already set");
-		m_ImageStream=value;
-		m_ImageStream_b=RR_MAKE_SHARED<RR::PipeBroadcaster<rrgz::LaserScanPtr> >();
-		m_ImageStream_b->Init(m_ImageStream,3);
+		boost::mutex::scoped_lock lock(rrgz::RaySensor_default_impl::this_lock);
+		rrvar_ScanStream=RR_MAKE_SHARED<RR::PipeBroadcaster<laserscan::LaserScanPtr> >();
+		rrvar_ScanStream->Init(value,3);
 	}
 
 	void RaySensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -100,18 +98,15 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void RaySensorImpl::OnUpdate1()
 	{
-
-		RR::PipeBroadcasterPtr<rrgz::LaserScanPtr> b;
+		RR::PipeBroadcasterPtr<laserscan::LaserScanPtr> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_ImageStream_b;
+		boost::mutex::scoped_lock lock(RaySensor_default_impl::this_lock);
+		b=rrvar_ScanStream;
 		}
 		if (b)
 		{
-
 			auto i=CaptureScan();
 			b->AsyncSendPacket(i, []() {});
 		}
-
 	}
 }

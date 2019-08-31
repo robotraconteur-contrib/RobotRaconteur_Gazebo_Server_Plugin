@@ -217,6 +217,17 @@ namespace RobotRaconteurGazeboServerPlugin
 
 
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<rrgz::experimental__gazeboFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::color::com__robotraconteur__colorFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::datetime::com__robotraconteur__datetimeFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::geometry::com__robotraconteur__geometryFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::gps::com__robotraconteur__gpsFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::image::com__robotraconteur__imageFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::imu::com__robotraconteur__imuFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::laserscan::com__robotraconteur__laserscanFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::pid::com__robotraconteur__pidFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::sensordata::com__robotraconteur__sensordataFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::uuid::com__robotraconteur__uuidFactory>());
+
 
 
 			server=RR_MAKE_SHARED<ServerImpl>();

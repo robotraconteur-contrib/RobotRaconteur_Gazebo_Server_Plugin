@@ -45,13 +45,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	RR::RRMapPtr<std::string,rrgz::PIDParam > JointControllerImpl::get_PositionPIDs()
+	RR::RRMapPtr<std::string,pid::PIDParam > JointControllerImpl::get_PositionPIDs()
 	{
-		auto o=RR::AllocateEmptyRRMap<std::string,rrgz::PIDParam>();
+		auto o=RR::AllocateEmptyRRMap<std::string,pid::PIDParam>();
 		auto p1=gz_controller->GetPositionPIDs();
 		for (auto e=p1.begin(); e!=p1.end(); e++)
 		{
-			rrgz::PIDParamPtr pid(new rrgz::PIDParam());
+			pid::PIDParamPtr pid(new pid::PIDParam());
 			pid->p=e->second.GetPGain();
 			pid->d=e->second.GetDGain();
 			pid->i=e->second.GetIGain();
@@ -64,13 +64,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	RR::RRMapPtr<std::string,rrgz::PIDParam> JointControllerImpl::get_VelocityPIDs()
+	RR::RRMapPtr<std::string,pid::PIDParam> JointControllerImpl::get_VelocityPIDs()
 	{
-		auto o=RR::AllocateEmptyRRMap<std::string,rrgz::PIDParam>();
+		auto o=RR::AllocateEmptyRRMap<std::string,pid::PIDParam>();
 		auto p1=gz_controller->GetVelocityPIDs();
 		for (auto e=p1.begin(); e!=p1.end(); e++)
 		{
-			rrgz::PIDParamPtr pid(new rrgz::PIDParam());
+			pid::PIDParamPtr pid(new pid::PIDParam());
 			pid->p=e->second.GetPGain();
 			pid->d=e->second.GetDGain();
 			pid->i=e->second.GetIGain();
@@ -83,50 +83,73 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	RR::RRMapPtr<std::string,RR::RRArray<double> > JointControllerImpl::get_JointTargetPositions()
+	static RR::RRMapPtr<std::string, RR::RRArray<double> > _get_JointPositions(physics::JointControllerPtr& controller)
+	{
+		auto o = RR::AllocateEmptyRRMap<std::string, RR::RRArray<double> >();		
+		for (auto j : controller->GetJoints())
+		{
+			o->insert(std::make_pair(j.first, RR::ScalarToRRArray(j.second->Position(0))));
+		}
+		
+		return o;
+	}
+
+	static RR::RRMapPtr<std::string, RR::RRArray<double> > _get_JointVelocities(physics::JointControllerPtr& controller)
+	{
+		auto o = RR::AllocateEmptyRRMap<std::string, RR::RRArray<double> >();
+		for (auto j : controller->GetJoints())
+		{
+			o->insert(std::make_pair(j.first, RR::ScalarToRRArray(j.second->GetVelocity(0))));
+		}
+
+		return o;
+	}
+
+	static RR::RRMapPtr<std::string, RR::RRArray<double> > _get_JointTargetPositions(physics::JointControllerPtr& controller)
+	{
+		auto o = RR::AllocateEmptyRRMap<std::string, RR::RRArray<double> >();
+		auto p1 = controller->GetPositions();
+		for (auto e = p1.begin(); e != p1.end(); e++)
+		{
+			o->insert(std::make_pair(e->first, RR::ScalarToRRArray(e->second)));
+		}
+		return o;
+	}
+		
+	static void _set_JointTargetPositions(physics::JointControllerPtr& controller, RR::RRMapPtr<std::string,RR::RRArray<double> > value)
+	{
+		RR_NULL_CHECK(value);
+		for (auto e=value->begin(); e!=value->end(); e++)
+		{
+			RR_NULL_CHECK(e->second);
+			controller->SetPositionTarget(e->first,RR::RRArrayToScalar(e->second));
+		}
+	}
+
+	static RR::RRMapPtr<std::string,RR::RRArray<double> > _get_JointTargetVelocities(physics::JointControllerPtr& controller)
 	{
 		auto o=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
-		auto p1=gz_controller->GetPositions();
+		auto p1=controller->GetVelocities();
 		for(auto e=p1.begin(); e!=p1.end(); e++)
 		{
 			o->insert(std::make_pair(e->first,RR::ScalarToRRArray(e->second)));
 		}
 		return o;
 	}
-	void JointControllerImpl::set_JointTargetPositions(RR::RRMapPtr<std::string,RR::RRArray<double> > value)
+	static void _set_JointTargetVelocities(physics::JointControllerPtr& controller, RR::RRMapPtr<std::string,RR::RRArray<double> > value)
 	{
 		RR_NULL_CHECK(value);
 		for (auto e=value->begin(); e!=value->end(); e++)
 		{
 			RR_NULL_CHECK(e->second);
-			gz_controller->SetPositionTarget(e->first,RR::RRArrayToScalar(e->second));
+			controller->SetVelocityTarget(e->first,RR::RRArrayToScalar(e->second));
 		}
 	}
 
-	RR::RRMapPtr<std::string,RR::RRArray<double> > JointControllerImpl::get_JointTargetVelocities()
+	RR::RRMapPtr<std::string,RR::RRArray<double> > _get_JointForces(physics::JointControllerPtr& controller)
 	{
 		auto o=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
-		auto p1=gz_controller->GetVelocities();
-		for(auto e=p1.begin(); e!=p1.end(); e++)
-		{
-			o->insert(std::make_pair(e->first,RR::ScalarToRRArray(e->second)));
-		}
-		return o;
-	}
-	void JointControllerImpl::set_JointTargetVelocities(RR::RRMapPtr<std::string,RR::RRArray<double> > value)
-	{
-		RR_NULL_CHECK(value);
-		for (auto e=value->begin(); e!=value->end(); e++)
-		{
-			RR_NULL_CHECK(e->second);
-			gz_controller->SetVelocityTarget(e->first,RR::RRArrayToScalar(e->second));
-		}
-	}
-
-	RR::RRMapPtr<std::string,RR::RRArray<double> > JointControllerImpl::get_JointForces()
-	{
-		auto o=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
-		auto p1=gz_controller->GetForces();
+		auto p1=controller->GetForces();
 		for(auto e=p1.begin(); e!=p1.end(); e++)
 		{
 			o->insert(std::make_pair(e->first,RR::ScalarToRRArray(e->second)));
@@ -139,124 +162,61 @@ namespace RobotRaconteurGazeboServerPlugin
 		physics::JointPtr j=get_model()->GetJoint(name);
 		if (!j) throw std::invalid_argument("Invalid joint name");
 		gz_controller->AddJoint(j);
-		boost::weak_ptr<physics::Joint> w_j=j;
-		gz_joints.insert(std::make_pair(j->GetName(),w_j));
 	}
 
-	void JointControllerImpl::SetPositionPID(const std::string& name, rrgz::PIDParamPtr pid)
+	void JointControllerImpl::SetPositionPID(const std::string& name, pid::PIDParamPtr pid)
 	{
 		RR_NULL_CHECK(pid);
 		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmdMax, pid->cmdMin);
 		gz_controller->SetPositionPID(name, p);
 	}
 
-	void JointControllerImpl::SetVelocityPID(const std::string& name, rrgz::PIDParamPtr pid)
+	void JointControllerImpl::SetVelocityPID(const std::string& name, pid::PIDParamPtr pid)
 	{
 		RR_NULL_CHECK(pid);
 		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmdMax, pid->cmdMin);
 		gz_controller->SetVelocityPID(name, p);
 	}
-
-	RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > JointControllerImpl::get_JointTargetPositionsSetWire()
+	
+	void JointControllerImpl::set_JointPositions(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_JointTargetPositionsSetWire;
-	}
-	void JointControllerImpl::set_JointTargetPositionsSetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_JointTargetPositionsSetWire) throw std::runtime_error("Already set");
-		m_JointTargetPositionsSetWire=value;
-		RR_WEAK_PTR<JointControllerImpl> j=shared_from_this();
-		m_JointTargetPositionsSetWire->SetWireConnectCallback(
-				boost::bind(&JointControllerImpl::OnJointTargetPositionsSetWireConnect, j, _1));
+		JointController_default_impl::set_JointPositions(value);
+		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
+		this->rrvar_JointPositions->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");				
+				return _get_JointPositions(this_->gz_controller);
+			}
+		);
 	}
 
-	void JointControllerImpl::OnJointTargetPositionsSetWireConnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > connection)
+	void JointControllerImpl::set_JointVelocities(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
 	{
-		//TODO: This doesn't seem to work properly.
-		throw std::runtime_error("Not implemented");
-		RR_SHARED_PTR<JointControllerImpl> c1=c.lock();
-		if (!c1) return;
-		boost::mutex::scoped_lock lock(c1->this_lock);
-		c1->m_JointTargetPositionsSetWire_c=connection;
-		c1->m_JointTargetPositionsSetWire_c->SetWireConnectionClosedCallback(
-				boost::bind(&JointControllerImpl::OnJointTargetPositionsSetWireDisconnect, c, _1));
-
-	}
-	void JointControllerImpl::OnJointTargetPositionsSetWireDisconnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<JointControllerImpl> c1=c.lock();
-		if (!c1) return;
-		boost::mutex::scoped_lock lock(c1->this_lock);
-		c1->m_JointTargetPositionsSetWire_c.reset();
+		JointController_default_impl::set_JointVelocities(value);
+		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
+		this->rrvar_JointVelocities->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				return _get_JointVelocities(this_->gz_controller);
+			}
+		);
 	}
 
-
-	RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > JointControllerImpl::get_JointTargetVelocitiesSetWire()
+	void JointControllerImpl::set_JointForces(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_JointTargetVelocitiesSetWire;
-	}
-	void JointControllerImpl::set_JointTargetVelocitiesSetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_JointTargetVelocitiesSetWire) throw std::runtime_error("Already set");
-		m_JointTargetVelocitiesSetWire=value;
-		RR_WEAK_PTR<JointControllerImpl> j=shared_from_this();
-		m_JointTargetVelocitiesSetWire->SetWireConnectCallback(
-		boost::bind(&JointControllerImpl::OnJointTargetVelocitiesSetWireConnect, j, _1));
+		JointController_default_impl::set_JointForces(value);
+		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
+		this->rrvar_JointForces->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				return _get_JointForces(this_->gz_controller);
+			}
+		);
 	}
 
-	void JointControllerImpl::OnJointTargetVelocitiesSetWireConnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > connection)
-	{
-		//TODO: This doesn't seem to work properly.
-		throw std::runtime_error("Not implemented");
-		RR_SHARED_PTR<JointControllerImpl> c1=c.lock();
-		if (!c1) return;
-		boost::mutex::scoped_lock lock(c1->this_lock);
-
-		c1->m_JointTargetVelocitiesSetWire_c=connection;
-		c1->m_JointTargetVelocitiesSetWire_c->SetWireConnectionClosedCallback(
-				boost::bind(&JointControllerImpl::OnJointTargetVelocitiesSetWireDisconnect, c, _1));
-
-	}
-	void JointControllerImpl::OnJointTargetVelocitiesSetWireDisconnect(RR_WEAK_PTR<JointControllerImpl> c, RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > connection)
-	{
-		RR_SHARED_PTR<JointControllerImpl> c1=c.lock();
-		if (!c1) return;
-		boost::mutex::scoped_lock lock(c1->this_lock);
-		c1->m_JointTargetVelocitiesSetWire_c.reset();
-
-	}
-
-	RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > JointControllerImpl::get_JointActualPositionsGetWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_JointActualPositionsGetWire;
-	}
-	void JointControllerImpl::set_JointActualPositionsGetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_JointActualPositionsGetWire) throw std::runtime_error("Already set");
-		m_JointActualPositionsGetWire=value;
-		m_JointActualPositionsGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<std::string,RR::RRArray<double> > > >();
-		m_JointActualPositionsGetWire_b->Init(m_JointActualPositionsGetWire);
-	}
-
-	RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > JointControllerImpl::get_JointActualVelocitiesGetWire()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_JointActualVelocitiesGetWire;
-	}
-	void JointControllerImpl::set_JointActualVelocitiesGetWire(RR::WirePtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		if (m_JointActualVelocitiesGetWire) throw std::runtime_error("Already set");
-		m_JointActualVelocitiesGetWire=value;
-		m_JointActualVelocitiesGetWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRMapPtr<std::string,RR::RRArray<double> > > >();
-		m_JointActualVelocitiesGetWire_b->Init(m_JointActualVelocitiesGetWire);
-	}
 
 	void JointControllerImpl::OnUpdate(RR_WEAK_PTR<JointControllerImpl> j, const common::UpdateInfo & _info)
 	{
@@ -267,11 +227,12 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void JointControllerImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
-		RR::WireBroadcasterPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > m_JointActualPositionsGetWire_b1;
-		RR::WireBroadcasterPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > m_JointActualVelocitiesGetWire_b1;
+		RR::WireBroadcasterPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > jointpositions_b;
+		RR::WireBroadcasterPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > jointvelocities_b;
+		RR::WireBroadcasterPtr<RR::RRMapPtr<std::string, RR::RRArray<double> > > jointforces_b;
 
-		RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > m_JointTargetPositionsSetWire_c1;
-		RR::WireConnectionPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > m_JointTargetVelocitiesSetWire_c1;
+		RR::WireUnicastReceiverPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > targetpositions_b;
+		RR::WireUnicastReceiverPtr<RR::RRMapPtr<std::string,RR::RRArray<double> > > targetvelocities_b;
 
 
 		{
@@ -279,62 +240,51 @@ namespace RobotRaconteurGazeboServerPlugin
 
 			gz_controller->Update();
 
-			m_JointActualPositionsGetWire_b1=m_JointActualPositionsGetWire_b;
-			m_JointActualVelocitiesGetWire_b1=m_JointActualVelocitiesGetWire_b;
-			m_JointTargetPositionsSetWire_c1=m_JointTargetPositionsSetWire_c;
-			m_JointTargetVelocitiesSetWire_c1=m_JointTargetPositionsSetWire_c;
+			jointpositions_b = rrvar_JointPositions;
+			jointpositions_b = rrvar_JointVelocities;
+			jointforces_b = rrvar_JointForces;
+			targetpositions_b=rrvar_JointPositionsCommand;
+			targetvelocities_b = rrvar_JointVelocitiesCommand;
 
 		}
 
 		auto o_pos=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
 		auto o_vel=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
+		auto o_f = RR::AllocateEmptyRRMap<std::string, RR::RRArray<double> >();
 
-		for (auto e=gz_joints.begin(); e!=gz_joints.end(); e++)
-		{
-			RR_SHARED_PTR<physics::Joint> j=e->second.lock();
-			if (!j) continue;
+		for (auto j : gz_controller->GetJoints() | boost::adaptors::map_values)
+		{			
 			if (j->DOF()<1) continue;
 			o_pos->insert(std::make_pair(j->GetName(),RR::ScalarToRRArray(j->Position(0))));
 			o_vel->insert(std::make_pair(j->GetName(),RR::ScalarToRRArray(j->GetVelocity(0))));
+			o_f->insert(std::make_pair(j->GetName(), RR::ScalarToRRArray(j->GetForce(0))));
 		}
 
-		if (m_JointActualPositionsGetWire_b1) m_JointActualPositionsGetWire_b1->SetOutValue(o_pos);
-		if (m_JointActualVelocitiesGetWire_b1) m_JointActualVelocitiesGetWire_b1->SetOutValue(o_vel);
+		if (jointpositions_b) jointpositions_b->SetOutValue(o_pos);
+		if (jointvelocities_b) jointvelocities_b->SetOutValue(o_vel);
+		if (jointforces_b) jointforces_b->SetOutValue(o_f);
 
-		try
+		if (targetpositions_b)
 		{
-			if (m_JointTargetPositionsSetWire_c1)
+			RR::RRMapPtr<std::string,RR::RRArray<double> > targets;
+			RR::TimeSpec ts;
+			uint32_t ep;
+			if (targetpositions_b->TryGetInValue(targets, ts, ep))
 			{
-				if (m_JointTargetPositionsSetWire_c1->GetInValueValid())
-				{
-					auto v=m_JointTargetPositionsSetWire_c1->GetInValue();
-					if (v)
-					{
-						set_JointTargetPositions(v);
-					}
-				}
-
+				_set_JointTargetPositions(gz_controller, targets);
 			}
 		}
-		catch (std::exception&) {}
 
-		try
+		if (targetvelocities_b)
 		{
-			if (m_JointTargetVelocitiesSetWire_c1)
+			RR::RRMapPtr<std::string, RR::RRArray<double> > targets;
+			RR::TimeSpec ts;
+			uint32_t ep;
+			if (targetvelocities_b->TryGetInValue(targets, ts, ep))
 			{
-				if (m_JointTargetVelocitiesSetWire_c1->GetInValueValid())
-				{
-					auto v=m_JointTargetVelocitiesSetWire_c1->GetInValue();
-					if (v)
-					{
-						set_JointTargetVelocities(v);
-					}
-				}
-
+				_set_JointTargetVelocities(gz_controller, targets);
 			}
 		}
-		catch (std::exception&) {}
-
 	}
 
 	physics::ModelPtr JointControllerImpl::get_model()

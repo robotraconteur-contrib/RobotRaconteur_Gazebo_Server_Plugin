@@ -38,34 +38,32 @@ namespace RobotRaconteurGazeboServerPlugin
 		c1->OnUpdate1();
 	}
 
-
-	rrgz::GpsStatePtr GpsSensorImpl::get_ReadState()
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		sensors::GpsSensorPtr c=get_gpssensor();
-		rrgz::GpsStatePtr o(new rrgz::GpsState());
-		o->altitude=c->Altitude();
-		o->latitude_deg=c->Latitude().Degree();
-		o->longitude_deg=c->Longitude().Degree();
+	static gps::GpsStatePtr gz_to_rr_gpsstate(sensors::GpsSensorPtr& c)
+	{		
+		gps::GpsStatePtr o(new gps::GpsState());
+		o->altitude = c->Altitude();
+		o->latitude_deg = c->Latitude().Degree();
+		o->longitude_deg = c->Longitude().Degree();
 
 		//TODO: Access velocities?
-		o->velocity_east=0.0;
-		o->velocity_north=0.0;
-		o->velocity_up=0.0;
+		o->velocity_east = 0.0;
+		o->velocity_north = 0.0;
+		o->velocity_up = 0.0;
 		return o;
 	}
-	
-	RR::WirePtr<rrgz::GpsStatePtr> GpsSensorImpl::get_StateWire()
+			
+	void GpsSensorImpl::set_State(RR::WirePtr<gps::GpsStatePtr> value)
 	{
-		boost::mutex::scoped_lock lock(this_lock);
-		return m_StateWire;
-	}
-	void GpsSensorImpl::set_StateWire(RR::WirePtr<rrgz::GpsStatePtr> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		m_StateWire=value;
-		m_StateWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<rrgz::GpsStatePtr> >();
-		m_StateWire_b->Init(m_StateWire);
+		GpsSensor_default_impl::set_State(value);				
+		boost::weak_ptr<GpsSensorImpl> weak_this = RR::rr_cast<GpsSensorImpl>(shared_from_this());
+		this->rrvar_State->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				auto s = this_->get_gpssensor();
+				return gz_to_rr_gpsstate(s);
+			}
+		);
 	}
 
 	sensors::GpsSensorPtr GpsSensorImpl::get_gpssensor()
@@ -75,14 +73,15 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void GpsSensorImpl::OnUpdate1()
 	{
-		RR::WireBroadcasterPtr<rrgz::GpsStatePtr> b;
+		RR::WireBroadcasterPtr<gps::GpsStatePtr> b;
 		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=m_StateWire_b;
+		boost::mutex::scoped_lock lock(GpsSensor_default_impl::this_lock);
+		b = rrvar_State;
 		}
 		if (b)
 		{
-			auto i=get_ReadState();
+			auto s = get_gpssensor();
+			auto i = gz_to_rr_gpsstate(s);
 			b->SetOutValue(i);
 		}
 	}
