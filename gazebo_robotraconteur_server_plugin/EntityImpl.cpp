@@ -157,7 +157,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::set_WorldPose(RR::WirePtr<geometry::Pose> value)
 	{
-		Entity_default_impl::set_WorldPose(value);
+		Entity_default_abstract_impl::set_WorldPose(value);
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_WorldPose->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -176,7 +176,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::set_RelativePose(RR::WirePtr<geometry::Pose> value)
 	{
-		Entity_default_impl::set_RelativePose(value);
+		Entity_default_abstract_impl::set_RelativePose(value);
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_RelativePose->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -195,7 +195,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::set_WorldVelocity(RR::WirePtr<geometry::SpatialVelocity> value)
 	{
-		Entity_default_impl::set_WorldVelocity(value);
+		Entity_default_abstract_impl::set_WorldVelocity(value);
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_WorldVelocity->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -210,7 +210,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::set_RelativeVelocity(RR::WirePtr<geometry::SpatialVelocity> value)
 	{
-		Entity_default_impl::set_RelativeVelocity(value);
+		Entity_default_abstract_impl::set_RelativeVelocity(value);
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_RelativeVelocity->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -225,7 +225,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	
 	void EntityImpl::set_WorldAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value)
 	{
-		Entity_default_impl::set_WorldAcceleration(value);
+		Entity_default_abstract_impl::set_WorldAcceleration(value);
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_WorldAcceleration->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -240,7 +240,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			
 	void EntityImpl::set_RelativeAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value)
 	{
-		Entity_default_impl::set_RelativeAcceleration(value);
+		Entity_default_abstract_impl::set_RelativeAcceleration(value);
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_RelativeAcceleration->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {

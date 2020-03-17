@@ -35,7 +35,7 @@ namespace image = com::robotraconteur::image;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class CameraImpl : public virtual rrgz::CameraSensor_default_impl, public virtual SensorImpl
+  class CameraImpl : public virtual rrgz::CameraSensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
 	  CameraImpl(sensors::CameraSensorPtr gz_camera);
@@ -44,7 +44,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-	  virtual std::string get_Name() override {return SensorImpl::get_Name();}	  
+	  /*virtual std::string get_Name() override {return SensorImpl::get_Name();}	  
 
 	  virtual std::string get_Type() override {return SensorImpl::get_Type();}	  
 
@@ -60,7 +60,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual datetime::Duration get_LastUpdateTime() override {return SensorImpl::get_LastUpdateTime();}	  
 
-	  virtual datetime::Duration get_LastMeasurementTime() override {return SensorImpl::get_LastMeasurementTime();}	  
+	  virtual datetime::Duration get_LastMeasurementTime() override {return SensorImpl::get_LastMeasurementTime();}	  */
 
 	  virtual image::ImagePtr CaptureImage() override;
 	  

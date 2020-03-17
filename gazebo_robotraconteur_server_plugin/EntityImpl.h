@@ -31,7 +31,7 @@ namespace geometry = com::robotraconteur::geometry;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-class EntityImpl : public virtual rrgz::Entity_default_impl, public RR_ENABLE_SHARED_FROM_THIS<EntityImpl>
+class EntityImpl : public virtual rrgz::Entity_default_abstract_impl, public RR_ENABLE_SHARED_FROM_THIS<EntityImpl>
 {
 public:
 	  virtual std::string get_Name() override;
@@ -62,7 +62,6 @@ public:
 
 protected:
 	  virtual physics::EntityPtr get_entity()=0;
-	  boost::mutex this_lock;
 
 	  virtual void OnUpdate1(const common::UpdateInfo & _info);
 

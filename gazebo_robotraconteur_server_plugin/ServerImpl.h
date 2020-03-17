@@ -33,7 +33,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   class WorldImpl;
 
-  class ServerImpl : public rrgz::Server, public RR_ENABLE_SHARED_FROM_THIS<ServerImpl>
+  class ServerImpl : public rrgz::Server_default_impl, public RR_ENABLE_SHARED_FROM_THIS<ServerImpl>
   {
   public:
 
@@ -53,7 +53,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  std::map<std::string,RR_SHARED_PTR<WorldImpl> > rr_worlds;
 
-	  boost::mutex this_lock;
 	  event::ConnectionPtr worldCreatedConnection;
   };
 }

@@ -32,7 +32,7 @@ namespace datetime = com::robotraconteur::datetime;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class SensorImpl : public virtual rrgz::Sensor, public RR_ENABLE_SHARED_FROM_THIS<SensorImpl>
+  class SensorImpl : public virtual rrgz::Sensor_default_impl, public RR_ENABLE_SHARED_FROM_THIS<SensorImpl>
   {
   public:
 	  SensorImpl(sensors::SensorPtr gz_sensor);
@@ -58,8 +58,7 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
 
 	  std::weak_ptr<sensors::Sensor> gz_sensor;
-	  sensors::SensorPtr get_sensor();
-	  boost::mutex this_lock;
+	  sensors::SensorPtr get_sensor();	  
   };
 
 }

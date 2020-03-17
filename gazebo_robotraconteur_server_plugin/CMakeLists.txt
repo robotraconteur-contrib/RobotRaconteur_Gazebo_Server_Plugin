@@ -6,7 +6,10 @@ set (CMAKE_CXX_STANDARD 11)
 find_package(gazebo REQUIRED)
 include_directories(${GAZEBO_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
-list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4251 /wd4275 /wd4068")
+endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -22,14 +25,20 @@ ROBOTRACONTEUR_GENERATE_THUNK(RR_THUNK_SRCS RR_THUNK_HDRS
     com.robotraconteur.geometry.robdef
 	com.robotraconteur.image.robdef
 	com.robotraconteur.color.robdef
-	com.robotraconteur.datetime.robdef
-	com.robotraconteur.sensordata.robdef
+	com.robotraconteur.datetime.robdef	
+	com.robotraconteur.resource.robdef
+	com.robotraconteur.identifier.robdef
 	com.robotraconteur.uuid.robdef
 	com.robotraconteur.laserscan.robdef
 	com.robotraconteur.pid.robdef
 	com.robotraconteur.sensordata.robdef
 	com.robotraconteur.gps.robdef
 	com.robotraconteur.imu.robdef
+	com.robotraconteur.sensor.robdef
+	com.robotraconteur.param.robdef
+	com.robotraconteur.datatype.robdef
+	com.robotraconteur.units.robdef
+	com.robotraconteur.device.robdef
 	MASTER_HEADER
 	IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${RobotRaconteur_STANDARD_ROBDEF_DIRS}
 	)

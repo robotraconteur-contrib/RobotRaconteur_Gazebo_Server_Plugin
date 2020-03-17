@@ -217,16 +217,24 @@ namespace RobotRaconteurGazeboServerPlugin
 
 
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<rrgz::experimental__gazeboFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::geometry::com__robotraconteur__geometryFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::image::com__robotraconteur__imageFactory>());
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::color::com__robotraconteur__colorFactory>());
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::datetime::com__robotraconteur__datetimeFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::geometry::com__robotraconteur__geometryFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::gps::com__robotraconteur__gpsFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::image::com__robotraconteur__imageFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::imu::com__robotraconteur__imuFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::resource::com__robotraconteur__resourceFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::identifier::com__robotraconteur__identifierFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::uuid::com__robotraconteur__uuidFactory>());
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::laserscan::com__robotraconteur__laserscanFactory>());
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::pid::com__robotraconteur__pidFactory>());
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::sensordata::com__robotraconteur__sensordataFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::uuid::com__robotraconteur__uuidFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::gps::com__robotraconteur__gpsFactory>());			
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::imu::com__robotraconteur__imuFactory>());		
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::sensor::com__robotraconteur__sensorFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::param::com__robotraconteur__paramFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::datatype::com__robotraconteur__datatypeFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::units::com__robotraconteur__unitsFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::device::com__robotraconteur__deviceFactory>());
+			
 
 
 

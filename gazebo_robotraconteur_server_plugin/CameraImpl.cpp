@@ -102,10 +102,10 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 		
 	void CameraImpl::set_ImageStream(RR::PipePtr<image::ImagePtr> value)
-	{
-		boost::mutex::scoped_lock lock(CameraSensor_default_impl::this_lock);
-		rrvar_ImageStream = RR_MAKE_SHARED<RR::PipeBroadcaster<image::ImagePtr> >();
-		rrvar_ImageStream->Init(value, 3);
+	{		
+		rrgz::CameraSensor_default_abstract_impl::set_ImageStream(value);
+		boost::mutex::scoped_lock lock(this_lock);
+		rrvar_ImageStream->SetMaxBacklog(3);
 	}
 
 	void CameraImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -120,7 +120,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		RR::PipeBroadcasterPtr<image::ImagePtr> b;
 		{
-		boost::mutex::scoped_lock lock(CameraSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		b=rrvar_ImageStream;
 		}
 		if (b)

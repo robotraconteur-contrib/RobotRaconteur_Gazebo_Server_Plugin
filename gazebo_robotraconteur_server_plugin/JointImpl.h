@@ -80,8 +80,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	 event::ConnectionPtr updateConnection;
 
-  	 RR::RRArrayPtr<double> axes_forces;
-  	 boost::mutex this_lock;	
+  	 RR::RRArrayPtr<double> axes_forces;  	 	
   };
 
 }
