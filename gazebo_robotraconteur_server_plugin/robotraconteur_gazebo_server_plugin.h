@@ -89,6 +89,12 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	static std::string ReadFile(const std::string& fname);
 
+	RR_BOOST_ASIO_IO_CONTEXT io_context;
+	RR_SHARED_PTR<RR::IOContextThreadPool> thread_pool;
+
+	void on_world_update_begin(const common::UpdateInfo& world_info);
+	event::ConnectionPtr on_world_update_begin_connection;
+
   };
 
 

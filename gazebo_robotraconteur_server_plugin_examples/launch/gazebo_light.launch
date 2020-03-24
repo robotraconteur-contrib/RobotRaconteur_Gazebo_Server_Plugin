@@ -15,4 +15,7 @@
   <node name="gazebo_camera_client" pkg="gazebo_robotraconteur_server_plugin_examples"
       type="gazebo_camera_client.py" respawn="true" respawn_delay="5" output="screen"/>
 
+  <node name="gazebo_light_client" pkg="gazebo_robotraconteur_server_plugin_examples"
+      type="gazebo_light_client.py" respawn="true" respawn_delay="5" output="screen"/>
+
 </launch>

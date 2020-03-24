@@ -57,17 +57,13 @@ def main():
     rip=w.get_Models('rip')
     joint_1=rip.get_Joints('joint_1')
     joint_2=rip.get_Joints('joint_2')
-    print joint_1.GetAxisAngle(0)
-    print joint_2.GetAxisAngle(1)
-    print joint_1.GetAxisVelocity(0)
-    print joint_2.GetAxisVelocity(1)
+    
+    q_1_wire=joint_1.AxesPositions.Connect()
+    q_2_wire=joint_2.AxesPositions.Connect()
+    u_1_wire=joint_1.AxesVelocities.Connect()
+    u_2_wire=joint_2.AxesVelocities.Connect()
 
-    q_1_wire=joint_1.AxisAngleGetWire.Connect()
-    q_2_wire=joint_2.AxisAngleGetWire.Connect()
-    u_1_wire=joint_1.AxisVelocityGetWire.Connect()
-    u_2_wire=joint_2.AxisVelocityGetWire.Connect()
-
-    f_1_wire=joint_1.ForceSetWire.Connect()
+    f_1_wire=joint_1.ApplyAxesForce.Connect()
 
 
     try:
@@ -90,7 +86,7 @@ def main():
                 f_1=-.1*(-2.5*q_1 + 40*q_2 + -2.5*u_1 +5*u_2)
             else:
                 f_1=swingup(q_1, q_2, u_1, u_2)
-            f_1_wire.OutValue={0: f_1}
+            f_1_wire.OutValue=[f_1]
             time.sleep(.01)
 
 

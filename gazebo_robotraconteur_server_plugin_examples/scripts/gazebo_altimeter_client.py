@@ -32,7 +32,7 @@ a=server.get_Sensors('default::rip::pendulum::altimeter')
 altitude=a.Altitude
 print altitude
 
-p=a.AltitudeWire.Connect()
+p=a.Altitude.Connect()
 try:
     while True:
         if (p.InValueValid):

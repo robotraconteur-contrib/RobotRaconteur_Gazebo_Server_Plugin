@@ -36,7 +36,7 @@ c=m.get_JointController()
 c.AddJoint('rip::joint_1')
 c.AddJoint('rip::joint_2')
 
-pid=RRN.NewStructure('experimental.gazebo.PIDParam', c)
+pid=RRN.NewStructure('com.robotraconteur.pid.PIDParam', c)
 pid.p=10
 pid.i=0
 pid.d=.2
@@ -73,7 +73,7 @@ try:
         if (t > 15.0):
             theta1=0.5*math.pi - (t-15.0)/5.0*math.pi
             theta2=0.5*math.pi
-        c.JointTargetPositions={'rip::joint_1': theta1, 'rip::joint_2': theta2}
+        c.JointPositionsCommand.PokeOutValue({'rip::joint_1': theta1, 'rip::joint_2': theta2})
         time.sleep(.01)
 
 except KeyboardInterrupt: pass

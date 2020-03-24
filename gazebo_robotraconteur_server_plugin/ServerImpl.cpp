@@ -77,6 +77,14 @@ namespace RobotRaconteurGazeboServerPlugin
 		sensors::SensorPtr s=sensors::SensorManager::Instance()->GetSensor(ind);
 		if (!s) throw std::invalid_argument("Invalid sensor name");
 
+		sensors::DepthCameraSensorPtr gz_depth_camera=std::dynamic_pointer_cast<sensors::DepthCameraSensor>(s);
+		if (gz_depth_camera)
+		{
+			auto rr_camera=RR_MAKE_SHARED<DepthCameraSensorImpl>(gz_depth_camera);
+			rr_camera->Init();
+			return rr_camera;
+		}
+
 		sensors::CameraSensorPtr gz_camera=std::dynamic_pointer_cast<sensors::CameraSensor>(s);
 		if (gz_camera)
 		{
@@ -92,15 +100,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			rr_camera->Init();
 			return rr_camera;
 		}
-
-		sensors::DepthCameraSensorPtr gz_depth_camera=std::dynamic_pointer_cast<sensors::DepthCameraSensor>(s);
-		if (gz_depth_camera)
-		{
-			auto rr_camera=RR_MAKE_SHARED<DepthCameraSensorImpl>(gz_depth_camera);
-			rr_camera->Init();
-			return rr_camera;
-		}
-
+		
 		sensors::RaySensorPtr gz_ray_sensor=std::dynamic_pointer_cast<sensors::RaySensor>(s);
 		if (gz_ray_sensor)
 		{

@@ -148,7 +148,28 @@ namespace RobotRaconteurGazeboServerPlugin
 			boost::mutex::scoped_lock lock(this_lock);
 
 			rr_node=RR_MAKE_SHARED<RR::RobotRaconteurNode>();
+			thread_pool = RR_MAKE_SHARED<RR::IOContextThreadPool>(rr_node,boost::ref(io_context),false);
+			rr_node->SetThreadPool(thread_pool);
 			rr_node->Init();
+
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<rrgz::experimental__gazeboFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::geometry::com__robotraconteur__geometryFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::image::com__robotraconteur__imageFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::color::com__robotraconteur__colorFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::datetime::com__robotraconteur__datetimeFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::resource::com__robotraconteur__resourceFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::identifier::com__robotraconteur__identifierFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::uuid::com__robotraconteur__uuidFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::laserscan::com__robotraconteur__laserscanFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::pid::com__robotraconteur__pidFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::sensordata::com__robotraconteur__sensordataFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::gps::com__robotraconteur__gpsFactory>());			
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::imu::com__robotraconteur__imuFactory>());		
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::sensor::com__robotraconteur__sensorFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::param::com__robotraconteur__paramFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::datatype::com__robotraconteur__datatypeFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::units::com__robotraconteur__unitsFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::device::com__robotraconteur__deviceFactory>());
 
 			rr_local_transport=RR_MAKE_SHARED<RR::LocalTransport>(rr_node);
 
@@ -216,28 +237,6 @@ namespace RobotRaconteurGazeboServerPlugin
 			}
 
 
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<rrgz::experimental__gazeboFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::geometry::com__robotraconteur__geometryFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::image::com__robotraconteur__imageFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::color::com__robotraconteur__colorFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::datetime::com__robotraconteur__datetimeFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::resource::com__robotraconteur__resourceFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::identifier::com__robotraconteur__identifierFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::uuid::com__robotraconteur__uuidFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::laserscan::com__robotraconteur__laserscanFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::pid::com__robotraconteur__pidFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::sensordata::com__robotraconteur__sensordataFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::gps::com__robotraconteur__gpsFactory>());			
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::imu::com__robotraconteur__imuFactory>());		
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::sensor::com__robotraconteur__sensorFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::param::com__robotraconteur__paramFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::datatype::com__robotraconteur__datatypeFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::units::com__robotraconteur__unitsFactory>());
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<com::robotraconteur::device::com__robotraconteur__deviceFactory>());
-			
-
-
-
 			server=RR_MAKE_SHARED<ServerImpl>();
 			server->Init();
 
@@ -266,6 +265,8 @@ namespace RobotRaconteurGazeboServerPlugin
 				RR_SHARED_PTR<RR::ServiceSecurityPolicy> s=RR_MAKE_SHARED<RR::ServiceSecurityPolicy>(p,policies);
 
 			}
+
+			on_world_update_begin_connection = event::Events::ConnectWorldUpdateBegin(boost::bind(&RobotRaconteurGazeboServerPlugin::on_world_update_begin,this,_1));
 		}
 		catch (std::exception& e)
 		{
@@ -280,7 +281,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		if (rr_node)
 		{
-			rr_node->Shutdown();
+			//rr_node->Shutdown();
+			on_world_update_begin_connection.reset();
 			rr_node.reset();
 		}
 
@@ -305,6 +307,11 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		return buffer.str();
 
+	}
+
+	void RobotRaconteurGazeboServerPlugin::on_world_update_begin(const common::UpdateInfo& world_info)
+	{
+		io_context.poll();
 	}
 
   GZ_REGISTER_SYSTEM_PLUGIN(RobotRaconteurGazeboServerPlugin)

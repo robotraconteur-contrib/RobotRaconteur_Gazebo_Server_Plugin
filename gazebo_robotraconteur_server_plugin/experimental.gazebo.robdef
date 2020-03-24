@@ -161,6 +161,9 @@ object Joint
 	function void SetAxisVelocity(uint32 axis, double vel)	
 		
 	wire JointWrench ForceTorque [readonly]
+
+	wire double[] ApplyAxesForce [writeonly]
+
 end object
 
 object JointController
@@ -268,8 +271,7 @@ object ContactSensor
 	property Duration LastUpdateTime [readonly]
 	property Duration LastMeasurementTime [readonly]
 	
-	function Contact{list} CaptureContacts()
-	wire Contact{list} ContactWire [readonly]
+	wire Contact{list} Contacts [readonly]
 end object
 
 object AltimeterSensor

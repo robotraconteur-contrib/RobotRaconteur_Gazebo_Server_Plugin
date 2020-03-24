@@ -54,6 +54,9 @@ protected:
 
 	rendering::LightPtr get_light();
 
+	transport::NodePtr gzNode;
+	transport::PublisherPtr lightPub;
+
 
 };
 }

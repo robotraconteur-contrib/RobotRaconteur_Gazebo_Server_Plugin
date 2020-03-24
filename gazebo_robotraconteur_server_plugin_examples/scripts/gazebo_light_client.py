@@ -33,13 +33,15 @@ print w.LightNames
 sun=w.get_Lights('sun')
 
 color=sun.DiffuseColor
-print str(color.a) + " " + str(color.r) + " " + str(color.g) + " " + str(color.b)
+print str(color[0]["a"]) + " " + str(color[0]["r"]) + " " + str(color[0]["g"]) + " " + str(color[0]["b"])
 
-color2=RRN.NewStructure('experimental.gazebo.Color',server)
+color_dtype=RRN.GetNamedArrayDType('com.robotraconteur.color.ColorRGBAf',server)
 
-color2.a=1.0
-color2.r=0.0
-color2.g=1.0
-color2.b=0.0
+color2=np.zeros((1,),dtype=color_dtype)
+
+color2["a"]=1.0
+color2["r"]=0.0
+color2["g"]=1.0
+color2["b"]=0.0
 
 sun.DiffuseColor=color2

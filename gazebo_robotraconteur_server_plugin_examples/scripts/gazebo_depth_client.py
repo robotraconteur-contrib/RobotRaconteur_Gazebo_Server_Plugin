@@ -29,8 +29,15 @@ current_frame=None
 current_depth=None
 
 def ImageToMat(image):
-    frame2=image.imageData.reshape([image.height, image.width, 3], order='C')
+    frame2=image.data.reshape([image.image_info.height, image.image_info.width, 3], order='C')
     return np.concatenate((np.atleast_3d(frame2[:,:,2]), np.atleast_3d(frame2[:,:,1]), np.atleast_3d(frame2[:,:,0])),axis=2)
+
+def DepthToMat(image):
+    dt = np.dtype(np.float32)
+    dt.newbyteorder('<')
+    depth_data = np.frombuffer(image.data, dtype = dt)
+    frame2 = depth_data.reshape([image.image_info.height,image.image_info.width],order='C')
+    return frame2
 
 def new_frame(pipe_ep):
     global current_frame
@@ -38,18 +45,22 @@ def new_frame(pipe_ep):
 
     while (pipe_ep.Available > 0):
         image=pipe_ep.ReceivePacket()
-        current_frame=ImageToMat(image)
-        current_depth=image.depthData.reshape([image.height,image.width],order='C')
+        current_frame=ImageToMat(image.intensity_image)
+        current_depth=DepthToMat(image.depth_image)
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
 print server.SensorNames
 cam=server.get_Sensors('default::rip::pendulum::depth')
 image=cam.CaptureImage()
-image1=ImageToMat(image)
+print(cam)
+print(image)
+print(dir(image))
+
+image1=ImageToMat(image.intensity_image)
 
 cv2.imshow('Captured Image',image1)
 
-depth1=image.depthData.reshape([image.height,image.width],order='C')
+depth1=DepthToMat(image.depth_image)
 cv2.imshow("Captured Depth", depth1)
 
 p=cam.ImageStream.Connect(-1)

@@ -24,18 +24,22 @@ from RobotRaconteur.Client import *
 import time
 import cv2
 import numpy as np
+import traceback
 
 current_ranges=None
 current_intensities=None
 
 def new_frame(pipe_ep):
-    global current_ranges
-    global current_intensities
+    try:
+        global current_ranges
+        global current_intensities
 
-    while (pipe_ep.Available > 0):
-        scan=pipe_ep.ReceivePacket()
-        current_ranges=scan.ranges.reshape([scan.verticalCount,scan.count],order='C')
-        current_intensities=scan.intensities.reshape([scan.verticalCount,scan.count],order='C')
+        while (pipe_ep.Available > 0):
+            scan=pipe_ep.ReceivePacket()
+            current_ranges=scan.ranges.reshape([scan.scan_info.vertical_angle_count,scan.scan_info.angle_count],order='C')
+            current_intensities=scan.intensities.reshape([scan.scan_info.vertical_angle_count,scan.scan_info.angle_count],order='C')
+    except:
+        traceback.print_exc()
 
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
@@ -43,10 +47,10 @@ print server.SensorNames
 cam=server.get_Sensors('default::rip::pendulum::laser')
 scan=cam.CaptureScan()
 
-depth1=scan.ranges.reshape([scan.verticalCount,scan.count],order='C')
+depth1=scan.ranges.reshape([scan.scan_info.vertical_angle_count,scan.scan_info.angle_count],order='C')
 cv2.imshow("Captured Depth", depth1)
 
-intensity1=scan.intensities.reshape([scan.verticalCount,scan.count],order='C')
+intensity1=scan.intensities.reshape([scan.scan_info.vertical_angle_count,scan.scan_info.angle_count],order='C')
 cv2.imshow("Captured Intensity", intensity1)
 
 p=cam.ScanStream.Connect(-1)

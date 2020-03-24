@@ -24,6 +24,9 @@ namespace RobotRaconteurGazeboServerPlugin
 	LightImpl::LightImpl(rendering::LightPtr light)
 	{
 		this->light=light;
+		this->gzNode = transport::NodePtr(new transport::Node());
+		this->gzNode->Init();
+		this->lightPub = this->gzNode->Advertise<msgs::Light>("~/light/modify");
 	}
 
 	std::string LightImpl::get_Name()
@@ -77,11 +80,15 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 	void LightImpl::set_DiffuseColor(const color::ColorRGBAf& value)
 	{
-		//TODO: This update doesn't apply to the gzclient viewer.
-		//It does work with the cameras sensors.		
 		ignition::math::Color c(value.s.r, value.s.g, value.s.b, value.s.a);
 		auto l=get_light();
 		l->SetDiffuseColor(c);
+
+		// Publish updated color so gzclient updates
+		msgs::Light lightMsg;
+		l->FillMsg(lightMsg);
+		this->lightPub->Publish(lightMsg);
+
 	}
 
 	color::ColorRGBAf LightImpl::get_SpecularColor()
@@ -96,11 +103,14 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 	void LightImpl::set_SpecularColor(const color::ColorRGBAf& value)
 	{
-		//TODO: This update doesn't apply to the gzclient viewer.
-		//It does work with the cameras sensors.		
 		ignition::math::Color c(value.s.r, value.s.g, value.s.b, value.s.a);
 		auto l=get_light();
 		l->SetSpecularColor(c);
+
+		// Publish updated color so gzclient updates
+		msgs::Light lightMsg;
+		l->FillMsg(lightMsg);
+		this->lightPub->Publish(lightMsg);
 	}
 
 	rendering::LightPtr LightImpl::get_light()

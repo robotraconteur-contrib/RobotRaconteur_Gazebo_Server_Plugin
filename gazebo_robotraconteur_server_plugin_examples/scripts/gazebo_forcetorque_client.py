@@ -29,10 +29,10 @@ server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
 print server.SensorNames
 a=server.get_Sensors('default::rip::joint_2::force_torque')
 
-m=a.ForceTorque
+m=a.ForceTorque.PeekInValue()
 print m
 
-p=a.ForceTorqueWire.Connect()
+p=a.ForceTorque.Connect()
 
 try:
     while True:

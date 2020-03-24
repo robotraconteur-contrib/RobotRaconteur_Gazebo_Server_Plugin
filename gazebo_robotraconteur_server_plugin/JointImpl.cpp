@@ -122,6 +122,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > axesvel_b;
 		RR::WireBroadcasterPtr<RR::RRArrayPtr<double> > axesforce_b;
 		RR::WireBroadcasterPtr<rrgz::JointWrench> ft_b;
+		RR::WireUnicastReceiverPtr<RR::RRArrayPtr<double> > apply_force_u;
 				
 		size_t axis_count;		
 		physics::JointPtr j=get_joint();
@@ -134,6 +135,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			axesvel_b=rrvar_AxesVelocities;
 			axesforce_b = rrvar_AxesForce;
 			ft_b=rrvar_ForceTorque;
+			apply_force_u = rrvar_ApplyAxesForce;
 		}
 		
 		if (axesPositions_b)
@@ -154,7 +156,27 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (ft_b)
 		{
 			ft_b->SetOutValue(_get_force_torque(j));
-		}		
+		}
+
+		if (apply_force_u)
+		{
+			// TODO: timeout on axes force command
+			RR::RRArrayPtr<double> force;
+			RR::TimeSpec ts;
+			uint32_t ep;
+			if(apply_force_u->TryGetInValue(force, ts, ep))
+			{
+				unsigned int dof = j->DOF();
+				for (unsigned int i=0; i<force->size(); i++)
+				{
+					if (i < dof)
+					{
+						j->SetForce(i, (*force)[i]);
+					}
+				}
+			}
+			
+		}
 	}
 
 	physics::JointPtr JointImpl::get_joint()

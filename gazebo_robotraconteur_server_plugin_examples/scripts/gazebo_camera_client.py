@@ -28,7 +28,7 @@ import numpy as np
 current_frame=None
 
 def ImageToMat(image):
-    frame2=image.data.reshape([image.height, image.width, 3], order='C')
+    frame2=image.data.reshape([image.image_info.height, image.image_info.width, 3], order='C')
     return np.concatenate((np.atleast_3d(frame2[:,:,2]), np.atleast_3d(frame2[:,:,1]), np.atleast_3d(frame2[:,:,0])),axis=2)
 
 def new_frame(pipe_ep):

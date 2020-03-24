@@ -32,7 +32,7 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class ContactSensorImpl : public virtual rrgz::ContactSensor, public virtual SensorImpl
+  class ContactSensorImpl : public virtual rrgz::ContactSensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
   	  ContactSensorImpl(sensors::ContactSensorPtr gz_contact);
@@ -59,10 +59,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual datetime::Duration get_LastMeasurementTime() override { return SensorImpl::get_LastMeasurementTime(); }
 
-  	  virtual RR::RRListPtr<rrgz::Contact> CaptureContacts() override;
+  	  virtual RR::RRListPtr<rrgz::Contact> CaptureContacts();
 
-  	  virtual RR::WirePtr<RR::RRListPtr<rrgz::Contact> > get_ContactWire() override;
-  	  virtual void set_ContactWire(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value) override;
+  	  	  virtual void set_Contacts(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value) override;
 
       virtual std::string RRType() {return "experimental.gazebo.ContactSensor";  }
   protected:
@@ -70,9 +69,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
       void OnUpdate1();
       event::ConnectionPtr updateConnection;
-
-      RR::WirePtr<RR::RRListPtr<rrgz::Contact  > > m_ContactWire;
-      RR::WireBroadcasterPtr<RR::RRListPtr<rrgz::Contact  > > m_ContactWire_b;
   };
 
 

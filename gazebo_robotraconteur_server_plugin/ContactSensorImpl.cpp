@@ -40,7 +40,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	RR::RRListPtr<rrgz::Contact> ContactSensorImpl::CaptureContacts()
 	{
-		boost::mutex::scoped_lock lock(this_lock);
 		auto o=RR::AllocateEmptyRRList<rrgz::Contact>();
 		sensors::ContactSensorPtr c=get_contactsensor();
 
@@ -59,17 +58,18 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 }
 
-	RR::WirePtr<RR::RRListPtr<rrgz::Contact> > ContactSensorImpl::get_ContactWire()
+	void ContactSensorImpl::set_Contacts(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		return m_ContactWire;
-	}
-	void ContactSensorImpl::set_ContactWire(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		m_ContactWire=value;
-		m_ContactWire_b=RR_MAKE_SHARED<RR::WireBroadcaster<RR::RRListPtr<rrgz::Contact> > >();
-		m_ContactWire_b->Init(m_ContactWire);
+		ContactSensor_default_abstract_impl::set_Contacts(value);
+		boost::weak_ptr<ContactSensorImpl> weak_this = RR::rr_cast<ContactSensorImpl>(shared_from_this());
+		this->rrvar_Contacts->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Sensor has been released");
+				return this_->CaptureContacts();
+			}
+		);
 	}
 
 	sensors::ContactSensorPtr ContactSensorImpl::get_contactsensor()
@@ -82,7 +82,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireBroadcasterPtr<RR::RRListPtr<rrgz::Contact> > b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
-		b=m_ContactWire_b;
+		b=rrvar_Contacts;
 		}
 		if (b)
 		{
