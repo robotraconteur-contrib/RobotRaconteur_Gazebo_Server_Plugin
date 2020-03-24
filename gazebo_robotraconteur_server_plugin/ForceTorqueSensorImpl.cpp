@@ -56,7 +56,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ForceTorqueSensorImpl::set_ForceTorque(RR::WirePtr<geometry::Wrench> value)
 	{
-		ForceTorqueSensor_default_impl::set_ForceTorque(value);
+		ForceTorqueSensor_default_abstract_impl::set_ForceTorque(value);
 		boost::weak_ptr<ForceTorqueSensorImpl> weak_this = RR::rr_cast<ForceTorqueSensorImpl>(shared_from_this());
 		this->rrvar_ForceTorque->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -76,7 +76,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::WireBroadcasterPtr<geometry::Wrench> b;
 		{
-		boost::mutex::scoped_lock lock(ForceTorqueSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(ForceTorqueSensor_default_abstract_impl::this_lock);
 		b=rrvar_ForceTorque;
 		}
 		if (b)

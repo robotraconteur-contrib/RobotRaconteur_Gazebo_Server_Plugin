@@ -32,7 +32,7 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class MagnetometerSensorImpl : public virtual rrgz::MagnetometerSensor_default_impl, public virtual SensorImpl
+  class MagnetometerSensorImpl : public virtual rrgz::MagnetometerSensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
   	  MagnetometerSensorImpl(sensors::MagnetometerSensorPtr gz_Magnetometer);
@@ -41,24 +41,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual std::string get_Name() override {return SensorImpl::get_Name();}	  
-
-	  virtual std::string get_Type() override {return SensorImpl::get_Type();}	  
-
-  	  virtual std::string get_ParentName() override {return SensorImpl::get_ParentName();}	  
-
-	  virtual geometry::Pose get_Pose() override { return SensorImpl::get_Pose(); }
-
-	  virtual RR::rr_bool get_Active() override { return SensorImpl::get_Active(); }
-	  virtual void set_Active(RR::rr_bool value) override { SensorImpl::set_Active(value); }
-
-	  virtual double get_UpdateRate() override { return SensorImpl::get_UpdateRate(); }
-	  virtual void set_UpdateRate(double value) override { SensorImpl::set_UpdateRate(value); }
-
-	  virtual datetime::Duration get_LastUpdateTime() override { return SensorImpl::get_LastUpdateTime(); }
-
-	  virtual datetime::Duration get_LastMeasurementTime() override { return SensorImpl::get_LastMeasurementTime(); }
-  
   	  virtual void set_MagneticField(RR::WirePtr<geometry::Vector3> value) override;
 
       virtual std::string RRType() {return "experimental.gazebo.MagnetometerSensor";  }

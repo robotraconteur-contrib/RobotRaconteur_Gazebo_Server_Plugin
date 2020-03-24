@@ -46,7 +46,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		
 		RR::WireUnicastReceiverPtr<RR::RRListPtr<RR::RRNamedArray<geometry::Wrench> > > appliedft_u;
 		{
-			boost::mutex::scoped_lock lock(Link_default_impl::this_lock);
+			boost::mutex::scoped_lock lock(Link_default_abstract_impl::this_lock);
 			appliedft_u = rrvar_AppliedWrenches;
 		}
 

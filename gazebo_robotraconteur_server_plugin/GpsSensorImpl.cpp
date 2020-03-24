@@ -54,7 +54,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			
 	void GpsSensorImpl::set_State(RR::WirePtr<gps::GpsStatePtr> value)
 	{
-		GpsSensor_default_impl::set_State(value);				
+		GpsSensor_default_abstract_impl::set_State(value);				
 		boost::weak_ptr<GpsSensorImpl> weak_this = RR::rr_cast<GpsSensorImpl>(shared_from_this());
 		this->rrvar_State->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -75,7 +75,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::WireBroadcasterPtr<gps::GpsStatePtr> b;
 		{
-		boost::mutex::scoped_lock lock(GpsSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		b = rrvar_State;
 		}
 		if (b)

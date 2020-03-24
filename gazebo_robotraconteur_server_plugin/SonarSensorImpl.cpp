@@ -55,7 +55,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	
 	void SonarSensorImpl::set_Range(RR::WirePtr<double> value)
 	{
-		SonarSensor_default_impl::set_Range(value);
+		SonarSensor_default_abstract_impl::set_Range(value);
 		boost::weak_ptr<SonarSensorImpl> weak_this = RR::rr_cast<SonarSensorImpl>(shared_from_this());
 		this->rrvar_Range->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -75,7 +75,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::WireBroadcasterPtr<double> b;
 		{
-		boost::mutex::scoped_lock lock(SonarSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		b=rrvar_Range;
 		}
 		if (b)

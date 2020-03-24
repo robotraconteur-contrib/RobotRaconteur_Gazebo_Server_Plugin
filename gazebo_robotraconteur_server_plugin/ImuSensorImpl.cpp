@@ -65,7 +65,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		
 	void ImuSensorImpl::set_State(RR::WirePtr<imu::ImuStatePtr> value)
 	{
-		ImuSensor_default_impl::set_State(value);
+		ImuSensor_default_abstract_impl::set_State(value);
 		boost::weak_ptr<ImuSensorImpl> weak_this = RR::rr_cast<ImuSensorImpl>(shared_from_this());
 		this->rrvar_State->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -91,7 +91,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::WireBroadcasterPtr<imu::ImuStatePtr> b;
 		{
-		boost::mutex::scoped_lock lock(ImuSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(ImuSensor_default_abstract_impl::this_lock);
 		b=rrvar_State;
 		}
 		if (b)

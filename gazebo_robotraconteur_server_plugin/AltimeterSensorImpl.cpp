@@ -41,8 +41,8 @@ namespace RobotRaconteurGazeboServerPlugin
 		
 	void AltimeterSensorImpl::set_Altitude(RR::WirePtr<double> value)
 	{
-		boost::mutex::scoped_lock lock(rrgz::AltimeterSensor_default_impl::this_lock);
-		AltimeterSensor_default_impl::set_Altitude(value);
+		boost::mutex::scoped_lock lock(this_lock);
+		AltimeterSensor_default_abstract_impl::set_Altitude(value);
 		boost::weak_ptr<AltimeterSensorImpl> weak_this = RR::rr_cast<AltimeterSensorImpl>(shared_from_this());
 		this->rrvar_Altitude->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -64,7 +64,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR_SHARED_PTR<RR::WireBroadcaster<double> > b;
 		{
-		boost::mutex::scoped_lock lock(rrgz::AltimeterSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		b=rrvar_Altitude;
 		}
 		if (b)

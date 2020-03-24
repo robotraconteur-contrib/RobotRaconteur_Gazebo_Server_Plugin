@@ -66,7 +66,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void MultiCameraSensorImpl::set_ImageStream(RR::PipePtr<RR::RRMapPtr<int32_t,image::Image> > value)
 	{
-		boost::mutex::scoped_lock lock(MultiCameraSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		rrvar_ImageStream = RR_MAKE_SHARED<RR::PipeBroadcaster<RR::RRMapPtr<int32_t, image::Image> > >();
 		rrvar_ImageStream->Init(value, 3);
 	}
@@ -82,7 +82,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::PipeBroadcasterPtr<RR::RRMapPtr<int32_t, image::Image> > b;
 		{
-		boost::mutex::scoped_lock lock(MultiCameraSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		b=rrvar_ImageStream;
 		}
 		if (b)

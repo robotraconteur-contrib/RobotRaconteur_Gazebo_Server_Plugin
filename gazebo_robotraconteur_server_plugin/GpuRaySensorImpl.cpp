@@ -84,7 +84,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void GpuRaySensorImpl::set_ScanStream(RR::PipePtr<laserscan::LaserScanPtr> value)
 	{
-		boost::mutex::scoped_lock lock(rrgz::RaySensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		rrvar_ScanStream = RR_MAKE_SHARED<RR::PipeBroadcaster<laserscan::LaserScanPtr> >();
 		rrvar_ScanStream->Init(value, 3);
 	}
@@ -100,7 +100,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::PipeBroadcasterPtr<laserscan::LaserScanPtr> b;
 		{
-			boost::mutex::scoped_lock lock(RaySensor_default_impl::this_lock);
+			boost::mutex::scoped_lock lock(this_lock);
 			b = rrvar_ScanStream;
 		}
 		if (b)

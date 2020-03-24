@@ -33,40 +33,14 @@ namespace geometry = com::robotraconteur::geometry;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class LinkImpl : public virtual EntityImpl, public virtual rrgz::Link_default_impl
+  class LinkImpl : public virtual rrgz::Link_default_abstract_impl, public virtual EntityImpl
   {
   public:
 	  LinkImpl(physics::LinkPtr l);
 	 
-      virtual std::string get_Name() override {return EntityImpl::get_Name();}
-	  
-	  virtual std::string get_ScopedName() override {return EntityImpl::get_ScopedName();}
+      virtual RR::RRListPtr<RR::RRArray<char> > get_SensorNames() override;
 
-	  virtual void SetWorldPose(const geometry::Pose& value) override { EntityImpl::SetWorldPose(value); }
-
-	  virtual void SetRelativePose(const geometry::Pose& value) override { EntityImpl::SetRelativePose(value); }
-
-	  virtual RR::WirePtr<geometry::Pose> get_WorldPose() override { return EntityImpl::get_WorldPose(); }
-	  virtual void set_WorldPose(RR::WirePtr<geometry::Pose> value) override { EntityImpl::set_WorldPose(value); }
-
-	  virtual RR::WirePtr<geometry::Pose> get_RelativePose() override { return EntityImpl::get_RelativePose(); }
-	  virtual void set_RelativePose(RR::WirePtr<geometry::Pose> value) override { EntityImpl::set_RelativePose(value); }
-
-	  virtual RR::WirePtr<geometry::SpatialVelocity> get_WorldVelocity() override { return EntityImpl::get_WorldVelocity(); }
-	  virtual void set_WorldVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override { EntityImpl::set_WorldVelocity(value); }
-
-	  virtual RR::WirePtr<geometry::SpatialVelocity> get_RelativeVelocity() override { return EntityImpl::get_RelativeVelocity(); }
-	  virtual void set_RelativeVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override { EntityImpl::set_RelativeVelocity(value); }
-
-	  virtual RR::WirePtr<geometry::SpatialAcceleration> get_WorldAcceleration() override { return EntityImpl::get_WorldAcceleration(); }
-	  virtual void set_WorldAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override { EntityImpl::set_WorldAcceleration(value); }
-
-	  virtual RR::WirePtr<geometry::SpatialAcceleration> get_RelativeAcceleration() override { return EntityImpl::get_RelativeAcceleration(); }
-	  virtual void set_RelativeAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override { EntityImpl::set_RelativeAcceleration(value); }
-	 	  
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_SensorNames() override;
-
-	  virtual std::string RRType() { return Link_default_impl::RRType(); }
+	  virtual std::string RRType() { return Link_default_abstract_impl::RRType(); }
 
   protected:
   	  boost::weak_ptr<physics::Link> gz_link;

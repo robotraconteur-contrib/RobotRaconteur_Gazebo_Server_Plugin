@@ -78,7 +78,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		
 	void DepthCameraSensorImpl::set_ImageStream(RR::PipePtr<image::DepthImagePtr> value)
 	{
-		boost::mutex::scoped_lock lock(DepthCameraSensor_default_impl::this_lock);				
+		boost::mutex::scoped_lock lock(this_lock);				
 		rrvar_ImageStream=RR_MAKE_SHARED<RR::PipeBroadcaster<image::DepthImagePtr> >();
 		rrvar_ImageStream->Init(value,3);
 	}
@@ -95,7 +95,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		RR::PipeBroadcasterPtr<image::DepthImagePtr> b;
 		{
-		boost::mutex::scoped_lock lock(DepthCameraSensor_default_impl::this_lock);
+		boost::mutex::scoped_lock lock(this_lock);
 		b=rrvar_ImageStream;
 		}
 		if (b)
