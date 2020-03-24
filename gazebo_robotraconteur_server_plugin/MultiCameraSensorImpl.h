@@ -49,7 +49,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	  virtual void set_ImageStream(RR::PipePtr<RR::RRMapPtr<int32_t,image::Image > > value) override;
 
 
-	  virtual std::string RRType() {return "experimental.gazebo.MultiCameraSensor";  }
+	  virtual std::string RRType() {return rrgz::MultiCameraSensor_default_abstract_impl::RRType();  }
   protected:
 	  sensors::MultiCameraSensorPtr get_camera();
 	  

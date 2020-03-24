@@ -43,7 +43,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual void set_Altitude(RR::WirePtr<double> value) override;
 
-      virtual std::string RRType() {return "experimental.gazebo.AltimeterSensor";  }
+      virtual std::string RRType() {return AltimeterSensor_default_abstract_impl::RRType();  }
   protected:
       sensors::AltimeterSensorPtr get_altimetersensor();
 

@@ -43,7 +43,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual void set_ForceTorque(RR::WirePtr<geometry::Wrench> value) override;
 
-      virtual std::string RRType() {return "experimental.gazebo.ForceTorqueSensor";  }
+      virtual std::string RRType() {return rrgz::ForceTorqueSensor_default_abstract_impl::RRType();  }
   protected:
       sensors::ForceTorqueSensorPtr get_forcetorquesensor();
 

@@ -45,7 +45,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual void set_Contacts(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value) override;
 
-      virtual std::string RRType() {return "experimental.gazebo.ContactSensor";  }
+      virtual std::string RRType() {return rrgz::ContactSensor_default_abstract_impl::RRType();  }
   protected:
       sensors::ContactSensorPtr get_contactsensor();
 

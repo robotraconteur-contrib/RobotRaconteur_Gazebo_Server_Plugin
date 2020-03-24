@@ -44,7 +44,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual void set_State(RR::WirePtr<gps::GpsStatePtr>  value) override;
 
-      virtual std::string RRType() {return "experimental.gazebo.GpsSensor";  }
+      virtual std::string RRType() {return rrgz::GpsSensor_default_abstract_impl::RRType();  }
   protected:
       sensors::GpsSensorPtr get_gpssensor();
 

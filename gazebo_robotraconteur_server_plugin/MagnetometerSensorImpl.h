@@ -43,7 +43,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual void set_MagneticField(RR::WirePtr<geometry::Vector3> value) override;
 
-      virtual std::string RRType() {return "experimental.gazebo.MagnetometerSensor";  }
+      virtual std::string RRType() {return rrgz::MagnetometerSensor_default_abstract_impl::RRType();  }
   protected:
       sensors::MagnetometerSensorPtr get_magnetometersensor();
 

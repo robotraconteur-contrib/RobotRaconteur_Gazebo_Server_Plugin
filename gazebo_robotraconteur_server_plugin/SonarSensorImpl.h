@@ -49,7 +49,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	    	    	 
   	  virtual void set_Range(RR::WirePtr<double> value) override;
 
-      virtual std::string RRType() {return "experimental.gazebo.SonarSensor";  }
+      virtual std::string RRType() {return rrgz::SonarSensor_default_abstract_impl::RRType();  }
   protected:
       sensors::SonarSensorPtr get_sonarsensor();
 

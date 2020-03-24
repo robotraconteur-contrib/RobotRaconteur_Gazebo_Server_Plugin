@@ -46,7 +46,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual void SetReferencePose() override;
 
-      virtual std::string RRType() {return "experimental.gazebo.ImuSensor";  }
+      virtual std::string RRType() {return rrgz::ImuSensor_default_abstract_impl::RRType();  }
   protected:
       sensors::ImuSensorPtr get_imusensor();
 

@@ -46,7 +46,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	  	  
 	  virtual void set_ScanStream(RR::PipePtr<laserscan::LaserScanPtr> value) override;
 	  
-	  virtual std::string RRType() {return "experimental.gazebo.RaySensor";  }
+	  virtual std::string RRType() {return rrgz::RaySensor_default_abstract_impl::RRType();  }
   protected:
 	  sensors::RaySensorPtr get_raysensor();
 	  

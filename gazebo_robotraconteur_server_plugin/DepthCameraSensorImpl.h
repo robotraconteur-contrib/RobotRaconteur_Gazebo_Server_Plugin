@@ -46,7 +46,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	  virtual void set_ImageStream(RR::PipePtr<image::DepthImagePtr> value) override;
 
 
-	  virtual std::string RRType() {return "experimental.gazebo.DepthCameraSensor";  }
+	  virtual std::string RRType() {return rrgz::DepthCameraSensor_default_abstract_impl::RRType();  }
   protected:
 	  sensors::DepthCameraSensorPtr get_camera();
 	  
