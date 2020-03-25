@@ -50,7 +50,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		auto m=RR_DYNAMIC_POINTER_CAST<physics::Model>(e);
 		if (!m) throw std::invalid_argument("Invalid model name");
 		RR_SHARED_PTR<ModelImpl> m_impl=RR_MAKE_SHARED<ModelImpl>(m);
-		m_impl->Init(GetRRPath() + ".child_models[" + RR::detail::encode_index(ind) + "]");
 		return m_impl;
 	}
 
@@ -71,7 +70,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		physics::LinkPtr m=get_model()->GetLink(ind);
 		if (!m) throw std::invalid_argument("Unknown index");
 		RR_SHARED_PTR<LinkImpl> m_impl=RR_MAKE_SHARED<LinkImpl>(m);
-		m_impl->Init(GetRRPath() + ".links[" + RR::detail::encode_index(ind) + "]");
 		return m_impl;
 	}
 
@@ -92,7 +90,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		physics::JointPtr m=get_model()->GetJoint(ind);
 		if (!m) throw std::invalid_argument("Unknown index");
 		RR_SHARED_PTR<JointImpl> m_impl=RR_MAKE_SHARED<JointImpl>(m);
-		m_impl->Init();
 		return m_impl;
 	}
 
@@ -115,14 +112,13 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		RR_SHARED_PTR<JointControllerImpl> j=RR_MAKE_SHARED<JointControllerImpl>(RR_DYNAMIC_POINTER_CAST<ModelImpl>(shared_from_this()), get_model());
 
-		joint_controller=j;
-		j->Init();
+		joint_controller=j;		
 	}
 	void ModelImpl::destroy_joint_controller()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		std::string spath=RR::ServerContext::GetCurrentServicePath() + ".JointController";
-		RR::ServerContext::GetCurrentServerContext()->ReleaseServicePath(spath);
+		if (!joint_controller) return;
+		RR::ServerContext::GetCurrentServerContext()->ReleaseServicePath(joint_controller->RRPath());
 
 		joint_controller.reset();
 	}

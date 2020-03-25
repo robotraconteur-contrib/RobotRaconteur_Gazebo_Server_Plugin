@@ -25,10 +25,19 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void ContactSensorImpl::Init()
+	void ContactSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
 		updateConnection=get_contactsensor()->ConnectUpdated(boost::bind(&ContactSensorImpl::OnUpdate,c));
+
+		boost::weak_ptr<ContactSensorImpl> weak_this = RR::rr_cast<ContactSensorImpl>(shared_from_this());
+		this->rrvar_contacts->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Sensor has been released");
+				return this_->CaptureContacts();
+			}
+		);
 	}
 
 	void ContactSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -58,20 +67,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 }
 
-	void ContactSensorImpl::set_contacts(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		ContactSensor_default_abstract_impl::set_contacts(value);
-		boost::weak_ptr<ContactSensorImpl> weak_this = RR::rr_cast<ContactSensorImpl>(shared_from_this());
-		this->rrvar_contacts->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Sensor has been released");
-				return this_->CaptureContacts();
-			}
-		);
-	}
-
 	sensors::ContactSensorPtr ContactSensorImpl::get_contactsensor()
 	{
 		return std::dynamic_pointer_cast<sensors::ContactSensor>(get_sensor());
@@ -79,16 +74,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ContactSensorImpl::OnUpdate1()
 	{
-		RR::WireBroadcasterPtr<RR::RRListPtr<rrgz::Contact> > b;
-		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_contacts;
-		}
-		if (b)
-		{
-			auto i=CaptureContacts();
-			b->SetOutValue(i);
-		}
+		auto i=CaptureContacts();
+		rrvar_contacts->SetOutValue(i);
 	}
 
 }

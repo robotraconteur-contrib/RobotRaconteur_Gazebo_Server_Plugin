@@ -26,10 +26,12 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void GpuRaySensorImpl::Init()
+	void GpuRaySensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
 		updateConnection=get_raysensor()->ConnectUpdated(boost::bind(&GpuRaySensorImpl::OnUpdate,c));
+
+		rrvar_scan_stream->SetMaxBacklog(3);
 	}
 
 	laserscan::LaserScanPtr GpuRaySensorImpl::capture_scan()
@@ -82,13 +84,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::GpuRaySensor>(get_sensor());
 	}
 
-	void GpuRaySensorImpl::set_scan_stream(RR::PipePtr<laserscan::LaserScanPtr> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		rrvar_scan_stream = RR_MAKE_SHARED<RR::PipeBroadcaster<laserscan::LaserScanPtr> >();
-		rrvar_scan_stream->Init(value, 3);
-	}
-
 	void GpuRaySensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
 	{
 		RR_SHARED_PTR<GpuRaySensorImpl> c1=RR_DYNAMIC_POINTER_CAST<GpuRaySensorImpl>(c.lock());
@@ -97,16 +92,8 @@ namespace RobotRaconteurGazeboServerPlugin
 	}
 
 	void GpuRaySensorImpl::OnUpdate1()
-	{
-		RR::PipeBroadcasterPtr<laserscan::LaserScanPtr> b;
-		{
-			boost::mutex::scoped_lock lock(this_lock);
-			b = rrvar_scan_stream;
-		}
-		if (b)
-		{
-			auto i = capture_scan();
-			b->AsyncSendPacket(i, []() {});
-		}
+	{		
+		auto i = capture_scan();
+		rrvar_scan_stream->AsyncSendPacket(i, []() {});		
 	}
 }

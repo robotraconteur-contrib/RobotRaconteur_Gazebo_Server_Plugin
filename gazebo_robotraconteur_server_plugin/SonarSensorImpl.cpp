@@ -25,10 +25,19 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void SonarSensorImpl::Init()
+	void SonarSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
 		updateConnection=get_sonarsensor()->ConnectUpdated(boost::bind(&SonarSensorImpl::OnUpdate,c));
+
+		boost::weak_ptr<SonarSensorImpl> weak_this = RR::rr_cast<SonarSensorImpl>(shared_from_this());
+		this->rrvar_range->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				return this_->get_sonarsensor()->Range();
+			}
+		);
 	}
 
 	void SonarSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -53,36 +62,15 @@ namespace RobotRaconteurGazeboServerPlugin
 		return get_sonarsensor()->Radius();
 	}
 	
-	void SonarSensorImpl::set_range(RR::WirePtr<double> value)
-	{
-		SonarSensor_default_abstract_impl::set_range(value);
-		boost::weak_ptr<SonarSensorImpl> weak_this = RR::rr_cast<SonarSensorImpl>(shared_from_this());
-		this->rrvar_range->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Entity has been released");
-				return this_->get_sonarsensor()->Range();
-			}
-		);
-	}
-
 	sensors::SonarSensorPtr SonarSensorImpl::get_sonarsensor()
 	{
 		return std::dynamic_pointer_cast<sensors::SonarSensor>(get_sensor());
 	}
 
 	void SonarSensorImpl::OnUpdate1()
-	{
-		RR::WireBroadcasterPtr<double> b;
-		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_range;
-		}
-		if (b)
-		{
-			auto i = get_sonarsensor()->Range();
-			b->SetOutValue(i);
-		}
+	{		
+		auto i = get_sonarsensor()->Range();
+		rrvar_range->SetOutValue(i);		
 	}
 
 }

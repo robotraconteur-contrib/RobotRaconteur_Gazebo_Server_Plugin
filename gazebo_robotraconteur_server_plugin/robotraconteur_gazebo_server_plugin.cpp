@@ -238,8 +238,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 
 			server=RR_MAKE_SHARED<ServerImpl>();
-			server->Init();
-
+			
 			if(password_file=="")
 			{
 				rr_node->RegisterService("GazeboServer", "experimental.gazebo", server);

@@ -33,12 +33,10 @@ namespace image = com::robotraconteur::image;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class MultiCameraSensorImpl : public virtual rrgz::MultiCameraSensor_default_abstract_impl, public virtual SensorImpl
+  class MultiCameraSensorImpl : public virtual rrgz::MultiCameraSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
   {
   public:
 	  MultiCameraSensorImpl(sensors::MultiCameraSensorPtr gz_camera);
-
-	  void Init();
 
 	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
@@ -46,10 +44,10 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual image::ImagePtr capture_image(int32_t ind) override;
 	  	  
-	  virtual void set_image_stream(RR::PipePtr<RR::RRMapPtr<int32_t,image::Image > > value) override;
-
-
 	  virtual std::string RRType() {return rrgz::MultiCameraSensor_default_abstract_impl::RRType();  }
+
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
   protected:
 	  sensors::MultiCameraSensorPtr get_camera();
 	  

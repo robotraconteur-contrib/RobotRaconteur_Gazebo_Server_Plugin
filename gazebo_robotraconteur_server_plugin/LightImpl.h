@@ -33,8 +33,6 @@ class LightImpl : public virtual rrgz::Light, public RR_ENABLE_SHARED_FROM_THIS<
 public:
 	LightImpl(rendering::LightPtr light);
 
-	virtual void Init() {};
-
 	virtual std::string get_name() override;	
 
 	virtual std::string get_type() override;	

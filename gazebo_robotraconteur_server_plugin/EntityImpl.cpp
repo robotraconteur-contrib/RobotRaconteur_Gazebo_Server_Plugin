@@ -77,21 +77,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		return get_entity()->GetScopedName(true);
 	}
-	
-	void EntityImpl::Init(const std::string& rr_path)
-	{
-		RR_WEAK_PTR<EntityImpl> w1=shared_from_this();
-		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-		boost::bind(&EntityImpl::OnUpdate, w1, _1));
-
-		gz_path=get_entity()->GetScopedName(true);
-		rr_context=RR::ServerContext::GetCurrentServerContext();
-		this->rr_path=rr_path;
-
-		this->deleteEntityConnection = event::Events::ConnectDeleteEntity(
-				boost::bind(&EntityImpl::OnEntityDeleted, w1, _1));
-	}
-
+		
 	void EntityImpl::OnUpdate(RR_WEAK_PTR<EntityImpl> e, const common::UpdateInfo & _info)
 	{
 		RR_SHARED_PTR<EntityImpl> e1=e.lock();
@@ -101,23 +87,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
-		RR::WireBroadcasterPtr<geometry::Pose> wpose;
-		RR::WireBroadcasterPtr<geometry::Pose> rpose;
-		RR::WireBroadcasterPtr<geometry::SpatialVelocity> wvel;
-		RR::WireBroadcasterPtr<geometry::SpatialVelocity> rvel;
-		RR::WireBroadcasterPtr<geometry::SpatialAcceleration> wacc;
-		RR::WireBroadcasterPtr<geometry::SpatialAcceleration> racc;
-		{
-			boost::mutex::scoped_lock lock(this_lock);
-			wpose=rrvar_world_pose;
-			rpose=rrvar_relative_pose;
-			wvel=rrvar_world_velocity;
-			rvel=rrvar_relative_velocity;
-			wacc=rrvar_world_acceleration;
-			racc=rrvar_relative_acceleration;
-
-		}
-
+		
 		auto e = get_entity();
 
 		auto wpose1=gz_pose_to_rr_pose(e->WorldPose());
@@ -127,12 +97,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		auto wacc1=gz_to_spatial_acceleration(e->WorldAngularAccel(), e->WorldLinearAccel());
 		auto racc1= gz_to_spatial_acceleration(e->RelativeAngularAccel(), e->RelativeLinearAccel());
 
-		if (wpose) wpose->SetOutValue(wpose1);
-		if (rpose) rpose->SetOutValue(rpose1);
-		if (wvel) wvel->SetOutValue(wvel1);
-		if (rvel) rvel->SetOutValue(rvel1);
-		if (wacc) wacc->SetOutValue(wacc1);
-		if (racc) racc->SetOutValue(racc1);
+		rrvar_world_pose->SetOutValue(wpose1);
+		rrvar_relative_pose->SetOutValue(rpose1);
+		rrvar_world_velocity->SetOutValue(wvel1);
+		rrvar_relative_velocity->SetOutValue(rvel1);
+		rrvar_world_acceleration->SetOutValue(wacc1);
+		rrvar_relative_acceleration->SetOutValue(racc1);
 	}
 
 	void EntityImpl::OnEntityDeleted(RR_WEAK_PTR<EntityImpl> t, const std::string& path)
@@ -155,37 +125,9 @@ namespace RobotRaconteurGazeboServerPlugin
 		return rr_path;
 	}
 
-	void EntityImpl::set_world_pose(RR::WirePtr<geometry::Pose> value)
-	{
-		Entity_default_abstract_impl::set_world_pose(value);
-		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
-		this->rrvar_world_pose->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Entity has been released");
-				auto p = this_->get_entity()->WorldPose();				
-				return gz_pose_to_rr_pose(p);
-			}
-		);
-	}
-
 	void EntityImpl::setf_world_pose(const geometry::Pose& value)
 	{		
 		get_entity()->SetWorldPose(rr_pose_to_gz_pose(value), true, true);
-	}
-
-	void EntityImpl::set_relative_pose(RR::WirePtr<geometry::Pose> value)
-	{
-		Entity_default_abstract_impl::set_relative_pose(value);
-		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
-		this->rrvar_relative_pose->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Entity has been released");
-				auto p = this_->get_entity()->RelativePose();
-				return gz_pose_to_rr_pose(p);
-			}
-		);
 	}
 
 	void EntityImpl::setf_relative_pose(const geometry::Pose& value)
@@ -193,40 +135,32 @@ namespace RobotRaconteurGazeboServerPlugin
 		get_entity()->SetRelativePose(rr_pose_to_gz_pose(value), true, true);
 	}
 
-	void EntityImpl::set_world_velocity(RR::WirePtr<geometry::SpatialVelocity> value)
+	void EntityImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		Entity_default_abstract_impl::set_world_velocity(value);
-		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
-		this->rrvar_world_velocity->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Entity has been released");
-				auto a = this_->get_entity()->WorldAngularVel();
-				auto v = this_->get_entity()->WorldLinearVel();
-				return gz_to_spatial_velocity(a, v);
-			}
-		);
-	}
+		RR_SHARED_PTR<RR::ServerContext> rr_context = context.lock();
+		BOOST_ASSERT(rr_context);
 
-	void EntityImpl::set_relative_velocity(RR::WirePtr<geometry::SpatialVelocity> value)
-	{
-		Entity_default_abstract_impl::set_relative_velocity(value);
+		RR_WEAK_PTR<EntityImpl> w1=shared_from_this();
+		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+		boost::bind(&EntityImpl::OnUpdate, w1, _1));
+
+		gz_path=get_entity()->GetScopedName(true);
+		this->rr_path=service_path;
+
+		this->deleteEntityConnection = event::Events::ConnectDeleteEntity(
+				boost::bind(&EntityImpl::OnEntityDeleted, w1, _1));
+
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
-		this->rrvar_relative_velocity->GetWire()->SetPeekInValueCallback(
+		this->rrvar_relative_acceleration->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Entity has been released");
-				auto a = this_->get_entity()->RelativeAngularVel();
-				auto v = this_->get_entity()->RelativeLinearVel();
-				return gz_to_spatial_velocity(a, v);
+				auto a = this_->get_entity()->RelativeAngularAccel();
+				auto v = this_->get_entity()->RelativeLinearAccel();
+				return gz_to_spatial_acceleration(a, v);
 			}
 		);
-	}
-	
-	void EntityImpl::set_world_acceleration(RR::WirePtr<geometry::SpatialAcceleration> value)
-	{
-		Entity_default_abstract_impl::set_world_acceleration(value);
-		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
+
 		this->rrvar_world_acceleration->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
@@ -236,19 +170,42 @@ namespace RobotRaconteurGazeboServerPlugin
 				return gz_to_spatial_acceleration(a, v);
 			}
 		);
-	}
-			
-	void EntityImpl::set_relative_acceleration(RR::WirePtr<geometry::SpatialAcceleration> value)
-	{
-		Entity_default_abstract_impl::set_relative_acceleration(value);
-		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
-		this->rrvar_relative_acceleration->GetWire()->SetPeekInValueCallback(
+
+		this->rrvar_relative_velocity->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Entity has been released");
-				auto a = this_->get_entity()->RelativeAngularAccel();
-				auto v = this_->get_entity()->RelativeLinearAccel();
-				return gz_to_spatial_acceleration(a, v);
+				auto a = this_->get_entity()->RelativeAngularVel();
+				auto v = this_->get_entity()->RelativeLinearVel();
+				return gz_to_spatial_velocity(a, v);
+			}
+		);
+
+		this->rrvar_world_velocity->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				auto a = this_->get_entity()->WorldAngularVel();
+				auto v = this_->get_entity()->WorldLinearVel();
+				return gz_to_spatial_velocity(a, v);
+			}
+		);
+
+		this->rrvar_world_pose->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				auto p = this_->get_entity()->WorldPose();				
+				return gz_pose_to_rr_pose(p);
+			}
+		);
+
+		this->rrvar_relative_pose->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Entity has been released");
+				auto p = this_->get_entity()->RelativePose();
+				return gz_pose_to_rr_pose(p);
 			}
 		);
 	}

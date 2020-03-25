@@ -32,21 +32,19 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class DepthCameraSensorImpl : public virtual rrgz::DepthCameraSensor_default_abstract_impl, public virtual SensorImpl
+  class DepthCameraSensorImpl : public virtual rrgz::DepthCameraSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
   {
   public:
 	  DepthCameraSensorImpl(sensors::DepthCameraSensorPtr gz_camera);
-
-	  void Init();
 
 	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
 	  virtual image::DepthImagePtr capture_image() override;
 	  	  
-	  virtual void set_image_stream(RR::PipePtr<image::DepthImagePtr> value) override;
-
-
 	  virtual std::string RRType() {return rrgz::DepthCameraSensor_default_abstract_impl::RRType();  }
+
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
   protected:
 	  sensors::DepthCameraSensorPtr get_camera();
 	  

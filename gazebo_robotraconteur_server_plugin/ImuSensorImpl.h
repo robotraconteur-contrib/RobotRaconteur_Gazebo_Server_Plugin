@@ -33,20 +33,19 @@ namespace imu = com::robotraconteur::imu;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class ImuSensorImpl : public virtual rrgz::ImuSensor_default_abstract_impl, public virtual SensorImpl
+  class ImuSensorImpl : public virtual rrgz::ImuSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
   {
   public:
   	  ImuSensorImpl(sensors::ImuSensorPtr gz_imu);
 
-  	  void Init();
-
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
-
-  	  virtual void set_state(RR::WirePtr<imu::ImuStatePtr> value) override;
 
   	  virtual void setf_reference_pose() override;
 
       virtual std::string RRType() {return rrgz::ImuSensor_default_abstract_impl::RRType();  }
+
+      virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
   protected:
       sensors::ImuSensorPtr get_imusensor();
 

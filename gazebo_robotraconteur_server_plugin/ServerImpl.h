@@ -33,11 +33,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
   class WorldImpl;
 
-  class ServerImpl : public rrgz::Server_default_impl, public RR_ENABLE_SHARED_FROM_THIS<ServerImpl>
+  class ServerImpl : public rrgz::Server_default_impl, public virtual RR::IRRServiceObject, public RR_ENABLE_SHARED_FROM_THIS<ServerImpl>
   {
   public:
-
-	  virtual void Init();
 
 	  virtual RR::RRListPtr<RR::RRArray<char> > get_world_names() override;	  
 
@@ -46,6 +44,8 @@ namespace RobotRaconteurGazeboServerPlugin
 	  virtual RR::RRListPtr<RR::RRArray<char> > get_sensor_names() override;
 
 	  virtual rrgz::SensorPtr get_sensors(const std::string& ind) override;
+
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
   protected:
 

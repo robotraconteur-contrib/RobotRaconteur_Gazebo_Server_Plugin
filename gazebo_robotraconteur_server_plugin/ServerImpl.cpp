@@ -20,7 +20,7 @@
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-	void ServerImpl::Init()
+	void ServerImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		worldCreatedConnection=event::Events::ConnectWorldCreated(
 				boost::bind(&ServerImpl::OnWorldCreated,shared_from_this(),_1));
@@ -81,7 +81,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_depth_camera)
 		{
 			auto rr_camera=RR_MAKE_SHARED<DepthCameraSensorImpl>(gz_depth_camera);
-			rr_camera->Init();
 			return rr_camera;
 		}
 
@@ -89,7 +88,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_camera)
 		{
 			auto rr_camera=RR_MAKE_SHARED<CameraImpl>(gz_camera);
-			rr_camera->Init();
 			return rr_camera;
 		}
 
@@ -97,7 +95,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_multi_camera)
 		{
 			auto rr_camera=RR_MAKE_SHARED<MultiCameraSensorImpl>(gz_multi_camera);
-			rr_camera->Init();
 			return rr_camera;
 		}
 		
@@ -105,7 +102,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_ray_sensor)
 		{
 			auto rr_ray=RR_MAKE_SHARED<RaySensorImpl>(gz_ray_sensor);
-			rr_ray->Init();
 			return rr_ray;
 		}
 
@@ -113,7 +109,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_gpu_ray_sensor)
 		{
 			auto rr_ray=RR_MAKE_SHARED<GpuRaySensorImpl>(gz_gpu_ray_sensor);
-			rr_ray->Init();
 			return rr_ray;
 		}
 
@@ -121,7 +116,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_contact_sensor)
 		{
 			auto rr_contact=RR_MAKE_SHARED<ContactSensorImpl>(gz_contact_sensor);
-			rr_contact->Init();
 			return rr_contact;
 		}
 
@@ -129,7 +123,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_altimeter_sensor)
 		{
 			auto rr_altimeter=RR_MAKE_SHARED<AltimeterSensorImpl>(gz_altimeter_sensor);
-			rr_altimeter->Init();
 			return rr_altimeter;
 		}
 
@@ -137,7 +130,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_sonar_sensor)
 		{
 			auto rr_sonar=RR_MAKE_SHARED<SonarSensorImpl>(gz_sonar_sensor);
-			rr_sonar->Init();
 			return rr_sonar;
 		}
 
@@ -145,7 +137,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_magnetometer_sensor)
 		{
 			auto rr_m=RR_MAKE_SHARED<MagnetometerSensorImpl>(gz_magnetometer_sensor);
-			rr_m->Init();
 			return rr_m;
 		}
 
@@ -153,7 +144,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_ft_sensor)
 		{
 			auto rr_m=RR_MAKE_SHARED<ForceTorqueSensorImpl>(gz_ft_sensor);
-			rr_m->Init();
 			return rr_m;
 		}
 
@@ -161,7 +151,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_gps_sensor)
 		{
 			auto rr_m=RR_MAKE_SHARED<GpsSensorImpl>(gz_gps_sensor);
-			rr_m->Init();
 			return rr_m;
 		}
 
@@ -169,7 +158,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		if (gz_imu_sensor)
 		{
 			auto rr_m=RR_MAKE_SHARED<ImuSensorImpl>(gz_imu_sensor);
-			rr_m->Init();
 			return rr_m;
 		}
 

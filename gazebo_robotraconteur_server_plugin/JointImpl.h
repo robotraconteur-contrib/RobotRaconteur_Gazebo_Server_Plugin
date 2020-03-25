@@ -31,12 +31,10 @@ namespace geometry=com::robotraconteur::geometry;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class JointImpl : public virtual rrgz::Joint_default_impl, public RR_ENABLE_SHARED_FROM_THIS<JointImpl>
+  class JointImpl : public virtual rrgz::Joint_default_impl, public virtual RR::IRRServiceObject, public RR_ENABLE_SHARED_FROM_THIS<JointImpl>
   {
   public:
 	  JointImpl(physics::JointPtr j);
-
-	  virtual void Init();
 
 	  static void OnUpdate(RR_WEAK_PTR<JointImpl> j, const common::UpdateInfo & _info);
 
@@ -54,17 +52,11 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual RR::RRNamedArrayPtr<geometry::Vector3> getf_local_axes() override;
 
-	  virtual void set_axes_position(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
-	  	  
-	  virtual void set_axes_velocity(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
-	  	  
-	  virtual void set_axes_force(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
-	  	  
 	  virtual void setf_axis_position(uint32_t axis, double Position);
 
 	  virtual void setf_axis_velocity(uint32_t axis, double vel);
 
-	  virtual void set_force_torque(RR::WirePtr<rrgz::JointWrench> value);
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
 	 
   protected:

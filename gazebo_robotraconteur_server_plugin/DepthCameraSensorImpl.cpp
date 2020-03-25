@@ -27,10 +27,12 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void DepthCameraSensorImpl::Init()
+	void DepthCameraSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
 		updateConnection=get_camera()->ConnectUpdated(boost::bind(&DepthCameraSensorImpl::OnUpdate,c));
+
+		rrvar_image_stream->SetMaxBacklog(3);
 	}
 
 	image::DepthImagePtr DepthCameraSensorImpl::capture_image()
@@ -76,13 +78,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::DepthCameraSensor>(get_sensor());
 	}
 		
-	void DepthCameraSensorImpl::set_image_stream(RR::PipePtr<image::DepthImagePtr> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);				
-		rrvar_image_stream=RR_MAKE_SHARED<RR::PipeBroadcaster<image::DepthImagePtr> >();
-		rrvar_image_stream->Init(value,3);
-	}
-
 	void DepthCameraSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
 	{
 		RR_SHARED_PTR<DepthCameraSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<DepthCameraSensorImpl>(c.lock());
@@ -92,17 +87,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void DepthCameraSensorImpl::OnUpdate1()
 	{
-
-		RR::PipeBroadcasterPtr<image::DepthImagePtr> b;
-		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_image_stream;
-		}
-		if (b)
-		{
-			auto i=capture_image();
-			b->AsyncSendPacket(i, []() {});
-		}
-
+		auto i=capture_image();
+		rrvar_image_stream->AsyncSendPacket(i, []() {});
 	}
 }

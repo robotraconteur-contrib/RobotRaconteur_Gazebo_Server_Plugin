@@ -25,19 +25,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void GpsSensorImpl::Init()
-	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_gpssensor()->ConnectUpdated(boost::bind(&GpsSensorImpl::OnUpdate,c));
-	}
-
-	void GpsSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<GpsSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<GpsSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-
 	static gps::GpsStatePtr gz_to_rr_gpsstate(sensors::GpsSensorPtr& c)
 	{		
 		gps::GpsStatePtr o(new gps::GpsState());
@@ -51,10 +38,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		o->velocity_up = 0.0;
 		return o;
 	}
-			
-	void GpsSensorImpl::set_state(RR::WirePtr<gps::GpsStatePtr> value)
+
+	void GpsSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		GpsSensor_default_abstract_impl::set_state(value);				
+		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
+		updateConnection=get_gpssensor()->ConnectUpdated(boost::bind(&GpsSensorImpl::OnUpdate,c));
+
 		boost::weak_ptr<GpsSensorImpl> weak_this = RR::rr_cast<GpsSensorImpl>(shared_from_this());
 		this->rrvar_state->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -66,6 +55,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
+	void GpsSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
+	{
+		RR_SHARED_PTR<GpsSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<GpsSensorImpl>(c.lock());
+		if (!c1) return;
+		c1->OnUpdate1();
+	}
+				
 	sensors::GpsSensorPtr GpsSensorImpl::get_gpssensor()
 	{
 		return std::dynamic_pointer_cast<sensors::GpsSensor>(get_sensor());
@@ -73,17 +69,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void GpsSensorImpl::OnUpdate1()
 	{
-		RR::WireBroadcasterPtr<gps::GpsStatePtr> b;
-		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b = rrvar_state;
-		}
-		if (b)
-		{
-			auto s = get_gpssensor();
-			auto i = gz_to_rr_gpsstate(s);
-			b->SetOutValue(i);
-		}
+		auto s = get_gpssensor();
+		auto i = gz_to_rr_gpsstate(s);
+		rrvar_state->SetOutValue(i);		
 	}
 
 }

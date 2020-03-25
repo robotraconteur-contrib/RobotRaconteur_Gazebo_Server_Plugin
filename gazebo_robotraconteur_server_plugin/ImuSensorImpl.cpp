@@ -25,20 +25,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void ImuSensorImpl::Init()
-	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_imusensor()->ConnectUpdated(boost::bind(&ImuSensorImpl::OnUpdate,c));
-	}
-
-	void ImuSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<ImuSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<ImuSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-
-
 	static imu::ImuStatePtr gz_to_rr_imustate(sensors::ImuSensorPtr& c)
 	{		
 		imu::ImuStatePtr o(new imu::ImuState());
@@ -62,10 +48,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		
 		return o;
 	}
-		
-	void ImuSensorImpl::set_state(RR::WirePtr<imu::ImuStatePtr> value)
+
+	void ImuSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		ImuSensor_default_abstract_impl::set_state(value);
+		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
+		updateConnection=get_imusensor()->ConnectUpdated(boost::bind(&ImuSensorImpl::OnUpdate,c));
+
 		boost::weak_ptr<ImuSensorImpl> weak_this = RR::rr_cast<ImuSensorImpl>(shared_from_this());
 		this->rrvar_state->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -76,6 +64,14 @@ namespace RobotRaconteurGazeboServerPlugin
 			}
 		);
 	}
+
+	void ImuSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
+	{
+		RR_SHARED_PTR<ImuSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<ImuSensorImpl>(c.lock());
+		if (!c1) return;
+		c1->OnUpdate1();
+	}
+
 
 	void ImuSensorImpl::setf_reference_pose()
 	{
@@ -89,17 +85,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ImuSensorImpl::OnUpdate1()
 	{
-		RR::WireBroadcasterPtr<imu::ImuStatePtr> b;
-		{
-		boost::mutex::scoped_lock lock(ImuSensor_default_abstract_impl::this_lock);
-		b=rrvar_state;
-		}
-		if (b)
-		{
-			auto s = get_imusensor();
-			auto i = gz_to_rr_imustate(s);
-			b->SetOutValue(i);
-		}
+		auto s = get_imusensor();
+		auto i = gz_to_rr_imustate(s);
+		rrvar_state->SetOutValue(i);		
 	}
 
 }

@@ -32,18 +32,17 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class AltimeterSensorImpl : public virtual rrgz::AltimeterSensor_default_abstract_impl, public virtual SensorImpl
+  class AltimeterSensorImpl : public virtual rrgz::AltimeterSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
   {
   public:
   	  AltimeterSensorImpl(sensors::AltimeterSensorPtr gz_altimeter);
 
-  	  void Init();
-
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual void set_altitude(RR::WirePtr<double> value) override;
+  	  virtual std::string RRType() {return AltimeterSensor_default_abstract_impl::RRType();  }
 
-      virtual std::string RRType() {return AltimeterSensor_default_abstract_impl::RRType();  }
+      virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
   protected:
       sensors::AltimeterSensorPtr get_altimetersensor();
 

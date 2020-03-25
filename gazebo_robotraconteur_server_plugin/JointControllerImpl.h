@@ -32,13 +32,11 @@ namespace pid = com::robotraconteur::pid;
 namespace RobotRaconteurGazeboServerPlugin
 {
 class ModelImpl;
-class JointControllerImpl : public virtual rrgz::JointController_default_impl, public virtual RR_ENABLE_SHARED_FROM_THIS<JointControllerImpl>
+class JointControllerImpl : public virtual rrgz::JointController_default_impl, public virtual RR::IRRServiceObject, public virtual RR_ENABLE_SHARED_FROM_THIS<JointControllerImpl>
 {
 public:
 
 	  JointControllerImpl(RR_SHARED_PTR<ModelImpl> model, physics::ModelPtr gz_model);
-
-	  virtual void Init();
 
 	  virtual RR::RRListPtr<RR::RRArray<char> > get_joint_names() override;	  
 
@@ -52,11 +50,9 @@ public:
 
 	  virtual void setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid) override;
 
-	  virtual void set_joint_position(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
-	  
-	  virtual void set_joint_velocity(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
-	  
-	  virtual void set_joint_forces(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
+	  virtual std::string RRPath();
 
 protected:
 	  boost::weak_ptr<physics::Model> gz_model;
@@ -68,6 +64,8 @@ protected:
 	  void OnUpdate1(const common::UpdateInfo& _info);
 
 	  event::ConnectionPtr updateConnection;
+
+	  std::string rr_path;
 
 };
 

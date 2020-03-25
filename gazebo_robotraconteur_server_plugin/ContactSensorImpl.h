@@ -32,20 +32,19 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class ContactSensorImpl : public virtual rrgz::ContactSensor_default_abstract_impl, public virtual SensorImpl
+  class ContactSensorImpl : public virtual rrgz::ContactSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
   {
   public:
   	  ContactSensorImpl(sensors::ContactSensorPtr gz_contact);
-
-  	  void Init();
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
   	  virtual RR::RRListPtr<rrgz::Contact> CaptureContacts();
 
-  	  virtual void set_contacts(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value) override;
+  	  virtual std::string RRType() {return rrgz::ContactSensor_default_abstract_impl::RRType();  }
 
-      virtual std::string RRType() {return rrgz::ContactSensor_default_abstract_impl::RRType();  }
+      virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
   protected:
       sensors::ContactSensorPtr get_contactsensor();
 

@@ -25,23 +25,11 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void MagnetometerSensorImpl::Init()
+	void MagnetometerSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
 		updateConnection=get_magnetometersensor()->ConnectUpdated(boost::bind(&MagnetometerSensorImpl::OnUpdate,c));
-	}
 
-	void MagnetometerSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<MagnetometerSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<MagnetometerSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-	
-	void MagnetometerSensorImpl::set_magnetic_field(RR::WirePtr<geometry::Vector3> value)
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		MagnetometerSensor_default_abstract_impl::set_magnetic_field(value);
 		boost::weak_ptr<MagnetometerSensorImpl> weak_this = RR::rr_cast<MagnetometerSensorImpl>(shared_from_this());
 		this->rrvar_magnetic_field->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -58,27 +46,26 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
+	void MagnetometerSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
+	{
+		RR_SHARED_PTR<MagnetometerSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<MagnetometerSensorImpl>(c.lock());
+		if (!c1) return;
+		c1->OnUpdate1();
+	}
+		
 	sensors::MagnetometerSensorPtr MagnetometerSensorImpl::get_magnetometersensor()
 	{
 		return std::dynamic_pointer_cast<sensors::MagnetometerSensor>(get_sensor());
 	}
 
 	void MagnetometerSensorImpl::OnUpdate1()
-	{
-		RR::WireBroadcasterPtr<geometry::Vector3> b;
-		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_magnetic_field;
-		}
-		if (b)
-		{
-			auto j = get_magnetometersensor();
-			auto v = j->MagneticField();
-			geometry::Vector3 o;
-			o.s.x = v.X();
-			o.s.y = v.Y();
-			o.s.y = v.Z();
-			b->SetOutValue(o);
-		}
+	{	
+		auto j = get_magnetometersensor();
+		auto v = j->MagneticField();
+		geometry::Vector3 o;
+		o.s.x = v.X();
+		o.s.y = v.Y();
+		o.s.y = v.Z();
+		rrvar_magnetic_field->SetOutValue(o);		
 	}
 }

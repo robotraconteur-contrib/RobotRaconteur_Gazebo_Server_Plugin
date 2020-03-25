@@ -27,13 +27,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		this->gz_model=gz_model;
 	}
 
-	void JointControllerImpl::Init()
-	{
-		RR_WEAK_PTR<JointControllerImpl> j1=shared_from_this();
-		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-						  boost::bind(&JointControllerImpl::OnUpdate, j1, _1));
-	}
-
 	RR::RRListPtr<RR::RRArray<char> > JointControllerImpl::get_joint_names()
 	{
 		auto o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
@@ -178,46 +171,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		gz_controller->SetVelocityPID(name, p);
 	}
 	
-	void JointControllerImpl::set_joint_position(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
-	{
-		JointController_default_impl::set_joint_position(value);
-		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
-		this->rrvar_joint_position->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Joint has been released");				
-				return _get_joint_position(this_->gz_controller);
-			}
-		);
-	}
-
-	void JointControllerImpl::set_joint_velocity(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
-	{
-		JointController_default_impl::set_joint_velocity(value);
-		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
-		this->rrvar_joint_velocity->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Joint has been released");
-				return _get_joint_velocity(this_->gz_controller);
-			}
-		);
-	}
-
-	void JointControllerImpl::set_joint_forces(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
-	{
-		JointController_default_impl::set_joint_forces(value);
-		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
-		this->rrvar_joint_forces->GetWire()->SetPeekInValueCallback(
-			[weak_this](uint32_t ep) {
-				auto this_ = weak_this.lock();
-				if (!this_) throw RR::InvalidOperationException("Joint has been released");
-				return _get_joint_forces(this_->gz_controller);
-			}
-		);
-	}
-
-
 	void JointControllerImpl::OnUpdate(RR_WEAK_PTR<JointControllerImpl> j, const common::UpdateInfo & _info)
 	{
 		RR_SHARED_PTR<JointControllerImpl> j1=j.lock();
@@ -292,6 +245,47 @@ namespace RobotRaconteurGazeboServerPlugin
 		physics::ModelPtr m=gz_model.lock();
 		if (!m) throw std::runtime_error("Model has been released");
 		return m;
+	}
+
+	void JointControllerImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
+	{
+		rr_path = service_path;
+
+		RR_WEAK_PTR<JointControllerImpl> weak_this=shared_from_this();
+		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+						  boost::bind(&JointControllerImpl::OnUpdate, weak_this, _1));
+
+		this->rrvar_joint_position->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");				
+				return _get_joint_position(this_->gz_controller);
+			}
+		);
+
+		this->rrvar_joint_velocity->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				return _get_joint_velocity(this_->gz_controller);
+			}
+		);
+
+		this->rrvar_joint_forces->GetWire()->SetPeekInValueCallback(
+			[weak_this](uint32_t ep) {
+				auto this_ = weak_this.lock();
+				if (!this_) throw RR::InvalidOperationException("Joint has been released");
+				return _get_joint_forces(this_->gz_controller);
+			}
+		);
+
+
+
+	}
+
+	std::string JointControllerImpl::RRPath()
+	{
+		return rr_path;
 	}
 
 }

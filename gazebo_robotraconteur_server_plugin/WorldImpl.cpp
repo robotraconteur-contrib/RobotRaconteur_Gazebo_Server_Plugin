@@ -63,7 +63,6 @@ rrgz::ModelPtr WorldImpl::get_models(const std::string& ind)
 	physics::ModelPtr m=get_world()->ModelByName(ind);
 	if (!m) throw RR::InvalidArgumentException("Unknown index");
 	RR_SHARED_PTR<ModelImpl> m_impl=RR_MAKE_SHARED<ModelImpl>(m);
-	m_impl->Init(GetRRPath() + ".Models[" + RR::detail::encode_index(ind) + "]");
 	return m_impl;
 }
 
@@ -88,7 +87,6 @@ rrgz::LightPtr WorldImpl::get_lights(const std::string& ind)
 	rendering::LightPtr l=scene->GetLight(world_light->GetScopedName());
 	if (!l) throw RR::InvalidArgumentException("Unknown index");
 	RR_SHARED_PTR<LightImpl> l_impl=RR_MAKE_SHARED<LightImpl>(l);
-	l_impl->Init();
 	return l_impl;
 }
 

@@ -26,10 +26,12 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	void CameraImpl::Init()
+	void CameraImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
 		updateConnection=get_camera()->ConnectUpdated(boost::bind(&CameraImpl::OnUpdate,c));
+
+		rrvar_image_stream->SetMaxBacklog(3);
 	}
 
 	namespace detail
@@ -101,13 +103,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::CameraSensor>(get_sensor());
 	}
 		
-	void CameraImpl::set_image_stream(RR::PipePtr<image::ImagePtr> value)
-	{		
-		rrgz::CameraSensor_default_abstract_impl::set_image_stream(value);
-		boost::mutex::scoped_lock lock(this_lock);
-		rrvar_image_stream->SetMaxBacklog(3);
-	}
-
 	void CameraImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
 	{
 		RR_SHARED_PTR<CameraImpl> c1=RR_DYNAMIC_POINTER_CAST<CameraImpl>(c.lock());
@@ -117,16 +112,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void CameraImpl::OnUpdate1()
 	{
-
-		RR::PipeBroadcasterPtr<image::ImagePtr> b;
-		{
-		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_image_stream;
-		}
-		if (b)
-		{
-			auto i=capture_image();
-			b->AsyncSendPacket(i, []() {});
-		}
+		auto i=capture_image();
+		rrvar_image_stream->AsyncSendPacket(i, []() {});
 	}
 }

@@ -32,12 +32,10 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class SonarSensorImpl : public virtual rrgz::SonarSensor_default_abstract_impl, public virtual SensorImpl
+  class SonarSensorImpl : public virtual rrgz::SonarSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
   {
   public:
   	  SonarSensorImpl(sensors::SonarSensorPtr gz_sonar);
-
-  	  void Init();
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
@@ -47,9 +45,10 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  virtual double get_radius() override;
 	    	    	 
-  	  virtual void set_range(RR::WirePtr<double> value) override;
+  	  virtual std::string RRType() {return rrgz::SonarSensor_default_abstract_impl::RRType();  }
 
-      virtual std::string RRType() {return rrgz::SonarSensor_default_abstract_impl::RRType();  }
+      virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
   protected:
       sensors::SonarSensorPtr get_sonarsensor();
 
