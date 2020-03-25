@@ -18,13 +18,3 @@ To start `rip_sensor_world.world`:
 
 Running the Python clients requires installing the Python Robot Raconteur module. It can be downloaded from [http://robotraconteur.com/download](http://robotraconetur.com/download). Registration is required but the dowload is free. Be sure to download the Linux x86_64 version of the Python module.
 
-## Build in ROS workspace
-
-    mkdir -p catkin_ws/src
-    cd catkin_ws/src
-    git clone https://github.com/robotraconteur/robotraconteur.git
-    git clone https://github.com/johnwason/robotraconteur_standard_robdef_cpp.git
-    git clone https://github.com/johnwason/RobotRaconteur_Gazebo_Server_Plugin.git
-    cd ..
-    catkin_make_isolated -DROBOTRACONTEUR_ROS=1 -DCMAKE_BUILD_TYPE=Release
-    source devel_isolated/setup.bash

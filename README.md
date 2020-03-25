@@ -14,7 +14,7 @@ First, set the **GAZEBO_PLUGIN_PATH** environmental variable to the folder conta
 
 The plugin is invoked using the command line. For the examples, use:
 
-`gazebo --verbose rip_sensors_world.world -s librobotraconteur_gazebo_server_plugin.so --robotraconteur-server-tcp-port=11346`
+`gazebo --verbose rip_sensors_world.world -s libgazebo_robotraconteur_server_plugin.so --robotraconteur-server-tcp-port=11346`
 
 The plugin will scan the command line to configure plugin options. The options that are recognized are:
 
@@ -49,6 +49,17 @@ Clients using Python, MATLAB, and JavaScript will automatically generate object 
 ## Examples
 
 The examples directory contains a number of Python scripts demonstrating the usage of the plugin. While the examples are in Python, clients can be written in any language that Robot Raconteur supports.
+
+## Build in ROS workspace
+
+    mkdir -p catkin_ws/src
+    cd catkin_ws/src
+    git clone https://github.com/robotraconteur/robotraconteur.git
+    git clone https://github.com/johnwason/robotraconteur_standard_robdef_cpp.git
+    git clone https://github.com/johnwason/RobotRaconteur_Gazebo_Server_Plugin.git
+    cd ..
+    catkin_make_isolated -DROBOTRACONTEUR_ROS=1 -DCMAKE_BUILD_TYPE=Release
+    source devel_isolated/setup.bash
 
 ## License
 
