@@ -29,27 +29,12 @@ w=server.get_worlds('default')
 print w.name
 m=w.get_models('rip')
 try:
-    m.destroy_joint_controller()
+    m.destroy_kinematic_joint_controller()
 except: pass
-m.create_joint_controller()
-c=m.get_joint_controller()
+m.create_kinematic_joint_controller()
+c=m.get_kinematic_joint_controller()
 c.add_joint('rip::joint_1')
 c.add_joint('rip::joint_2')
-
-pid=RRN.NewStructure('com.robotraconteur.pid.PIDParam', c)
-pid.p=10
-pid.i=0
-pid.d=.2
-pid.imax=100
-pid.imin=-100
-pid.cmdMax=1000
-pid.cmdMin=-1000
-
-print c.joint_names
-print c.position_pid
-c.setf_position_pid('rip::joint_1',pid)
-c.setf_position_pid('rip::joint_2',pid)
-
 
 try:
     t_start=time.time()

@@ -33,6 +33,7 @@ namespace rrgz=experimental::gazebo;
 namespace RobotRaconteurGazeboServerPlugin
 {
   class JointControllerImpl;
+  class KinematicJointControllerImpl;
   class ModelImpl : public virtual rrgz::Model_default_abstract_impl, public virtual EntityImpl
   {
   public:
@@ -55,6 +56,11 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual rrgz::JointControllerPtr get_joint_controller() override;
 
+	  virtual void create_kinematic_joint_controller() override;
+	  virtual void destroy_kinematic_joint_controller() override;
+
+	  virtual rrgz::JointControllerPtr get_kinematic_joint_controller() override;
+
 	  virtual std::string RRType() override { return Model_default_abstract_impl::RRType(); }
 
   protected:
@@ -65,6 +71,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	  virtual physics::EntityPtr get_entity();
 
 	  RR_SHARED_PTR<JointControllerImpl> joint_controller;
+	  RR_SHARED_PTR<KinematicJointControllerImpl> kinematic_joint_controller;
 
   };
 

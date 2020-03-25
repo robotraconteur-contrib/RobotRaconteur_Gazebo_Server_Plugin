@@ -56,6 +56,7 @@ add_library(gazebo_robotraconteur_server_plugin SHARED
 	WorldImpl.cpp
 	JointImpl.cpp
 	JointControllerImpl.cpp
+	KinematicJointControllerImpl.cpp
 	LinkImpl.cpp
 	ModelImpl.cpp
 	SensorImpl.cpp

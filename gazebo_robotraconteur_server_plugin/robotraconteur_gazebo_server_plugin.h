@@ -35,6 +35,7 @@ namespace rrgz=experimental::gazebo;
 #include "LinkImpl.h"
 #include "ModelImpl.h"
 #include "JointControllerImpl.h"
+#include "KinematicJointControllerImpl.h"
 #include "SensorImpl.h"
 #include "CameraImpl.h"
 #include "MultiCameraSensorImpl.h"

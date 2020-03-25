@@ -111,6 +111,12 @@ object Model
 	function void destroy_joint_controller()
 
 	objref JointController joint_controller
+
+	function void create_kinematic_joint_controller()
+	function void destroy_kinematic_joint_controller()
+
+	objref JointController kinematic_joint_controller
+
 end object
 
 object Link

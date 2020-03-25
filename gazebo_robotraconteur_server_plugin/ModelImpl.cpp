@@ -108,7 +108,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void ModelImpl::create_joint_controller()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		if (joint_controller) throw std::runtime_error("Joint controller already active");
+		if (joint_controller || kinematic_joint_controller) throw std::runtime_error("Joint controller already active");
 
 		RR_SHARED_PTR<JointControllerImpl> j=RR_MAKE_SHARED<JointControllerImpl>(RR_DYNAMIC_POINTER_CAST<ModelImpl>(shared_from_this()), get_model());
 
@@ -128,6 +128,31 @@ namespace RobotRaconteurGazeboServerPlugin
 		boost::mutex::scoped_lock lock(this_lock);
 		if (!joint_controller) throw std::runtime_error("Joint controller not active");
 		return joint_controller;
+	}
+
+	void ModelImpl::create_kinematic_joint_controller()
+	{
+		boost::mutex::scoped_lock lock(this_lock);
+		if (joint_controller || kinematic_joint_controller) throw std::runtime_error("Joint controller already active");
+
+		RR_SHARED_PTR<KinematicJointControllerImpl> j=RR_MAKE_SHARED<KinematicJointControllerImpl>(RR_DYNAMIC_POINTER_CAST<ModelImpl>(shared_from_this()), get_model());
+
+		kinematic_joint_controller=j;		
+	}
+	void ModelImpl::destroy_kinematic_joint_controller()
+	{
+		boost::mutex::scoped_lock lock(this_lock);
+		if (!kinematic_joint_controller) return;
+		RR::ServerContext::GetCurrentServerContext()->ReleaseServicePath(kinematic_joint_controller->RRPath());
+
+		kinematic_joint_controller.reset();
+	}
+
+	rrgz::JointControllerPtr ModelImpl::get_kinematic_joint_controller()
+	{
+		boost::mutex::scoped_lock lock(this_lock);
+		if (!kinematic_joint_controller) throw std::runtime_error("Joint controller not active");
+		return kinematic_joint_controller;
 	}
 
 }
