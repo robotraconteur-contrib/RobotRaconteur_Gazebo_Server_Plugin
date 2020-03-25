@@ -39,13 +39,13 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual void Init();
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_WorldNames() override;	  
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_world_names() override;	  
 
-	  virtual rrgz::WorldPtr get_Worlds(const std::string& ind) override;
+	  virtual rrgz::WorldPtr get_worlds(const std::string& ind) override;
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_SensorNames() override;
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_sensor_names() override;
 
-	  virtual rrgz::SensorPtr get_Sensors(const std::string& ind);
+	  virtual rrgz::SensorPtr get_sensors(const std::string& ind) override;
 
   protected:
 

@@ -37,23 +37,23 @@ namespace RobotRaconteurGazeboServerPlugin
   public:
 	  SensorImpl(sensors::SensorPtr gz_sensor);
 
-	  virtual std::string get_Name() override;	  
+	  virtual std::string get_name() override;	  
 
-	  virtual std::string get_Type() override;	  
+	  virtual std::string get_type() override;	  
 
-	  virtual std::string get_ParentName() override;	  
+	  virtual std::string get_parent_name() override;	  
 
-	  virtual geometry::Pose get_Pose() override;	  
+	  virtual geometry::Pose get_pose() override;	  
 
-	  virtual RR::rr_bool get_Active() override;
-	  virtual void set_Active(RR::rr_bool value) override;
+	  virtual RR::rr_bool get_active() override;
+	  virtual void set_active(RR::rr_bool value) override;
 
-	  virtual double get_UpdateRate() override;
-	  virtual void set_UpdateRate(double value) override;
+	  virtual double get_update_rate() override;
+	  virtual void set_update_rate(double value) override;
 
-	  virtual datetime::Duration get_LastUpdateTime() override;  
+	  virtual datetime::Duration get_last_update_time() override;  
 
-	  virtual datetime::Duration get_LastMeasurementTime() override;	  
+	  virtual datetime::Duration get_last_measurement_time() override;	  
 
   protected:
 

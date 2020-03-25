@@ -40,23 +40,23 @@ public:
 
 	  virtual void Init();
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_JointNames() override;	  
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_joint_names() override;	  
 
-	  virtual RR::RRMapPtr<std::string,pid::PIDParam> get_PositionPIDs() override;
+	  virtual RR::RRMapPtr<std::string,pid::PIDParam> get_position_pid() override;
 
-	  virtual RR::RRMapPtr<std::string,pid::PIDParam> get_VelocityPIDs() override;	  
+	  virtual RR::RRMapPtr<std::string,pid::PIDParam> get_velocity_pid() override;	  
 
-	  virtual void AddJoint(const std::string& name) override;
+	  virtual void add_joint(const std::string& name) override;
 
-	  virtual void SetPositionPID(const std::string& name, pid::PIDParamPtr pid) override;
+	  virtual void setf_position_pid(const std::string& name, pid::PIDParamPtr pid) override;
 
-	  virtual void SetVelocityPID(const std::string& name, pid::PIDParamPtr pid) override;
+	  virtual void setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid) override;
 
-	  virtual void set_JointPositions(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
+	  virtual void set_joint_position(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
 	  
-	  virtual void set_JointVelocities(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
+	  virtual void set_joint_velocity(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
 	  
-	  virtual void set_JointForces(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
+	  virtual void set_joint_forces(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value) override;
 
 protected:
 	  boost::weak_ptr<physics::Model> gz_model;

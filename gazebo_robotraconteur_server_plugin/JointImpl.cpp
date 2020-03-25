@@ -131,11 +131,11 @@ namespace RobotRaconteurGazeboServerPlugin
 			boost::mutex::scoped_lock lock(this_lock);
 
 			
-			axesPositions_b=rrvar_AxesPositions;
-			axesvel_b=rrvar_AxesVelocities;
-			axesforce_b = rrvar_AxesForce;
-			ft_b=rrvar_ForceTorque;
-			apply_force_u = rrvar_ApplyAxesForce;
+			axesPositions_b=rrvar_axes_position;
+			axesvel_b=rrvar_axes_velocity;
+			axesforce_b = rrvar_axes_force;
+			ft_b=rrvar_force_torque;
+			apply_force_u = rrvar_apply_axes_force;
 		}
 		
 		if (axesPositions_b)
@@ -186,27 +186,27 @@ namespace RobotRaconteurGazeboServerPlugin
 		return j;
 	}
 
-	std::string JointImpl::get_Name()
+	std::string JointImpl::get_name()
 	{
 		return get_joint()->GetName();
 	}
 	
-	std::string JointImpl::get_ScopedName()
+	std::string JointImpl::get_scoped_name()
 	{
 		return get_joint()->GetScopedName(true);
 	}
 	
-	std::string JointImpl::get_ParentLinkName()
+	std::string JointImpl::get_parent_link_name()
 	{
 		return get_joint()->GetParent()->GetName();
 	}
 	
-	std::string JointImpl::get_ChildLinkName()
+	std::string JointImpl::get_child_link_name()
 	{
 		return get_joint()->GetChild()->GetName();
 	}
 	
-	uint32_t JointImpl::get_AxisCount()
+	uint32_t JointImpl::get_dof()
 	{
 		return get_joint()->DOF();
 	}
@@ -247,7 +247,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 	
-	RR::RRNamedArrayPtr<geometry::Vector3> JointImpl::GetGlobalAxes()
+	RR::RRNamedArrayPtr<geometry::Vector3> JointImpl::getf_global_axes()
 	{		
 		physics::JointPtr j=get_joint();
 		size_t axis_count=j->DOF();
@@ -261,7 +261,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 
-	RR::RRNamedArrayPtr<geometry::Vector3> JointImpl::GetLocalAxes()
+	RR::RRNamedArrayPtr<geometry::Vector3> JointImpl::getf_local_axes()
 	{
 		physics::JointPtr j = get_joint();
 		size_t axis_count = j->DOF();
@@ -275,11 +275,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 
-	void JointImpl::set_AxesPositions(RR::WirePtr<RR::RRArrayPtr<double> > value)
+	void JointImpl::set_axes_position(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
-		Joint_default_impl::set_AxesPositions(value);
+		Joint_default_impl::set_axes_position(value);
 		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
-		this->rrvar_AxesPositions->GetWire()->SetPeekInValueCallback(
+		this->rrvar_axes_position->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Joint has been released");
@@ -289,11 +289,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 	
-	void JointImpl::set_AxesVelocities(RR::WirePtr<RR::RRArrayPtr<double> > value)
+	void JointImpl::set_axes_velocity(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
-		Joint_default_impl::set_AxesVelocities(value);
+		Joint_default_impl::set_axes_velocity(value);
 		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
-		this->rrvar_AxesVelocities->GetWire()->SetPeekInValueCallback(
+		this->rrvar_axes_velocity->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Joint has been released");
@@ -303,11 +303,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 	
-	void JointImpl::set_AxesForce(RR::WirePtr<RR::RRArrayPtr<double> > value)
+	void JointImpl::set_axes_force(RR::WirePtr<RR::RRArrayPtr<double> > value)
 	{
-		Joint_default_impl::set_AxesForce(value);
+		Joint_default_impl::set_axes_force(value);
 		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
-		this->rrvar_AxesForce->GetWire()->SetPeekInValueCallback(
+		this->rrvar_axes_force->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Joint has been released");
@@ -317,11 +317,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 		
-	void JointImpl::set_ForceTorque(RR::WirePtr<rrgz::JointWrench> value)
+	void JointImpl::set_force_torque(RR::WirePtr<rrgz::JointWrench> value)
 	{
-		Joint_default_impl::set_ForceTorque(value);
+		Joint_default_impl::set_force_torque(value);
 		boost::weak_ptr<JointImpl> weak_this = shared_from_this();
-		this->rrvar_ForceTorque->GetWire()->SetPeekInValueCallback(
+		this->rrvar_force_torque->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Joint has been released");
@@ -331,7 +331,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
-	void JointImpl::SetAxisPosition(uint32_t axis, double value)
+	void JointImpl::setf_axis_position(uint32_t axis, double value)
 	{
 		physics::JointPtr j = get_joint();
 		int axis_count = j->DOF();
@@ -339,7 +339,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		j->SetPosition(axis, value);
 	}
 
-	void JointImpl::SetAxisVelocity(uint32_t axis, double value)
+	void JointImpl::setf_axis_velocity(uint32_t axis, double value)
 	{
 		physics::JointPtr j = get_joint();
 		int axis_count = j->DOF();

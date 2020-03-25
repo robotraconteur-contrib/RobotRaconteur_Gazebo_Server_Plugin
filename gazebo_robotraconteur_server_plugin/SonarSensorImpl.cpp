@@ -38,26 +38,26 @@ namespace RobotRaconteurGazeboServerPlugin
 		c1->OnUpdate1();
 	}
 
-	double SonarSensorImpl::get_RangeMin()
+	double SonarSensorImpl::get_range_min()
 	{
 		return get_sonarsensor()->RangeMin();
 	}
 	
-	double SonarSensorImpl::get_RangeMax()
+	double SonarSensorImpl::get_range_max()
 	{
 		return get_sonarsensor()->RangeMax();
 	}
 	
-	double SonarSensorImpl::get_Radius()
+	double SonarSensorImpl::get_radius()
 	{
 		return get_sonarsensor()->Radius();
 	}
 	
-	void SonarSensorImpl::set_Range(RR::WirePtr<double> value)
+	void SonarSensorImpl::set_range(RR::WirePtr<double> value)
 	{
-		SonarSensor_default_abstract_impl::set_Range(value);
+		SonarSensor_default_abstract_impl::set_range(value);
 		boost::weak_ptr<SonarSensorImpl> weak_this = RR::rr_cast<SonarSensorImpl>(shared_from_this());
-		this->rrvar_Range->GetWire()->SetPeekInValueCallback(
+		this->rrvar_range->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Entity has been released");
@@ -76,7 +76,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireBroadcasterPtr<double> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_Range;
+		b=rrvar_range;
 		}
 		if (b)
 		{

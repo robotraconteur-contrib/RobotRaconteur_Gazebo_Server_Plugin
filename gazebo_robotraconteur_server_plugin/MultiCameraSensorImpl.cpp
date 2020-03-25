@@ -32,13 +32,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		updateConnection=get_camera()->ConnectUpdated(boost::bind(&MultiCameraSensorImpl::OnUpdate,c));
 	}
 
-	int32_t MultiCameraSensorImpl::get_CameraCount()
+	int32_t MultiCameraSensorImpl::get_camera_count()
 	{
 		sensors::MultiCameraSensorPtr c=get_camera();
 		return (int32_t)c->CameraCount();
 	}
 	
-	image::ImagePtr MultiCameraSensorImpl::CaptureImage(int32_t ind)
+	image::ImagePtr MultiCameraSensorImpl::capture_image(int32_t ind)
 	{
 
 		if (ind<0) throw std::invalid_argument("Invalid camera");
@@ -64,11 +64,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::MultiCameraSensor>(get_sensor());
 	}
 
-	void MultiCameraSensorImpl::set_ImageStream(RR::PipePtr<RR::RRMapPtr<int32_t,image::Image> > value)
+	void MultiCameraSensorImpl::set_image_stream(RR::PipePtr<RR::RRMapPtr<int32_t,image::Image> > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		rrvar_ImageStream = RR_MAKE_SHARED<RR::PipeBroadcaster<RR::RRMapPtr<int32_t, image::Image> > >();
-		rrvar_ImageStream->Init(value, 3);
+		rrvar_image_stream = RR_MAKE_SHARED<RR::PipeBroadcaster<RR::RRMapPtr<int32_t, image::Image> > >();
+		rrvar_image_stream->Init(value, 3);
 	}
 
 	void MultiCameraSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -83,16 +83,16 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::PipeBroadcasterPtr<RR::RRMapPtr<int32_t, image::Image> > b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_ImageStream;
+		b=rrvar_image_stream;
 		}
 		if (b)
 		{
 			auto o=RR::AllocateEmptyRRMap<int32_t, image::Image >();
 
-			int32_t count=get_CameraCount();
+			int32_t count=get_camera_count();
 			for (int32_t i=0; i<count; i++ )
 			{
-				auto img=CaptureImage(i);
+				auto img=capture_image(i);
 				o->insert(std::make_pair(i,img));
 			}
 			b->AsyncSendPacket(o, []() {});

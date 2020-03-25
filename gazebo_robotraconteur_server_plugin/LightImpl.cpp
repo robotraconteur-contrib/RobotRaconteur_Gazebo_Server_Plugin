@@ -29,18 +29,18 @@ namespace RobotRaconteurGazeboServerPlugin
 		this->lightPub = this->gzNode->Advertise<msgs::Light>("~/light/modify");
 	}
 
-	std::string LightImpl::get_Name()
+	std::string LightImpl::get_name()
 	{
 		return get_light()->Name();
 	}
 
 	
-	std::string LightImpl::get_Type()
+	std::string LightImpl::get_type()
 	{
 		return get_light()->Type();
 	}
 	
-	geometry::Pose LightImpl::get_Pose()
+	geometry::Pose LightImpl::get_pose()
 	{
 		auto pos = get_light()->Position();
 		auto rot = get_light()->Rotation();
@@ -58,7 +58,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	geometry::Vector3 LightImpl::get_Direction()
+	geometry::Vector3 LightImpl::get_direction()
 	{
 		auto d=get_light()->Direction();
 		geometry::Vector3 o;
@@ -68,7 +68,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	color::ColorRGBAf LightImpl::get_DiffuseColor()
+	color::ColorRGBAf LightImpl::get_diffuse_color()
 	{
 		auto c=get_light()->DiffuseColor();
 		color::ColorRGBAf o;
@@ -78,7 +78,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		o.s.r = c.R();
 		return o;
 	}
-	void LightImpl::set_DiffuseColor(const color::ColorRGBAf& value)
+	void LightImpl::set_diffuse_color(const color::ColorRGBAf& value)
 	{
 		ignition::math::Color c(value.s.r, value.s.g, value.s.b, value.s.a);
 		auto l=get_light();
@@ -91,7 +91,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 
-	color::ColorRGBAf LightImpl::get_SpecularColor()
+	color::ColorRGBAf LightImpl::get_specular_color()
 	{
 		auto c=get_light()->SpecularColor();
 		color::ColorRGBAf o;
@@ -101,7 +101,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		o.s.r = c.R();
 		return o;
 	}
-	void LightImpl::set_SpecularColor(const color::ColorRGBAf& value)
+	void LightImpl::set_specular_color(const color::ColorRGBAf& value)
 	{
 		ignition::math::Color c(value.s.r, value.s.g, value.s.b, value.s.a);
 		auto l=get_light();

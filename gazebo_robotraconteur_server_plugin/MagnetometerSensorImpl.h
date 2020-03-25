@@ -41,7 +41,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual void set_MagneticField(RR::WirePtr<geometry::Vector3> value) override;
+  	  virtual void set_magnetic_field(RR::WirePtr<geometry::Vector3> value) override;
 
       virtual std::string RRType() {return rrgz::MagnetometerSensor_default_abstract_impl::RRType();  }
   protected:

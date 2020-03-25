@@ -41,30 +41,30 @@ namespace RobotRaconteurGazeboServerPlugin
 	  static void OnUpdate(RR_WEAK_PTR<JointImpl> j, const common::UpdateInfo & _info);
 
 
-	  virtual std::string get_Name() override; 
-	  virtual std::string get_ScopedName() override;  
+	  virtual std::string get_name() override; 
+	  virtual std::string get_scoped_name() override;  
 
-	  virtual std::string get_ParentLinkName() override;	  
+	  virtual std::string get_parent_link_name() override;	  
 
-	  virtual std::string get_ChildLinkName() override;	  
+	  virtual std::string get_child_link_name() override;	  
 
-	  virtual uint32_t get_AxisCount() override;
+	  virtual uint32_t get_dof() override;
 	  
-	  virtual RR::RRNamedArrayPtr<geometry::Vector3 > GetGlobalAxes() override;
+	  virtual RR::RRNamedArrayPtr<geometry::Vector3 > getf_global_axes() override;
 
-	  virtual RR::RRNamedArrayPtr<geometry::Vector3> GetLocalAxes() override;
+	  virtual RR::RRNamedArrayPtr<geometry::Vector3> getf_local_axes() override;
 
-	  virtual void set_AxesPositions(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
+	  virtual void set_axes_position(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
 	  	  
-	  virtual void set_AxesVelocities(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
+	  virtual void set_axes_velocity(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
 	  	  
-	  virtual void set_AxesForce(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
+	  virtual void set_axes_force(RR::WirePtr<RR::RRArrayPtr<double> > value) override;
 	  	  
-	  virtual void SetAxisPosition(uint32_t axis, double Position);
+	  virtual void setf_axis_position(uint32_t axis, double Position);
 
-	  virtual void SetAxisVelocity(uint32_t axis, double vel);
+	  virtual void setf_axis_velocity(uint32_t axis, double vel);
 
-	  virtual void set_ForceTorque(RR::WirePtr<rrgz::JointWrench> value);
+	  virtual void set_force_torque(RR::WirePtr<rrgz::JointWrench> value);
 
 	 
   protected:

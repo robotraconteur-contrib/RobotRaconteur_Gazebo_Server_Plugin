@@ -41,7 +41,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual void set_ForceTorque(RR::WirePtr<geometry::Wrench> value) override;
+  	  virtual void set_force_torque(RR::WirePtr<geometry::Wrench> value) override;
 
       virtual std::string RRType() {return rrgz::ForceTorqueSensor_default_abstract_impl::RRType();  }
   protected:

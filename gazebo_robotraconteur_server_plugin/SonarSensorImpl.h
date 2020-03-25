@@ -41,13 +41,13 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual double get_RangeMin() override;
+  	  virtual double get_range_min() override;
 
-  	  virtual double get_RangeMax() override;
+  	  virtual double get_range_max() override;
 
-  	  virtual double get_Radius() override;
+  	  virtual double get_radius() override;
 	    	    	 
-  	  virtual void set_Range(RR::WirePtr<double> value) override;
+  	  virtual void set_range(RR::WirePtr<double> value) override;
 
       virtual std::string RRType() {return rrgz::SonarSensor_default_abstract_impl::RRType();  }
   protected:

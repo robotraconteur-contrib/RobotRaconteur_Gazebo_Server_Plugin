@@ -41,7 +41,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 
-	RR::RRListPtr<RR::RRArray<char> > ServerImpl::get_WorldNames()
+	RR::RRListPtr<RR::RRArray<char> > ServerImpl::get_world_names()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		RR::RRListPtr<RR::RRArray<char> > o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
@@ -53,14 +53,14 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	}
 	
-	rrgz::WorldPtr ServerImpl::get_Worlds(const std::string& ind)
+	rrgz::WorldPtr ServerImpl::get_worlds(const std::string& ind)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		if (rr_worlds.count(ind)==0) throw std::invalid_argument("Invalid world");
 		return rr_worlds.at(ind);
 	}
 
-	RR::RRListPtr<RR::RRArray<char> > ServerImpl::get_SensorNames()
+	RR::RRListPtr<RR::RRArray<char> > ServerImpl::get_sensor_names()
 	{
 		sensors::Sensor_V s=sensors::SensorManager::Instance()->GetSensors();
 		auto o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
@@ -72,7 +72,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	rrgz::SensorPtr ServerImpl::get_Sensors(const std::string& ind)
+	rrgz::SensorPtr ServerImpl::get_sensors(const std::string& ind)
 	{
 		sensors::SensorPtr s=sensors::SensorManager::Instance()->GetSensor(ind);
 		if (!s) throw std::invalid_argument("Invalid sensor name");

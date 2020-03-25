@@ -24,17 +24,17 @@ import time
 import math
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.WorldNames
-w=server.get_Worlds('default')
-print w.Name
-m=w.get_Models('rip')
+print server.world_names
+w=server.get_worlds('default')
+print w.name
+m=w.get_models('rip')
 try:
-    m.DestroyJointController()
+    m.destroy_joint_controller()
 except: pass
-m.CreateJointController()
-c=m.get_JointController()
-c.AddJoint('rip::joint_1')
-c.AddJoint('rip::joint_2')
+m.create_joint_controller()
+c=m.get_joint_controller()
+c.add_joint('rip::joint_1')
+c.add_joint('rip::joint_2')
 
 pid=RRN.NewStructure('com.robotraconteur.pid.PIDParam', c)
 pid.p=10
@@ -45,10 +45,10 @@ pid.imin=-100
 pid.cmdMax=1000
 pid.cmdMin=-1000
 
-print c.JointNames
-print c.PositionPIDs
-c.SetPositionPID('rip::joint_1',pid)
-c.SetPositionPID('rip::joint_2',pid)
+print c.joint_names
+print c.position_pid
+c.setf_position_pid('rip::joint_1',pid)
+c.setf_position_pid('rip::joint_2',pid)
 c.JointTargetPositions={'rip::joint_1': -0.5*math.pi, 'rip::joint_2': 0.5*math.pi}
 
 
@@ -73,7 +73,7 @@ try:
         if (t > 15.0):
             theta1=0.5*math.pi - (t-15.0)/5.0*math.pi
             theta2=0.5*math.pi
-        c.JointPositionsCommand.PokeOutValue({'rip::joint_1': theta1, 'rip::joint_2': theta2})
+        c.joint_position_command.PokeOutValue({'rip::joint_1': theta1, 'rip::joint_2': theta2})
         time.sleep(.01)
 
 except KeyboardInterrupt: pass

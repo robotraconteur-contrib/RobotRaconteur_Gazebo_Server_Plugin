@@ -52,11 +52,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 			
-	void GpsSensorImpl::set_State(RR::WirePtr<gps::GpsStatePtr> value)
+	void GpsSensorImpl::set_state(RR::WirePtr<gps::GpsStatePtr> value)
 	{
-		GpsSensor_default_abstract_impl::set_State(value);				
+		GpsSensor_default_abstract_impl::set_state(value);				
 		boost::weak_ptr<GpsSensorImpl> weak_this = RR::rr_cast<GpsSensorImpl>(shared_from_this());
-		this->rrvar_State->GetWire()->SetPeekInValueCallback(
+		this->rrvar_state->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Entity has been released");
@@ -76,7 +76,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireBroadcasterPtr<gps::GpsStatePtr> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
-		b = rrvar_State;
+		b = rrvar_state;
 		}
 		if (b)
 		{

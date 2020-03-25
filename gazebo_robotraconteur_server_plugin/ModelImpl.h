@@ -38,22 +38,22 @@ namespace RobotRaconteurGazeboServerPlugin
   public:
 	  ModelImpl(physics::ModelPtr m);
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_ChildModelNames() override; 
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_child_model_names() override; 
 
-	  virtual rrgz::ModelPtr get_ChildModels(const std::string& ind) override;
+	  virtual rrgz::ModelPtr get_child_models(const std::string& ind) override;
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_LinkNames() override;
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_link_names() override;
 	  
-	  virtual rrgz::LinkPtr get_Links(const std::string& ind) override;
+	  virtual rrgz::LinkPtr get_links(const std::string& ind) override;
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_JointNames() override;
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_joint_names() override;
 	  
-	  virtual rrgz::JointPtr get_Joints(const std::string& ind) override;
+	  virtual rrgz::JointPtr get_joints(const std::string& ind) override;
 	  
-	  virtual void CreateJointController() override;
-	  virtual void DestroyJointController() override;
+	  virtual void create_joint_controller() override;
+	  virtual void destroy_joint_controller() override;
 
-	  virtual rrgz::JointControllerPtr get_JointController() override;
+	  virtual rrgz::JointControllerPtr get_joint_controller() override;
 
 	  virtual std::string RRType() override { return Model_default_abstract_impl::RRType(); }
 

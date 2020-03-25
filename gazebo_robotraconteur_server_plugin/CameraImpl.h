@@ -44,9 +44,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-	  virtual image::ImagePtr CaptureImage() override;
+	  virtual image::ImagePtr capture_image() override;
 	  
-	  virtual void set_ImageStream(RR::PipePtr<image::ImagePtr> value) override;
+	  virtual void set_image_stream(RR::PipePtr<image::ImagePtr> value) override;
 
 	  virtual std::string RRType() {return rrgz::CameraSensor_default_abstract_impl::RRType();  }
   protected:

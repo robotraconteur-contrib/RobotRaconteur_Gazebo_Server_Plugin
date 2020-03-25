@@ -28,11 +28,11 @@ import cv2
 import numpy as np
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-w=server.get_Worlds('default')
-print w.LightNames
-sun=w.get_Lights('sun')
+w=server.get_worlds('default')
+print w.light_names
+sun=w.get_lights('sun')
 
-color=sun.DiffuseColor
+color=sun.diffuse_color
 print str(color[0]["a"]) + " " + str(color[0]["r"]) + " " + str(color[0]["g"]) + " " + str(color[0]["b"])
 
 color_dtype=RRN.GetNamedArrayDType('com.robotraconteur.color.ColorRGBAf',server)
@@ -44,4 +44,4 @@ color2["r"]=0.0
 color2["g"]=1.0
 color2["b"]=0.0
 
-sun.DiffuseColor=color2
+sun.diffuse_color=color2

@@ -41,12 +41,12 @@ std::string WorldImpl::GetRRPath()
 
 
 
-std::string WorldImpl::get_Name()
+std::string WorldImpl::get_name()
 {
 	return get_world()->Name();
 }
 
-RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_ModelNames()
+RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_model_names()
 {
 	RR::RRListPtr<RR::RRArray<char> > o( new RR::RRList<RR::RRArray<char> >());
 	physics::Model_V v=get_world()->Models();
@@ -57,7 +57,7 @@ RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_ModelNames()
 	return o;
 }
 
-rrgz::ModelPtr WorldImpl::get_Models(const std::string& ind)
+rrgz::ModelPtr WorldImpl::get_models(const std::string& ind)
 {
 	if (ind.find(':')!=std::string::npos) throw RR::InvalidArgumentException("Do not use scoped names for index");
 	physics::ModelPtr m=get_world()->ModelByName(ind);
@@ -67,7 +67,7 @@ rrgz::ModelPtr WorldImpl::get_Models(const std::string& ind)
 	return m_impl;
 }
 
-RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_LightNames()
+RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_light_names()
 {
 	RR::RRListPtr<RR::RRArray<char> > o(new RR::RRList<RR::RRArray<char> >());
 	physics::Light_V v=get_world()->Lights();
@@ -78,7 +78,7 @@ RR::RRListPtr<RR::RRArray<char> > WorldImpl::get_LightNames()
 	return o;
 }
 
-rrgz::LightPtr WorldImpl::get_Lights(const std::string& ind)
+rrgz::LightPtr WorldImpl::get_lights(const std::string& ind)
 {
 	//if (ind.find(':')!=std::string::npos) throw std::invalid_argument("Do not use scoped names for index");
 	rendering::ScenePtr scene=rendering::get_scene(get_world()->Name());
@@ -114,18 +114,18 @@ static rrgz::WorldTimesPtr gz_to_rr_worldtimes(gazebo::physics::WorldPtr& world)
 {
 	rrgz::WorldTimesPtr t(new rrgz::WorldTimes());
 
-	t->SimTime = gz_time_to_rr_duration(world->SimTime());
-	t->RealTime = gz_time_to_rr_duration(world->RealTime());
-	t->WallTime = gz_time_to_rr_datetimeutc(common::Time::GetWallTime());
-	t->StartTime = gz_time_to_rr_datetimeutc(world->StartTime());
+	t->sim_time = gz_time_to_rr_duration(world->SimTime());
+	t->real_time = gz_time_to_rr_duration(world->RealTime());
+	t->wall_time = gz_time_to_rr_datetimeutc(common::Time::GetWallTime());
+	t->start_time = gz_time_to_rr_datetimeutc(world->StartTime());
 	return t;
 }
 
-void WorldImpl::set_SimTime(RR::WirePtr<datetime::Duration> value)
+void WorldImpl::set_sim_time(RR::WirePtr<datetime::Duration> value)
 {
-	rrgz::World_default_impl::set_SimTime(value);
+	rrgz::World_default_impl::set_sim_time(value);
 	RR_WEAK_PTR<WorldImpl> weak_this = shared_from_this();
-	rrvar_SimTime->GetWire()->SetPeekInValueCallback(
+	rrvar_sim_time->GetWire()->SetPeekInValueCallback(
 		[weak_this](const uint32_t&)
 		{
 			auto this_ = weak_this.lock();
@@ -135,11 +135,11 @@ void WorldImpl::set_SimTime(RR::WirePtr<datetime::Duration> value)
 	);
 }
 
-void WorldImpl::set_Time(RR::WirePtr<rrgz::WorldTimesPtr> value)
+void WorldImpl::set_time(RR::WirePtr<rrgz::WorldTimesPtr> value)
 {
-	rrgz::World_default_impl::set_Time(value);
+	rrgz::World_default_impl::set_time(value);
 	RR_WEAK_PTR<WorldImpl> weak_this = shared_from_this();
-	rrvar_Time->GetWire()->SetPeekInValueCallback(
+	rrvar_time->GetWire()->SetPeekInValueCallback(
 		[weak_this](const uint32_t&)
 		{
 			auto this_ = weak_this.lock();
@@ -165,8 +165,8 @@ void WorldImpl::OnUpdate1(const common::UpdateInfo & _info)
 	
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		time_b = rrvar_Time;
-		simtime_b = rrvar_SimTime;
+		time_b = rrvar_time;
+		simtime_b = rrvar_sim_time;
 	}
 	
 	physics::WorldPtr w = get_world();

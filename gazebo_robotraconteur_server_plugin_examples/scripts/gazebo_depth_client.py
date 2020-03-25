@@ -49,9 +49,9 @@ def new_frame(pipe_ep):
         current_depth=DepthToMat(image.depth_image)
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.SensorNames
-cam=server.get_Sensors('default::rip::pendulum::depth')
-image=cam.CaptureImage()
+print server.sensor_names
+cam=server.get_sensors('default::rip::pendulum::depth')
+image=cam.capture_image()
 print(cam)
 print(image)
 print(dir(image))
@@ -63,7 +63,7 @@ cv2.imshow('Captured Image',image1)
 depth1=DepthToMat(image.depth_image)
 cv2.imshow("Captured Depth", depth1)
 
-p=cam.ImageStream.Connect(-1)
+p=cam.image_stream.Connect(-1)
 p.PacketReceivedEvent+=new_frame
 
 cv2.namedWindow("Image")

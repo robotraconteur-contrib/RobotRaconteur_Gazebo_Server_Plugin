@@ -77,7 +77,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 
-	image::ImagePtr CameraImpl::CaptureImage()
+	image::ImagePtr CameraImpl::capture_image()
 	{
 
 		sensors::CameraSensorPtr c=get_camera();
@@ -101,11 +101,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::CameraSensor>(get_sensor());
 	}
 		
-	void CameraImpl::set_ImageStream(RR::PipePtr<image::ImagePtr> value)
+	void CameraImpl::set_image_stream(RR::PipePtr<image::ImagePtr> value)
 	{		
-		rrgz::CameraSensor_default_abstract_impl::set_ImageStream(value);
+		rrgz::CameraSensor_default_abstract_impl::set_image_stream(value);
 		boost::mutex::scoped_lock lock(this_lock);
-		rrvar_ImageStream->SetMaxBacklog(3);
+		rrvar_image_stream->SetMaxBacklog(3);
 	}
 
 	void CameraImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
@@ -121,11 +121,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::PipeBroadcasterPtr<image::ImagePtr> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_ImageStream;
+		b=rrvar_image_stream;
 		}
 		if (b)
 		{
-			auto i=CaptureImage();
+			auto i=capture_image();
 			b->AsyncSendPacket(i, []() {});
 		}
 	}

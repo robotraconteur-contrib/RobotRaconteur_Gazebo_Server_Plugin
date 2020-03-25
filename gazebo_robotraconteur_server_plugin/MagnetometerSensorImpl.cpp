@@ -38,12 +38,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		c1->OnUpdate1();
 	}
 	
-	void MagnetometerSensorImpl::set_MagneticField(RR::WirePtr<geometry::Vector3> value)
+	void MagnetometerSensorImpl::set_magnetic_field(RR::WirePtr<geometry::Vector3> value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		MagnetometerSensor_default_abstract_impl::set_MagneticField(value);
+		MagnetometerSensor_default_abstract_impl::set_magnetic_field(value);
 		boost::weak_ptr<MagnetometerSensorImpl> weak_this = RR::rr_cast<MagnetometerSensorImpl>(shared_from_this());
-		this->rrvar_MagneticField->GetWire()->SetPeekInValueCallback(
+		this->rrvar_magnetic_field->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Sensor has been released");
@@ -68,7 +68,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireBroadcasterPtr<geometry::Vector3> b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_MagneticField;
+		b=rrvar_magnetic_field;
 		}
 		if (b)
 		{

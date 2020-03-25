@@ -42,9 +42,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-	  virtual laserscan::LaserScanPtr CaptureScan() override;
+	  virtual laserscan::LaserScanPtr capture_scan() override;
 	  	  
-	  virtual void set_ScanStream(RR::PipePtr<laserscan::LaserScanPtr> value) override;
+	  virtual void set_scan_stream(RR::PipePtr<laserscan::LaserScanPtr> value) override;
 	  
 	  virtual std::string RRType() {return rrgz::RaySensor_default_abstract_impl::RRType();  }
   protected:

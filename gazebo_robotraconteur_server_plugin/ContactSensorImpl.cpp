@@ -50,20 +50,20 @@ namespace RobotRaconteurGazeboServerPlugin
 		{
 			msgs::Contact contact=contacts.contact(i);
 			rrgz::ContactPtr o_i(new rrgz::Contact());
-			o_i->contactName1=contact.collision1();
-			o_i->contactName2=contact.collision2();
+			o_i->contact_name1=contact.collision1();
+			o_i->contact_name2=contact.collision2();
 			o->push_back(o_i);
 		}
 
 		return o;
 }
 
-	void ContactSensorImpl::set_Contacts(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value)
+	void ContactSensorImpl::set_contacts(RR::WirePtr<RR::RRListPtr<rrgz::Contact> > value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
-		ContactSensor_default_abstract_impl::set_Contacts(value);
+		ContactSensor_default_abstract_impl::set_contacts(value);
 		boost::weak_ptr<ContactSensorImpl> weak_this = RR::rr_cast<ContactSensorImpl>(shared_from_this());
-		this->rrvar_Contacts->GetWire()->SetPeekInValueCallback(
+		this->rrvar_contacts->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Sensor has been released");
@@ -82,7 +82,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireBroadcasterPtr<RR::RRListPtr<rrgz::Contact> > b;
 		{
 		boost::mutex::scoped_lock lock(this_lock);
-		b=rrvar_Contacts;
+		b=rrvar_contacts;
 		}
 		if (b)
 		{

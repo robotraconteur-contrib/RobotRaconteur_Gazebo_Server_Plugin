@@ -63,11 +63,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 		
-	void ImuSensorImpl::set_State(RR::WirePtr<imu::ImuStatePtr> value)
+	void ImuSensorImpl::set_state(RR::WirePtr<imu::ImuStatePtr> value)
 	{
-		ImuSensor_default_abstract_impl::set_State(value);
+		ImuSensor_default_abstract_impl::set_state(value);
 		boost::weak_ptr<ImuSensorImpl> weak_this = RR::rr_cast<ImuSensorImpl>(shared_from_this());
-		this->rrvar_State->GetWire()->SetPeekInValueCallback(
+		this->rrvar_state->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Entity has been released");
@@ -77,7 +77,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
-	void ImuSensorImpl::SetReferencePose()
+	void ImuSensorImpl::setf_reference_pose()
 	{
 		get_imusensor()->SetReferencePose();
 	}
@@ -92,7 +92,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireBroadcasterPtr<imu::ImuStatePtr> b;
 		{
 		boost::mutex::scoped_lock lock(ImuSensor_default_abstract_impl::this_lock);
-		b=rrvar_State;
+		b=rrvar_state;
 		}
 		if (b)
 		{

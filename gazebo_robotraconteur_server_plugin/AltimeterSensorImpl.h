@@ -41,7 +41,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual void set_Altitude(RR::WirePtr<double> value) override;
+  	  virtual void set_altitude(RR::WirePtr<double> value) override;
 
       virtual std::string RRType() {return AltimeterSensor_default_abstract_impl::RRType();  }
   protected:

@@ -35,19 +35,19 @@ public:
 
 	virtual void Init() {};
 
-	virtual std::string get_Name() override;	
+	virtual std::string get_name() override;	
 
-	virtual std::string get_Type() override;	
+	virtual std::string get_type() override;	
 
-	virtual geometry::Pose get_Pose() override;
+	virtual geometry::Pose get_pose() override;
 	
-	virtual geometry::Vector3 get_Direction() override;
+	virtual geometry::Vector3 get_direction() override;
 	
-	virtual color::ColorRGBAf get_DiffuseColor() override;
-	virtual void set_DiffuseColor(const color::ColorRGBAf& value) override;
+	virtual color::ColorRGBAf get_diffuse_color() override;
+	virtual void set_diffuse_color(const color::ColorRGBAf& value) override;
 
-	virtual color::ColorRGBAf get_SpecularColor() override;
-	virtual void set_SpecularColor(const color::ColorRGBAf& value) override;
+	virtual color::ColorRGBAf get_specular_color() override;
+	virtual void set_specular_color(const color::ColorRGBAf& value) override;
 
 protected:
 	boost::weak_ptr<rendering::Light> light;

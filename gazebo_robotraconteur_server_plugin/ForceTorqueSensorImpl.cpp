@@ -54,11 +54,11 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 
-	void ForceTorqueSensorImpl::set_ForceTorque(RR::WirePtr<geometry::Wrench> value)
+	void ForceTorqueSensorImpl::set_force_torque(RR::WirePtr<geometry::Wrench> value)
 	{
-		ForceTorqueSensor_default_abstract_impl::set_ForceTorque(value);
+		ForceTorqueSensor_default_abstract_impl::set_force_torque(value);
 		boost::weak_ptr<ForceTorqueSensorImpl> weak_this = RR::rr_cast<ForceTorqueSensorImpl>(shared_from_this());
-		this->rrvar_ForceTorque->GetWire()->SetPeekInValueCallback(
+		this->rrvar_force_torque->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Entity has been released");
@@ -76,12 +76,11 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR::WireBroadcasterPtr<geometry::Wrench> b;
 		{
-		boost::mutex::scoped_lock lock(ForceTorqueSensor_default_abstract_impl::this_lock);
-		b=rrvar_ForceTorque;
+		boost::mutex::scoped_lock lock(this_lock);
+		b=rrvar_force_torque;
 		}
 		if (b)
-		{
-			auto i=get_ForceTorque();
+		{			
 			b->SetOutValue(gz_forcetorque_to_rr_wrench(get_forcetorquesensor()));
 		}
 	}

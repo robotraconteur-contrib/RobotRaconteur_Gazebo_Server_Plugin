@@ -41,9 +41,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-	  virtual image::DepthImagePtr CaptureImage() override;
+	  virtual image::DepthImagePtr capture_image() override;
 	  	  
-	  virtual void set_ImageStream(RR::PipePtr<image::DepthImagePtr> value) override;
+	  virtual void set_image_stream(RR::PipePtr<image::DepthImagePtr> value) override;
 
 
 	  virtual std::string RRType() {return rrgz::DepthCameraSensor_default_abstract_impl::RRType();  }

@@ -26,13 +26,13 @@ import cv2
 import numpy as np
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.SensorNames
-a=server.get_Sensors('default::rip::joint_2::force_torque')
+print server.sensor_names
+a=server.get_sensors('default::rip::joint_2::force_torque')
 
-m=a.ForceTorque.PeekInValue()
+m=a.force_torque.PeekInValue()
 print m
 
-p=a.ForceTorque.Connect()
+p=a.force_torque.Connect()
 
 try:
     while True:

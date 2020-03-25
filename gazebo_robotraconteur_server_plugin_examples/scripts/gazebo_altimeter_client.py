@@ -26,13 +26,13 @@ import cv2
 import numpy as np
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.SensorNames
-a=server.get_Sensors('default::rip::pendulum::altimeter')
+print server.sensor_names
+a=server.get_sensors('default::rip::pendulum::altimeter')
 
-altitude=a.Altitude
+altitude=a.altitude
 print altitude
 
-p=a.Altitude.Connect()
+p=a.altitude.Connect()
 try:
     while True:
         if (p.InValueValid):

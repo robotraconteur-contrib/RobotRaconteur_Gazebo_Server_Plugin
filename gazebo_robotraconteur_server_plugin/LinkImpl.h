@@ -38,7 +38,7 @@ namespace RobotRaconteurGazeboServerPlugin
   public:
 	  LinkImpl(physics::LinkPtr l);
 	 
-      virtual RR::RRListPtr<RR::RRArray<char> > get_SensorNames() override;
+      virtual RR::RRListPtr<RR::RRArray<char> > get_sensor_names() override;
 
 	  virtual std::string RRType() { return Link_default_abstract_impl::RRType(); }
 

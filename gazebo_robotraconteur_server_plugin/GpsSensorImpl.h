@@ -42,7 +42,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual void set_State(RR::WirePtr<gps::GpsStatePtr>  value) override;
+  	  virtual void set_state(RR::WirePtr<gps::GpsStatePtr>  value) override;
 
       virtual std::string RRType() {return rrgz::GpsSensor_default_abstract_impl::RRType();  }
   protected:

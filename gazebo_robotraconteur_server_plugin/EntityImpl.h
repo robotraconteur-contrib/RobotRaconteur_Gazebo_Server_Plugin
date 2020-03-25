@@ -34,9 +34,9 @@ namespace RobotRaconteurGazeboServerPlugin
 class EntityImpl : public virtual rrgz::Entity_default_abstract_impl, public RR_ENABLE_SHARED_FROM_THIS<EntityImpl>
 {
 public:
-	  virtual std::string get_Name() override;
+	  virtual std::string get_name() override;
 	  
-	  virtual std::string get_ScopedName() override;
+	  virtual std::string get_scoped_name() override;
 	  
 	  virtual void Init(const std::string& rr_path);
 
@@ -44,21 +44,21 @@ public:
 
 	  static void OnUpdate(RR_WEAK_PTR<EntityImpl> j, const common::UpdateInfo & _info);
 
-	  virtual void SetWorldPose(const geometry::Pose& value) override;
+	  virtual void setf_world_pose(const geometry::Pose& value) override;
 	  	  
-	  virtual void SetRelativePose(const geometry::Pose& value) override;
+	  virtual void setf_relative_pose(const geometry::Pose& value) override;
 	  		  
-	  virtual void set_WorldPose(RR::WirePtr<geometry::Pose> value) override;
+	  virtual void set_world_pose(RR::WirePtr<geometry::Pose> value) override;
 	  	  
-	  virtual void set_RelativePose(RR::WirePtr<geometry::Pose> value) override;
+	  virtual void set_relative_pose(RR::WirePtr<geometry::Pose> value) override;
 	  	  
-	  virtual void set_WorldVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override;
+	  virtual void set_world_velocity(RR::WirePtr<geometry::SpatialVelocity> value) override;
 	  	  
-	  virtual void set_RelativeVelocity(RR::WirePtr<geometry::SpatialVelocity> value) override;
+	  virtual void set_relative_velocity(RR::WirePtr<geometry::SpatialVelocity> value) override;
 	  	  
-	  virtual void set_WorldAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override;
+	  virtual void set_world_acceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override;
 	  
-	  virtual void set_RelativeAcceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override;
+	  virtual void set_relative_acceleration(RR::WirePtr<geometry::SpatialAcceleration> value) override;
 
 protected:
 	  virtual physics::EntityPtr get_entity()=0;

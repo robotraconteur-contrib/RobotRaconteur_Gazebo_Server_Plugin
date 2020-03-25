@@ -47,7 +47,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR::WireUnicastReceiverPtr<RR::RRListPtr<RR::RRNamedArray<geometry::Wrench> > > appliedft_u;
 		{
 			boost::mutex::scoped_lock lock(Link_default_abstract_impl::this_lock);
-			appliedft_u = rrvar_AppliedWrenches;
+			appliedft_u = rrvar_applied_wrenches;
 		}
 
 		if (appliedft_u)
@@ -75,7 +75,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 		
-	RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char> > LinkImpl::get_SensorNames()
+	RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char> > LinkImpl::get_sensor_names()
 	{
 		auto o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
 		auto l=get_link();

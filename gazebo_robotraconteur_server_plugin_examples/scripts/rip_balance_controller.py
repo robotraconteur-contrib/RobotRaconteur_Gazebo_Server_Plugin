@@ -53,17 +53,17 @@ def swingup(q_1, q_2, u_1, u_2):
 def main():
     global c
     c=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-    w=c.get_Worlds('default')
-    rip=w.get_Models('rip')
-    joint_1=rip.get_Joints('joint_1')
-    joint_2=rip.get_Joints('joint_2')
+    w=c.get_worlds('default')
+    rip=w.get_models('rip')
+    joint_1=rip.get_joints('joint_1')
+    joint_2=rip.get_joints('joint_2')
     
-    q_1_wire=joint_1.AxesPositions.Connect()
-    q_2_wire=joint_2.AxesPositions.Connect()
-    u_1_wire=joint_1.AxesVelocities.Connect()
-    u_2_wire=joint_2.AxesVelocities.Connect()
+    q_1_wire=joint_1.axes_position.Connect()
+    q_2_wire=joint_2.axes_position.Connect()
+    u_1_wire=joint_1.axes_velocity.Connect()
+    u_2_wire=joint_2.axes_velocity.Connect()
 
-    f_1_wire=joint_1.ApplyAxesForce.Connect()
+    f_1_wire=joint_1.apply_axes_force.Connect()
 
 
     try:

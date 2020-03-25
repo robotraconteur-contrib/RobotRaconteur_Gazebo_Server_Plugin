@@ -43,9 +43,9 @@ def new_frame(pipe_ep):
 
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.SensorNames
-cam=server.get_Sensors('default::rip::pendulum::laser')
-scan=cam.CaptureScan()
+print server.sensor_names
+cam=server.get_sensors('default::rip::pendulum::laser')
+scan=cam.capture_scan()
 
 depth1=scan.ranges.reshape([scan.scan_info.vertical_angle_count,scan.scan_info.angle_count],order='C')
 cv2.imshow("Captured Depth", depth1)
@@ -53,7 +53,7 @@ cv2.imshow("Captured Depth", depth1)
 intensity1=scan.intensities.reshape([scan.scan_info.vertical_angle_count,scan.scan_info.angle_count],order='C')
 cv2.imshow("Captured Intensity", intensity1)
 
-p=cam.ScanStream.Connect(-1)
+p=cam.scan_stream.Connect(-1)
 p.PacketReceivedEvent+=new_frame
 
 cv2.namedWindow("Ranges")

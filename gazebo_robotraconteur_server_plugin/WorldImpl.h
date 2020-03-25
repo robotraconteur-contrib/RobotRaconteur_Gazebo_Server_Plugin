@@ -38,20 +38,20 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual void Init(const std::string& rr_path);
 
-	  virtual std::string get_Name() override;	  
+	  virtual std::string get_name() override;	  
 
 	  static void OnUpdate(RR_WEAK_PTR<WorldImpl> j, const common::UpdateInfo & _info);
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_ModelNames() override;	  
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_model_names() override;	  
 
-	  virtual RR::RRListPtr<RR::RRArray<char> > get_LightNames() override;
+	  virtual RR::RRListPtr<RR::RRArray<char> > get_light_names() override;
 	  	  
-	  virtual void set_Time(RR::WirePtr<rrgz::WorldTimesPtr> value) override;
+	  virtual void set_time(RR::WirePtr<rrgz::WorldTimesPtr> value) override;
 
-	  virtual void set_SimTime(RR::WirePtr<datetime::Duration> value) override;
+	  virtual void set_sim_time(RR::WirePtr<datetime::Duration> value) override;
 
-	  virtual rrgz::ModelPtr get_Models(const std::string& ind) override;
-	  virtual rrgz::LightPtr get_Lights(const std::string& ind) override;
+	  virtual rrgz::ModelPtr get_models(const std::string& ind) override;
+	  virtual rrgz::LightPtr get_lights(const std::string& ind) override;
 
 	  physics::WorldPtr get_world();
 

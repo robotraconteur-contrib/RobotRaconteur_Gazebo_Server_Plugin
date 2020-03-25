@@ -34,7 +34,7 @@ namespace RobotRaconteurGazeboServerPlugin
 						  boost::bind(&JointControllerImpl::OnUpdate, j1, _1));
 	}
 
-	RR::RRListPtr<RR::RRArray<char> > JointControllerImpl::get_JointNames()
+	RR::RRListPtr<RR::RRArray<char> > JointControllerImpl::get_joint_names()
 	{
 		auto o=RR::AllocateEmptyRRList<RR::RRArray<char> >();
 		auto j_map=gz_controller->GetJoints();
@@ -45,7 +45,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	RR::RRMapPtr<std::string,pid::PIDParam > JointControllerImpl::get_PositionPIDs()
+	RR::RRMapPtr<std::string,pid::PIDParam > JointControllerImpl::get_position_pid()
 	{
 		auto o=RR::AllocateEmptyRRMap<std::string,pid::PIDParam>();
 		auto p1=gz_controller->GetPositionPIDs();
@@ -64,7 +64,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	RR::RRMapPtr<std::string,pid::PIDParam> JointControllerImpl::get_VelocityPIDs()
+	RR::RRMapPtr<std::string,pid::PIDParam> JointControllerImpl::get_velocity_pid()
 	{
 		auto o=RR::AllocateEmptyRRMap<std::string,pid::PIDParam>();
 		auto p1=gz_controller->GetVelocityPIDs();
@@ -83,7 +83,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	static RR::RRMapPtr<std::string, RR::RRArray<double> > _get_JointPositions(physics::JointControllerPtr& controller)
+	static RR::RRMapPtr<std::string, RR::RRArray<double> > _get_joint_position(physics::JointControllerPtr& controller)
 	{
 		auto o = RR::AllocateEmptyRRMap<std::string, RR::RRArray<double> >();		
 		for (auto j : controller->GetJoints())
@@ -94,7 +94,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 
-	static RR::RRMapPtr<std::string, RR::RRArray<double> > _get_JointVelocities(physics::JointControllerPtr& controller)
+	static RR::RRMapPtr<std::string, RR::RRArray<double> > _get_joint_velocity(physics::JointControllerPtr& controller)
 	{
 		auto o = RR::AllocateEmptyRRMap<std::string, RR::RRArray<double> >();
 		for (auto j : controller->GetJoints())
@@ -146,7 +146,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		}
 	}
 
-	RR::RRMapPtr<std::string,RR::RRArray<double> > _get_JointForces(physics::JointControllerPtr& controller)
+	RR::RRMapPtr<std::string,RR::RRArray<double> > _get_joint_forces(physics::JointControllerPtr& controller)
 	{
 		auto o=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
 		auto p1=controller->GetForces();
@@ -157,62 +157,62 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	void JointControllerImpl::AddJoint(const std::string& name)
+	void JointControllerImpl::add_joint(const std::string& name)
 	{
 		physics::JointPtr j=get_model()->GetJoint(name);
 		if (!j) throw std::invalid_argument("Invalid joint name");
 		gz_controller->AddJoint(j);
 	}
 
-	void JointControllerImpl::SetPositionPID(const std::string& name, pid::PIDParamPtr pid)
+	void JointControllerImpl::setf_position_pid(const std::string& name, pid::PIDParamPtr pid)
 	{
 		RR_NULL_CHECK(pid);
 		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmdMax, pid->cmdMin);
 		gz_controller->SetPositionPID(name, p);
 	}
 
-	void JointControllerImpl::SetVelocityPID(const std::string& name, pid::PIDParamPtr pid)
+	void JointControllerImpl::setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid)
 	{
 		RR_NULL_CHECK(pid);
 		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmdMax, pid->cmdMin);
 		gz_controller->SetVelocityPID(name, p);
 	}
 	
-	void JointControllerImpl::set_JointPositions(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
+	void JointControllerImpl::set_joint_position(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
 	{
-		JointController_default_impl::set_JointPositions(value);
+		JointController_default_impl::set_joint_position(value);
 		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
-		this->rrvar_JointPositions->GetWire()->SetPeekInValueCallback(
+		this->rrvar_joint_position->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Joint has been released");				
-				return _get_JointPositions(this_->gz_controller);
+				return _get_joint_position(this_->gz_controller);
 			}
 		);
 	}
 
-	void JointControllerImpl::set_JointVelocities(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
+	void JointControllerImpl::set_joint_velocity(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
 	{
-		JointController_default_impl::set_JointVelocities(value);
+		JointController_default_impl::set_joint_velocity(value);
 		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
-		this->rrvar_JointVelocities->GetWire()->SetPeekInValueCallback(
+		this->rrvar_joint_velocity->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Joint has been released");
-				return _get_JointVelocities(this_->gz_controller);
+				return _get_joint_velocity(this_->gz_controller);
 			}
 		);
 	}
 
-	void JointControllerImpl::set_JointForces(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
+	void JointControllerImpl::set_joint_forces(RR::WirePtr<RR::RRMapPtr<std::string, RR::RRArray<double > > > value)
 	{
-		JointController_default_impl::set_JointForces(value);
+		JointController_default_impl::set_joint_forces(value);
 		boost::weak_ptr<JointControllerImpl> weak_this = shared_from_this();
-		this->rrvar_JointForces->GetWire()->SetPeekInValueCallback(
+		this->rrvar_joint_forces->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
 				auto this_ = weak_this.lock();
 				if (!this_) throw RR::InvalidOperationException("Joint has been released");
-				return _get_JointForces(this_->gz_controller);
+				return _get_joint_forces(this_->gz_controller);
 			}
 		);
 	}
@@ -240,11 +240,11 @@ namespace RobotRaconteurGazeboServerPlugin
 
 			gz_controller->Update();
 
-			jointpositions_b = rrvar_JointPositions;
-			jointpositions_b = rrvar_JointVelocities;
-			jointforces_b = rrvar_JointForces;
-			targetpositions_b=rrvar_JointPositionsCommand;
-			targetvelocities_b = rrvar_JointVelocitiesCommand;
+			jointpositions_b = rrvar_joint_position;
+			jointpositions_b = rrvar_joint_velocity;
+			jointforces_b = rrvar_joint_forces;
+			targetpositions_b=rrvar_joint_position_command;
+			targetvelocities_b = rrvar_joint_velocity_command;
 
 		}
 

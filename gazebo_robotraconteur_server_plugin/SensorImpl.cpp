@@ -25,22 +25,22 @@ namespace RobotRaconteurGazeboServerPlugin
 		this->gz_sensor=gz_sensor;
 	}
 
-	std::string SensorImpl::get_Name()
+	std::string SensorImpl::get_name()
 	{
 		return get_sensor()->ScopedName();
 	}
 	
-	std::string SensorImpl::get_Type()
+	std::string SensorImpl::get_type()
 	{
 		return get_sensor()->Type();
 	}
 	
-	std::string SensorImpl::get_ParentName()
+	std::string SensorImpl::get_parent_name()
 	{
 		return get_sensor()->ParentName();
 	}
 	
-	geometry::Pose SensorImpl::get_Pose()
+	geometry::Pose SensorImpl::get_pose()
 	{
 		auto p=get_sensor()->Pose();
 		geometry::Pose o;
@@ -64,29 +64,29 @@ namespace RobotRaconteurGazeboServerPlugin
 		return s;
 	}
 
-	RR::rr_bool SensorImpl::get_Active()
+	RR::rr_bool SensorImpl::get_active()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return get_sensor()->IsActive() ? 1 : 0;
 	}
-	void SensorImpl::set_Active(RR::rr_bool value)
+	void SensorImpl::set_active(RR::rr_bool value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		get_sensor()->SetActive(value!=0);
 	}
 
-	double SensorImpl::get_UpdateRate()
+	double SensorImpl::get_update_rate()
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		return get_sensor()->UpdateRate();
 	}
-	void SensorImpl::set_UpdateRate(double value)
+	void SensorImpl::set_update_rate(double value)
 	{
 		boost::mutex::scoped_lock lock(this_lock);
 		get_sensor()->SetUpdateRate(value);
 	}
 
-	datetime::Duration SensorImpl::get_LastUpdateTime()
+	datetime::Duration SensorImpl::get_last_update_time()
 	{
 		auto t1 = get_sensor()->LastUpdateTime();
 
@@ -97,7 +97,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 	
-	datetime::Duration SensorImpl::get_LastMeasurementTime()
+	datetime::Duration SensorImpl::get_last_measurement_time()
 	{
 		auto t1 = get_sensor()->LastMeasurementTime();
 		datetime::Duration o;

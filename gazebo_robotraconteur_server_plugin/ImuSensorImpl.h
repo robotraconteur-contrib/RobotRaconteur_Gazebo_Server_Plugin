@@ -42,9 +42,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
-  	  virtual void set_State(RR::WirePtr<imu::ImuStatePtr> value) override;
+  	  virtual void set_state(RR::WirePtr<imu::ImuStatePtr> value) override;
 
-  	  virtual void SetReferencePose() override;
+  	  virtual void setf_reference_pose() override;
 
       virtual std::string RRType() {return rrgz::ImuSensor_default_abstract_impl::RRType();  }
   protected:

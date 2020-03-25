@@ -26,26 +26,26 @@ import cv2
 import numpy as np
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.SensorNames
-contact=server.get_Sensors('default::rip::arm::contact_sensor')
+print server.sensor_names
+contact=server.get_sensors('default::rip::arm::contact_sensor')
 
 print ("Found contact sensor")
 print(contact)
 
-contacts=contact.Contacts.PeekInValue()[0]
+contacts=contact.contacts.PeekInValue()[0]
 if (len(contacts) > 0):
-    print contacts[0].contactName1
+    print contacts[0].contact_name1
 
 
 
-p=contact.Contacts.Connect()
+p=contact.contacts.Connect()
 
 try:
     while True:
         if (p.InValueValid):
             contacts=p.InValue
             if (len(contacts) > 0):
-                print contacts[0].contactName1
+                print contacts[0].contact_name1
             else:
                 print ("No contacts")
         else:
