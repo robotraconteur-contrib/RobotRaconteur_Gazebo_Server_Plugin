@@ -214,6 +214,16 @@ void WorldImpl::insert_model(const std::string& model_sdf, const std::string& mo
 	}
 
 	model->GetAttribute("name")->SetFromString(model_name);
+	auto pose_elem = model->GetElement("pose");
+	if (pose_elem)
+	{
+		pose_elem->Set(p);
+	}
+	else
+	{
+		pose_elem = model->AddElement("pose");
+		pose_elem->Set(p);
+	}
 	w->InsertModelSDF(modelSDF);
 }
 
