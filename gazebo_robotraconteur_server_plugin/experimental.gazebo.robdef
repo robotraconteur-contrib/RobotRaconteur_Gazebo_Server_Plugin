@@ -67,9 +67,6 @@ object World
 	function void insert_model(string model_sdf, string model_name, Pose model_pose)
 	function void remove_model(string model_name)
 
-	function void insert_light(string light_sdf, string light_name, Pose light_pose)
-	function void remove_light(string light_name)
-
 end object
 
 object Entity
