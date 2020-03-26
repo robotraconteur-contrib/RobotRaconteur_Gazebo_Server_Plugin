@@ -87,8 +87,16 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
-		
-		auto e = get_entity();
+		// TODO: don't throw exception if entity has been released
+		physics::EntityPtr e;
+		try
+		{
+		e = get_entity();		
+		}
+		catch (std::exception&)
+		{
+			return;
+		}
 
 		auto wpose1=gz_pose_to_rr_pose(e->WorldPose());
 		auto rpose1= gz_pose_to_rr_pose(e->RelativePose());
