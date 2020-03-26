@@ -180,5 +180,54 @@ physics::WorldPtr WorldImpl::get_world()
 	return w;
 }
 
+void WorldImpl::insert_model(const std::string& model_sdf, const std::string& model_name, const geometry::Pose& model_pose)
+{
+	physics::WorldPtr w=gz_world.lock();
+	if (!w) throw RR::InvalidOperationException("World has been released");
+
+	if(w->ModelByName(model_name))
+	{
+		throw RR::InvalidOperationException("Model name " + model_name + " already in use");
+	}
+
+	auto model_quat = model_pose.s.orientation;
+	if (model_quat.s.w == 0 && model_quat.s.x == 0 && model_quat.s.y == 0 && model_quat.s.z == 0)
+	{
+		model_quat.s.w = 1.0;
+	}
+	auto model_pos = model_pose.s.position;
+
+	ignition::math::Pose3d p(model_pos.s.x, model_pos.s.y, model_pos.s.z, model_quat.s.w, model_quat.s.x, model_quat.s.y, model_quat.s.z);
+
+	sdf::SDF modelSDF;
+	/*if (!sdf::readString(model_sdf, modelSDF.Root()))
+	{
+		throw RR::InvalidArgumentException("Could not parse specified SDF model");
+	}*/
+
+	modelSDF.SetFromString(model_sdf);
+
+	sdf::ElementPtr model = modelSDF.Root()->GetElement("model");
+	if (!model)
+	{
+		throw RR::InvalidArgumentException("Model not found in specified SDF");
+	}
+
+	model->GetAttribute("name")->SetFromString(model_name);
+	w->InsertModelSDF(modelSDF);
+}
+
+void WorldImpl::remove_model(const std::string& model_name)
+{
+	physics::WorldPtr w=gz_world.lock();
+	if (!w) throw RR::InvalidOperationException("World has been released");
+
+	if(!w->ModelByName(model_name))
+	{
+		throw RR::InvalidArgumentException("Model name " + model_name + " not found");
+	}
+
+	w->RemoveModel(model_name);
+}
 
 }

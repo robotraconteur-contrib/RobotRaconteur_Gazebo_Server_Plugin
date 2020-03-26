@@ -28,6 +28,7 @@ using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
 namespace datetime = com::robotraconteur::datetime;
+namespace geometry = com::robotraconteur::geometry;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
@@ -56,6 +57,11 @@ namespace RobotRaconteurGazeboServerPlugin
 	  physics::WorldPtr get_world();
 
 	  std::string GetRRPath();
+
+	  virtual void insert_model(const std::string& model_sdf, const std::string& model_name, const geometry::Pose& model_pose);
+
+	  virtual void remove_model(const std::string& model_name);
+
 
   protected:
 	  boost::weak_ptr<physics::World> gz_world;

@@ -1,0 +1,17 @@
+<launch>
+  <arg name="gui" default="true" />
+
+  <node name="gazebo" pkg="gazebo_ros" type="gzserver"
+      respawn="false" output="screen"
+      args="--verbose $(find gazebo_robotraconteur_server_plugin_examples)/worlds/rip_world.world -s libgazebo_robotraconteur_server_plugin.so --robotraconteur-server-tcp-port=11346" />
+
+  <group if="$(arg gui)">
+    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
+  </group>
+
+  <node name="insert_model" pkg="gazebo_robotraconteur_server_plugin_examples"
+      type="gazebo_insert_model.py" respawn="true" respawn_delay="10" output="screen"/>
+
+
+
+</launch>
