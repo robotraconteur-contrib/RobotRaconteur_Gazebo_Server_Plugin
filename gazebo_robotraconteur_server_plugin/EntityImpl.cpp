@@ -68,6 +68,18 @@ namespace RobotRaconteurGazeboServerPlugin
 		return o;
 	}
 
+	EntityImpl::EntityImpl(physics::EntityPtr e)
+	{
+		gz_entity = e;
+	}
+
+	physics::EntityPtr EntityImpl::get_entity()
+	{
+		physics::EntityPtr m=gz_entity.lock();
+		if (!m) throw std::runtime_error("Entity has been released");
+		return m;
+	}
+
 	std::string EntityImpl::get_name()
 	{
 		return get_entity()->GetName();
@@ -87,16 +99,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
-		// TODO: don't throw exception if entity has been released
-		physics::EntityPtr e;
-		try
-		{
-		e = get_entity();		
-		}
-		catch (std::exception&)
-		{
-			return;
-		}
+		physics::EntityPtr e = gz_entity.lock();
+		if (!e) return;		
 
 		auto wpose1=gz_pose_to_rr_pose(e->WorldPose());
 		auto rpose1= gz_pose_to_rr_pose(e->RelativePose());
@@ -111,21 +115,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		rrvar_relative_velocity->SetOutValue(rvel1);
 		rrvar_world_acceleration->SetOutValue(wacc1);
 		rrvar_relative_acceleration->SetOutValue(racc1);
-	}
-
-	void EntityImpl::OnEntityDeleted(RR_WEAK_PTR<EntityImpl> t, const std::string& path)
-	{
-
-		//TODO: Attempt to support entity deletion. This doesn't seem to work yet.
-		RR_SHARED_PTR<EntityImpl> t1=t.lock();
-		if(!t1) return;
-		RR_SHARED_PTR<RR::ServerContext> c=t1->rr_context.lock();
-		if(!c) return;
-
-		if (path == t1->gz_path)
-		{
-			c->ReleaseServicePath(t1->rr_path);
-		}
 	}
 
 	std::string EntityImpl::GetRRPath()
@@ -154,9 +143,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		gz_path=get_entity()->GetScopedName(true);
 		this->rr_path=service_path;
-
-		this->deleteEntityConnection = event::Events::ConnectDeleteEntity(
-				boost::bind(&EntityImpl::OnEntityDeleted, w1, _1));
 
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_relative_acceleration->GetWire()->SetPeekInValueCallback(

@@ -48,8 +48,7 @@ namespace RobotRaconteurGazeboServerPlugin
   	  physics::WorldPtr gz_world;
 
   	  physics::LinkPtr get_link();
-  	  virtual physics::EntityPtr get_entity();
-
+  	  
   	  RR::RRListPtr<RR::RRArray<double > > applied_wrenches;
   	  virtual void OnUpdate1(const common::UpdateInfo & _info);
   };

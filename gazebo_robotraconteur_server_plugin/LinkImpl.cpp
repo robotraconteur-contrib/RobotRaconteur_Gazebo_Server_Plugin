@@ -20,7 +20,7 @@
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  LinkImpl::LinkImpl(physics::LinkPtr l)
+  LinkImpl::LinkImpl(physics::LinkPtr l) : EntityImpl(l)
 	{
 		gz_link=l;
 		model_name=l->GetParentModel()->GetName();
@@ -32,11 +32,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		physics::LinkPtr l=gz_link.lock();
 		if (!l) throw std::runtime_error("Link has been released");
 		return l;
-	}
-
-	physics::EntityPtr LinkImpl::get_entity()
-	{
-		return boost::dynamic_pointer_cast<physics::Entity>(get_link());
 	}
 
 	void LinkImpl::OnUpdate1(const common::UpdateInfo & _info)

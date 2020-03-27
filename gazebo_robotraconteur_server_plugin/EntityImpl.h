@@ -34,6 +34,9 @@ namespace RobotRaconteurGazeboServerPlugin
 class EntityImpl : public virtual rrgz::Entity_default_abstract_impl, public virtual RR::IRRServiceObject, public RR_ENABLE_SHARED_FROM_THIS<EntityImpl>
 {
 public:
+	  
+	  EntityImpl(physics::EntityPtr e);
+
 	  virtual std::string get_name() override;
 	  
 	  virtual std::string get_scoped_name() override;
@@ -49,18 +52,17 @@ public:
 	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
 protected:
-	  virtual physics::EntityPtr get_entity()=0;
+	  virtual physics::EntityPtr get_entity();
 
 	  virtual void OnUpdate1(const common::UpdateInfo & _info);
 
-	  static void OnEntityDeleted(RR_WEAK_PTR<EntityImpl> t, const std::string& path);
-
 	  event::ConnectionPtr updateConnection;
-	  event::ConnectionPtr deleteEntityConnection;
-
+	  
 	  std::string gz_path;
 	  std::string rr_path;
 	  RR_WEAK_PTR<RR::ServerContext> rr_context;
+
+	  boost::weak_ptr<physics::Entity> gz_entity;
 };
 
 }

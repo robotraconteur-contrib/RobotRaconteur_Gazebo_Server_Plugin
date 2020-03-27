@@ -20,7 +20,7 @@
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-	ModelImpl::ModelImpl(physics::ModelPtr m)
+	ModelImpl::ModelImpl(physics::ModelPtr m) : EntityImpl(m)
 	{
 		gz_model=m;
 		gz_world=m->GetWorld();
@@ -98,11 +98,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		physics::ModelPtr m=gz_model.lock();
 		if (!m) throw std::runtime_error("Model has been released");
 		return m;
-	}
-
-	physics::EntityPtr ModelImpl::get_entity()
-	{
-		return boost::dynamic_pointer_cast<physics::Entity>(get_model());
 	}
 
 	void ModelImpl::create_joint_controller()

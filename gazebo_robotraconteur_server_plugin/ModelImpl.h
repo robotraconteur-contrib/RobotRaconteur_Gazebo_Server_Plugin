@@ -68,8 +68,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	  physics::WorldPtr gz_world;
 
 	  physics::ModelPtr get_model();
-	  virtual physics::EntityPtr get_entity();
-
+	  
 	  RR_SHARED_PTR<JointControllerImpl> joint_controller;
 	  RR_SHARED_PTR<KinematicJointControllerImpl> kinematic_joint_controller;
 
