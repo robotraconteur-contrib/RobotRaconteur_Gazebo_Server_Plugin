@@ -85,6 +85,11 @@ void WorldImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, cons
 			return gz_to_rr_worldtimes(w);
 		}
 	);
+
+	gz_node = gazebo::transport::NodePtr(new gazebo::transport::Node());
+	gz_node->Init(get_world()->Name());
+	gz_request_pub = gz_node->Advertise<gazebo::msgs::Request>("~/request");
+	gz_factory_pub = gz_node->Advertise<gazebo::msgs::Factory>("~/factory");
 }
 
 std::string WorldImpl::GetRRPath()
@@ -237,7 +242,12 @@ void WorldImpl::insert_model(const std::string& model_sdf, const std::string& mo
 		pose_elem = model->AddElement("pose");
 		pose_elem->Set(p);
 	}
-	w->InsertModelSDF(modelSDF);
+	//w->InsertModelSDF(modelSDF);
+  gazebo::msgs::Factory msg;
+  gazebo::msgs::Init(msg, "spawn_model");
+  msg.set_sdf( modelSDF.ToString() );
+
+  gz_factory_pub->Publish(msg);
 }
 
 void WorldImpl::remove_model(const std::string& model_name)
@@ -245,12 +255,19 @@ void WorldImpl::remove_model(const std::string& model_name)
 	physics::WorldPtr w=gz_world.lock();
 	if (!w) throw RR::InvalidOperationException("World has been released");
 
-	if(!w->ModelByName(model_name))
+	auto model = w->ModelByName(model_name);
+	if(!model)
 	{
 		throw RR::InvalidArgumentException("Model name " + model_name + " not found");
 	}
 
-	w->RemoveModel(model_name);
+	//w->RemoveModel(model_name);
+	//model->Fini();
+
+	gazebo::msgs::Request *msg = gazebo::msgs::CreateRequest("entity_delete",model->GetScopedName());
+    gz_request_pub->Publish(*msg,false);
+	delete msg;
+	
 }
 
 void WorldImpl::async_get_name(boost::function<void (const std::string&,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)

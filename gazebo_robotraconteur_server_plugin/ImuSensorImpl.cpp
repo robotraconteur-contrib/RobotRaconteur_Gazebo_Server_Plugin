@@ -22,7 +22,7 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	ImuSensorImpl::ImuSensorImpl(sensors::ImuSensorPtr gz_imu) : SensorImpl(gz_imu)
 	{
-
+		this->gz_imu = gz_imu;
 	}
 
 	static imu::ImuStatePtr gz_to_rr_imustate(sensors::ImuSensorPtr& c)
@@ -51,8 +51,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ImuSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_imusensor()->ConnectUpdated(boost::bind(&ImuSensorImpl::OnUpdate,c));
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		boost::weak_ptr<ImuSensorImpl> weak_this = RR::rr_cast<ImuSensorImpl>(shared_from_this());
 		this->rrvar_state->GetWire()->SetPeekInValueCallback(
@@ -64,14 +63,6 @@ namespace RobotRaconteurGazeboServerPlugin
 			}
 		);
 	}
-
-	void ImuSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<ImuSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<ImuSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-
 
 	void ImuSensorImpl::setf_reference_pose()
 	{
@@ -85,7 +76,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ImuSensorImpl::OnUpdate1()
 	{
-		auto s = get_imusensor();
+		SensorImpl::OnUpdate1();
+		auto s = gz_imu.lock();
+		if (!s) return;
 		auto i = gz_to_rr_imustate(s);
 		rrvar_state->SetOutValue(i);		
 	}

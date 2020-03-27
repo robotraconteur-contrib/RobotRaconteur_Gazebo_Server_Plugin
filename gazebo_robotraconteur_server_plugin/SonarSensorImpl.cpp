@@ -22,13 +22,13 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	SonarSensorImpl::SonarSensorImpl(sensors::SonarSensorPtr gz_sonar) : SensorImpl(gz_sonar)
 	{
-
+		this->gz_sonar=gz_sonar;
 	}
 
 	void SonarSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_sonarsensor()->ConnectUpdated(boost::bind(&SonarSensorImpl::OnUpdate,c));
+		
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		boost::weak_ptr<SonarSensorImpl> weak_this = RR::rr_cast<SonarSensorImpl>(shared_from_this());
 		this->rrvar_range->GetWire()->SetPeekInValueCallback(
@@ -40,13 +40,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
-	void SonarSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<SonarSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<SonarSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-
+	
 	double SonarSensorImpl::get_range_min()
 	{
 		return get_sonarsensor()->RangeMin();
@@ -69,7 +63,12 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void SonarSensorImpl::OnUpdate1()
 	{		
-		auto i = get_sonarsensor()->Range();
+		SensorImpl::OnUpdate1();
+		
+		auto s = gz_sonar.lock();
+		if (!s) return;
+
+		auto i = s->Range();
 		rrvar_range->SetOutValue(i);		
 	}
 

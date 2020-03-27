@@ -22,7 +22,7 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	ForceTorqueSensorImpl::ForceTorqueSensorImpl(sensors::ForceTorqueSensorPtr gz_contact) : SensorImpl(gz_contact)
 	{
-
+		this->gz_forcetorque = gz_contact;
 	}
 
 	static geometry::Wrench gz_forcetorque_to_rr_wrench(const sensors::ForceTorqueSensorPtr& ft)
@@ -42,8 +42,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ForceTorqueSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_forcetorquesensor()->ConnectUpdated(boost::bind(&ForceTorqueSensorImpl::OnUpdate,c));
+		
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		boost::weak_ptr<ForceTorqueSensorImpl> weak_this = RR::rr_cast<ForceTorqueSensorImpl>(shared_from_this());
 		this->rrvar_force_torque->GetWire()->SetPeekInValueCallback(
@@ -55,13 +55,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
-	void ForceTorqueSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<ForceTorqueSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<ForceTorqueSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-	
 	sensors::ForceTorqueSensorPtr ForceTorqueSensorImpl::get_forcetorquesensor()
 	{
 		return std::dynamic_pointer_cast<sensors::ForceTorqueSensor>(get_sensor());
@@ -69,7 +62,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ForceTorqueSensorImpl::OnUpdate1()
 	{
-			
+		SensorImpl::OnUpdate1();
+		auto ft = gz_forcetorque.lock();
+		if (!ft) return;			
 		rrvar_force_torque->SetOutValue(gz_forcetorque_to_rr_wrench(get_forcetorquesensor()));
 		
 	}

@@ -100,7 +100,20 @@ namespace RobotRaconteurGazeboServerPlugin
 	void EntityImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
 		physics::EntityPtr e = gz_entity.lock();
-		if (!e) return;		
+		if (!e || !e->GetParent()) 
+		{
+			auto context = rr_context.lock();
+			if (context)
+			{
+				try
+				{
+				context->ReleaseServicePath(rr_path);
+				}
+				catch (std::exception&) {}
+			}
+			//updateConnection.reset();
+			return;
+		}
 
 		auto wpose1=gz_pose_to_rr_pose(e->WorldPose());
 		auto rpose1= gz_pose_to_rr_pose(e->RelativePose());
@@ -134,7 +147,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void EntityImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_SHARED_PTR<RR::ServerContext> rr_context = context.lock();
+		rr_context = context.lock();
 		BOOST_ASSERT(rr_context);
 
 		RR_WEAK_PTR<EntityImpl> w1=shared_from_this();

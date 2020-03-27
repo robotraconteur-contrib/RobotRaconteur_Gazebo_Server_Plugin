@@ -32,12 +32,10 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class ForceTorqueSensorImpl : public virtual rrgz::ForceTorqueSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
+  class ForceTorqueSensorImpl : public virtual rrgz::ForceTorqueSensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
   	  ForceTorqueSensorImpl(sensors::ForceTorqueSensorPtr gz_forcetorque);
-
-  	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
   	  virtual std::string RRType() {return rrgz::ForceTorqueSensor_default_abstract_impl::RRType();  }
 
@@ -46,8 +44,9 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
       sensors::ForceTorqueSensorPtr get_forcetorquesensor();
 
-      void OnUpdate1();
-      event::ConnectionPtr updateConnection;
+      virtual void OnUpdate1();
+
+      std::weak_ptr<sensors::ForceTorqueSensor> gz_forcetorque;
   };
 
 

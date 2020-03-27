@@ -32,7 +32,7 @@ namespace datetime = com::robotraconteur::datetime;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class SensorImpl : public virtual rrgz::Sensor_default_impl, public RR_ENABLE_SHARED_FROM_THIS<SensorImpl>
+  class SensorImpl : public virtual rrgz::Sensor_default_impl, public virtual RR::IRRServiceObject, public RR_ENABLE_SHARED_FROM_THIS<SensorImpl>
   {
   public:
 	  SensorImpl(sensors::SensorPtr gz_sensor);
@@ -53,12 +53,23 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual datetime::Duration get_last_update_time() override;  
 
-	  virtual datetime::Duration get_last_measurement_time() override;	  
+	  virtual datetime::Duration get_last_measurement_time() override;
+
+	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
+
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
   protected:
 
+	  virtual void OnUpdate1();
+
 	  std::weak_ptr<sensors::Sensor> gz_sensor;
-	  sensors::SensorPtr get_sensor();	  
+	  sensors::SensorPtr get_sensor();
+
+	  event::ConnectionPtr updateConnection;
+
+	  RR_WEAK_PTR<RR::ServerContext> rr_context;
+	  std::string rr_path;  
   };
 
 }

@@ -72,7 +72,10 @@ namespace RobotRaconteurGazeboServerPlugin
 
   	 event::ConnectionPtr updateConnection;
 
-  	 RR::RRArrayPtr<double> axes_forces;  	 	
+  	 RR::RRArrayPtr<double> axes_forces;
+
+	 std::string rr_path;
+	 RR_WEAK_PTR<RR::ServerContext> rr_context;	
   };
 
 }

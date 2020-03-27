@@ -23,13 +23,12 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	MultiCameraSensorImpl::MultiCameraSensorImpl(sensors::MultiCameraSensorPtr gz_camera) : SensorImpl(gz_camera)
 	{
-
+		this->gz_camera = gz_camera;
 	}
 
 	void MultiCameraSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_camera()->ConnectUpdated(boost::bind(&MultiCameraSensorImpl::OnUpdate,c));
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		rrvar_image_stream->SetMaxBacklog(3);
 	}
@@ -66,15 +65,13 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::MultiCameraSensor>(get_sensor());
 	}
 
-	void MultiCameraSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<MultiCameraSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<MultiCameraSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-
 	void MultiCameraSensorImpl::OnUpdate1()
 	{
+		SensorImpl::OnUpdate1();
+
+		auto c = gz_camera.lock();
+		if (!c) return;
+
 		auto o=RR::AllocateEmptyRRMap<int32_t, image::Image >();
 
 		int32_t count=get_camera_count();

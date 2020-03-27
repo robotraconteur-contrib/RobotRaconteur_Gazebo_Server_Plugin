@@ -23,13 +23,12 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	AltimeterSensorImpl::AltimeterSensorImpl(sensors::AltimeterSensorPtr gz_contact) : SensorImpl(gz_contact)
 	{
-
+		gz_altsensor=gz_contact;
 	}
 
 	void AltimeterSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_altimetersensor()->ConnectUpdated(boost::bind(&AltimeterSensorImpl::OnUpdate,c));
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		boost::weak_ptr<AltimeterSensorImpl> weak_this = RR::rr_cast<AltimeterSensorImpl>(shared_from_this());
 		this->rrvar_altitude->GetWire()->SetPeekInValueCallback(
@@ -42,13 +41,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
-	void AltimeterSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<AltimeterSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<AltimeterSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-		
 	sensors::AltimeterSensorPtr AltimeterSensorImpl::get_altimetersensor()
 	{
 		return std::dynamic_pointer_cast<sensors::AltimeterSensor>(get_sensor());
@@ -56,7 +48,10 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void AltimeterSensorImpl::OnUpdate1()
 	{
-		rrvar_altitude->SetOutValue(get_altimetersensor()->Altitude());		
+		SensorImpl::OnUpdate1();
+		auto s = gz_altsensor.lock();
+		if (!s) return;
+		rrvar_altitude->SetOutValue(s->Altitude());		
 	}
 
 }

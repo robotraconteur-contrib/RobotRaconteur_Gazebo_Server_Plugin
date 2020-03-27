@@ -37,37 +37,30 @@ namespace RobotRaconteurGazeboServerPlugin
 	void LinkImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
 		EntityImpl::OnUpdate1(_info);		
-		physics::LinkPtr l=get_link();
+		auto l=gz_link.lock();
+		if (!l) return;		
 		
-		RR::WireUnicastReceiverPtr<RR::RRListPtr<RR::RRNamedArray<geometry::Wrench> > > appliedft_u;
+		RR::RRListPtr<RR::RRNamedArray<geometry::Wrench> > ft;
+		RR::TimeSpec ts;
+		uint32_t ep;
+		if (rrvar_applied_wrenches->TryGetInValue(ft, ts, ep))
 		{
-			boost::mutex::scoped_lock lock(Link_default_abstract_impl::this_lock);
-			appliedft_u = rrvar_applied_wrenches;
-		}
-
-		if (appliedft_u)
-		{
-			RR::RRListPtr<RR::RRNamedArray<geometry::Wrench> > ft;
-			RR::TimeSpec ts;
-			uint32_t ep;
-			if (appliedft_u->TryGetInValue(ft, ts, ep))
+			if (ft)
 			{
-				if (ft)
+				for (auto e : *ft)
 				{
-					for (auto e : *ft)
-					{
-						if (!e) continue;
-						auto e2 = RR::RRNamedArrayToScalar(e);
-						
-						if (!(e)->size() != 1) continue;
-						ignition::math::Vector3d torque(e2.s.torque.s.x, e2.s.torque.s.y, e2.s.torque.s.z);
-						ignition::math::Vector3d force(e2.s.force.s.x, e2.s.force.s.y, e2.s.force.s.z);
-						l->AddRelativeForce(force);
-						l->AddRelativeTorque(torque);
-					}
+					if (!e) continue;
+					auto e2 = RR::RRNamedArrayToScalar(e);
+					
+					if (!(e)->size() != 1) continue;
+					ignition::math::Vector3d torque(e2.s.torque.s.x, e2.s.torque.s.y, e2.s.torque.s.z);
+					ignition::math::Vector3d force(e2.s.force.s.x, e2.s.force.s.y, e2.s.force.s.z);
+					l->AddRelativeForce(force);
+					l->AddRelativeTorque(torque);
 				}
 			}
 		}
+		
 	}
 		
 	RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char> > LinkImpl::get_sensor_names()

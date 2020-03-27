@@ -22,13 +22,12 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	ContactSensorImpl::ContactSensorImpl(sensors::ContactSensorPtr gz_contact) : SensorImpl(gz_contact)
 	{
-
+		this->gz_contact = gz_contact;
 	}
 
 	void ContactSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_contactsensor()->ConnectUpdated(boost::bind(&ContactSensorImpl::OnUpdate,c));
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		boost::weak_ptr<ContactSensorImpl> weak_this = RR::rr_cast<ContactSensorImpl>(shared_from_this());
 		this->rrvar_contacts->GetWire()->SetPeekInValueCallback(
@@ -38,13 +37,6 @@ namespace RobotRaconteurGazeboServerPlugin
 				return this_->CaptureContacts();
 			}
 		);
-	}
-
-	void ContactSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<ContactSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<ContactSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
 	}
 
 	RR::RRListPtr<rrgz::Contact> ContactSensorImpl::CaptureContacts()
@@ -74,6 +66,10 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void ContactSensorImpl::OnUpdate1()
 	{
+		SensorImpl::OnUpdate1();
+
+		auto c = gz_contact.lock();
+		if (!c) return;
 		auto i=CaptureContacts();
 		rrvar_contacts->SetOutValue(i);
 	}

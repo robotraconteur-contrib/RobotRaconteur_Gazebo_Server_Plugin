@@ -110,8 +110,23 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		//std::cout << _info.simTime.Double() << std::endl;
 
+		auto j=gz_joint.lock();
+		if (!j)
+		{
+			auto context = rr_context.lock();
+			if (context)
+			{
+				try
+				{
+				context->ReleaseServicePath(rr_path);
+				}
+				catch (std::exception&) {}
+			}
+			return;
+		}
+
 		size_t axis_count;		
-		physics::JointPtr j=get_joint();
+		
 		axis_count = j->DOF();
 				
 		rrvar_axes_position->SetOutValue(_get_axes_Positions(j));
@@ -257,6 +272,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void JointImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
+		rr_context = context;
+		rr_path = service_path;
+
 		RR_WEAK_PTR<JointImpl> weak_this = shared_from_this();
 		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
 		boost::bind(&JointImpl::OnUpdate, weak_this, _1));

@@ -56,16 +56,17 @@ model_pose["position"]["x"] = np.random.uniform(-2,2,1),
 model_pose["position"]["y"] = np.random.uniform(-2,2,1),
 model_pose["position"]["z"] = np.random.uniform(0,3,1),
 
-w.insert_model(sphere_model_sdf, "my_sphere", model_pose)
-w.get_models("my_sphere")
+while True:
+    w.insert_model(sphere_model_sdf, "my_sphere", model_pose)
+    #m = w.get_models("my_sphere")
+    #print(m.name)
+    time.sleep(1)
 
-time.sleep(5)
-
-w.remove_model("my_sphere")
-
-time.sleep(1)
-
-w.insert_model(sphere_model_sdf, "my_sphere", model_pose)
+    w.remove_model("my_sphere")
+    time.sleep(0.1)
+    w.insert_model(sphere_model_sdf, "my_sphere2", model_pose)
+    time.sleep(1)
+    w.remove_model("my_sphere2")
 
 
 

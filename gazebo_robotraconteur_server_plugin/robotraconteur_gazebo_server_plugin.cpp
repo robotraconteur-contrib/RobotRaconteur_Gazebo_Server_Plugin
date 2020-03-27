@@ -310,7 +310,19 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void RobotRaconteurGazeboServerPlugin::on_world_update_begin(const common::UpdateInfo& world_info)
 	{
-		io_context.poll();
+		int count;
+		do
+		{
+			try
+			{
+				count = io_context.poll_one();
+			}
+			catch (std::exception& e)
+			{
+				gzdbg << "Robot Raconteur exception occurred: " << e.what();
+			}
+		}
+		while ( count > 0);
 	}
 
   GZ_REGISTER_SYSTEM_PLUGIN(RobotRaconteurGazeboServerPlugin)

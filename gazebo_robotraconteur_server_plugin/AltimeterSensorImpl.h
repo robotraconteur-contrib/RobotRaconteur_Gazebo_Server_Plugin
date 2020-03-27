@@ -37,17 +37,15 @@ namespace RobotRaconteurGazeboServerPlugin
   public:
   	  AltimeterSensorImpl(sensors::AltimeterSensorPtr gz_altimeter);
 
-  	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
-
   	  virtual std::string RRType() {return AltimeterSensor_default_abstract_impl::RRType();  }
 
       virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
   protected:
       sensors::AltimeterSensorPtr get_altimetersensor();
+      std::weak_ptr<sensors::AltimeterSensor> gz_altsensor;
 
-      void OnUpdate1();
-      event::ConnectionPtr updateConnection;
+      virtual void OnUpdate1();      
   };
 
 

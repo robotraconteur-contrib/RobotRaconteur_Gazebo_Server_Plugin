@@ -33,12 +33,10 @@ namespace gps = com::robotraconteur::gps;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class GpsSensorImpl : public virtual rrgz::GpsSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
+  class GpsSensorImpl : public virtual rrgz::GpsSensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
-  	  GpsSensorImpl(sensors::GpsSensorPtr gz_Magnetometer);
-
-  	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
+  	  GpsSensorImpl(sensors::GpsSensorPtr gps);
 
   	  virtual std::string RRType() {return rrgz::GpsSensor_default_abstract_impl::RRType();  }
 
@@ -47,8 +45,10 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
       sensors::GpsSensorPtr get_gpssensor();
 
-      void OnUpdate1();
-      event::ConnectionPtr updateConnection;
+      virtual void OnUpdate1();
+
+      std::weak_ptr<sensors::GpsSensor> gz_gps;
+      
   };
 
 

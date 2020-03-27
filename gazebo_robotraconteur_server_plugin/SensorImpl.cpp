@@ -105,5 +105,40 @@ namespace RobotRaconteurGazeboServerPlugin
 		o.nanoseconds = t1.nsec;
 		o.seconds = t1.sec;
 		return o;
-	}	
+	}
+
+	void SensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
+	{
+		rr_context = context;
+		rr_path = service_path;
+
+		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
+		updateConnection=get_sensor()->ConnectUpdated(boost::bind(&SensorImpl::OnUpdate,c));		
+	}
+
+	void SensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> e)
+	{
+		RR_SHARED_PTR<SensorImpl> e1=e.lock();
+		if (!e1) return;
+		e1->OnUpdate1();
+	}
+
+	void SensorImpl::OnUpdate1()
+	{
+		sensors::SensorPtr e = gz_sensor.lock();
+		if (!e) 
+		{
+			auto context = rr_context.lock();
+			if (context)
+			{
+				try
+				{
+				context->ReleaseServicePath(rr_path);
+				}
+				catch (std::exception&) {}
+			}
+			
+			return;
+		}
+	}
 }

@@ -9,9 +9,7 @@
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
   </group>
 
-  <!--<node name="insert_model" pkg="gazebo_robotraconteur_server_plugin_examples"
-      type="gazebo_insert_model.py" respawn="true" respawn_delay="10" output="screen"/>-->
-
-
+  <node name="rip_joint_controller" pkg="gazebo_robotraconteur_server_plugin_examples"
+      type="rip_joint_controller.py" respawn="true" respawn_delay="5" output="screen"/>
 
 </launch>

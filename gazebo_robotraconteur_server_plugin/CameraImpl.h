@@ -35,12 +35,10 @@ namespace image = com::robotraconteur::image;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class CameraImpl : public virtual rrgz::CameraSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
+  class CameraImpl : public virtual rrgz::CameraSensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
 	  CameraImpl(sensors::CameraSensorPtr gz_camera);
-
-	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
 	  virtual image::ImagePtr capture_image() override;
 	  
@@ -51,9 +49,9 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
 	  sensors::CameraSensorPtr get_camera();	  
 
-	  void OnUpdate1();
+	  virtual void OnUpdate1();
 
-	  event::ConnectionPtr updateConnection;
+	 std::weak_ptr<sensors::CameraSensor> gz_camera;
   };
 
   namespace detail

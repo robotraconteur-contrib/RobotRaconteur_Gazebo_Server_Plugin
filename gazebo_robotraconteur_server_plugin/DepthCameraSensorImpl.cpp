@@ -24,14 +24,12 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	DepthCameraSensorImpl::DepthCameraSensorImpl(sensors::DepthCameraSensorPtr gz_camera) : SensorImpl(gz_camera)
 	{
-
+		this->gz_camera = gz_camera;
 	}
 
 	void DepthCameraSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_camera()->ConnectUpdated(boost::bind(&DepthCameraSensorImpl::OnUpdate,c));
-
+		SensorImpl::RRServiceObjectInit(context, service_path);
 		rrvar_image_stream->SetMaxBacklog(3);
 	}
 
@@ -78,15 +76,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::DepthCameraSensor>(get_sensor());
 	}
 		
-	void DepthCameraSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<DepthCameraSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<DepthCameraSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-
 	void DepthCameraSensorImpl::OnUpdate1()
 	{
+		SensorImpl::OnUpdate1();
+		auto c = gz_camera.lock();
+		if (!c) return;
+
 		auto i=capture_image();
 		rrvar_image_stream->AsyncSendPacket(i, []() {});
 	}

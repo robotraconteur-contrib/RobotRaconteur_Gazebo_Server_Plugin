@@ -20,15 +20,14 @@
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-	MagnetometerSensorImpl::MagnetometerSensorImpl(sensors::MagnetometerSensorPtr gz_contact) : SensorImpl(gz_contact)
+	MagnetometerSensorImpl::MagnetometerSensorImpl(sensors::MagnetometerSensorPtr mag) : SensorImpl(mag)
 	{
-
+		gz_mag = mag;
 	}
 
 	void MagnetometerSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_magnetometersensor()->ConnectUpdated(boost::bind(&MagnetometerSensorImpl::OnUpdate,c));
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		boost::weak_ptr<MagnetometerSensorImpl> weak_this = RR::rr_cast<MagnetometerSensorImpl>(shared_from_this());
 		this->rrvar_magnetic_field->GetWire()->SetPeekInValueCallback(
@@ -46,13 +45,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
-	void MagnetometerSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<MagnetometerSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<MagnetometerSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-		
 	sensors::MagnetometerSensorPtr MagnetometerSensorImpl::get_magnetometersensor()
 	{
 		return std::dynamic_pointer_cast<sensors::MagnetometerSensor>(get_sensor());
@@ -60,7 +52,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void MagnetometerSensorImpl::OnUpdate1()
 	{	
-		auto j = get_magnetometersensor();
+		SensorImpl::OnUpdate1();
+		auto j = gz_mag.lock();
+		if (!j) return;
 		auto v = j->MagneticField();
 		geometry::Vector3 o;
 		o.s.x = v.X();

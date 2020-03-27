@@ -21,15 +21,14 @@
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-	RaySensorImpl::RaySensorImpl(sensors::RaySensorPtr gz_RaySensor) : SensorImpl(gz_RaySensor)
+	RaySensorImpl::RaySensorImpl(sensors::RaySensorPtr ray) : SensorImpl(ray)
 	{
-
+		gz_ray = ray;
 	}
 
 	void RaySensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_raysensor()->ConnectUpdated(boost::bind(&RaySensorImpl::OnUpdate,c));
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		rrvar_scan_stream->SetMaxBacklog(3);
 	}
@@ -84,15 +83,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::RaySensor>(get_sensor());
 	}
 		
-	void RaySensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<RaySensorImpl> c1=RR_DYNAMIC_POINTER_CAST<RaySensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
-
 	void RaySensorImpl::OnUpdate1()
 	{		
+		SensorImpl::OnUpdate1();
+		
+		auto r = gz_ray.lock();
+		if (!r) return;
 		auto i=capture_scan();
 		rrvar_scan_stream->AsyncSendPacket(i, []() {});		
 	}

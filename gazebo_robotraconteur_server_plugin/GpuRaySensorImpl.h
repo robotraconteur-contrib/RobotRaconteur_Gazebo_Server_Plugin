@@ -33,14 +33,10 @@ namespace laserscan = com::robotraconteur::laserscan;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class GpuRaySensorImpl : public virtual rrgz::RaySensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
+  class GpuRaySensorImpl : public virtual rrgz::RaySensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
-	  GpuRaySensorImpl(sensors::GpuRaySensorPtr gz_camera);
-
-	  void Init();
-
-	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
+	  GpuRaySensorImpl(sensors::GpuRaySensorPtr ray);
 
 	  virtual laserscan::LaserScanPtr capture_scan() override;
 
@@ -51,9 +47,9 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
 	  sensors::GpuRaySensorPtr get_raysensor();
 	  
-	  void OnUpdate1();
+	  virtual void OnUpdate1();
 
-	  event::ConnectionPtr updateConnection;
+	  std::weak_ptr<sensors::GpuRaySensor> gz_ray;
   };
 
 }

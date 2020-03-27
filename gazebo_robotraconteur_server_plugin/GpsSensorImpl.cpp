@@ -20,9 +20,9 @@
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-	GpsSensorImpl::GpsSensorImpl(sensors::GpsSensorPtr gz_contact) : SensorImpl(gz_contact)
+	GpsSensorImpl::GpsSensorImpl(sensors::GpsSensorPtr gps) : SensorImpl(gps)
 	{
-
+		gz_gps = gps;
 	}
 
 	static gps::GpsStatePtr gz_to_rr_gpsstate(sensors::GpsSensorPtr& c)
@@ -41,8 +41,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void GpsSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
-		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
-		updateConnection=get_gpssensor()->ConnectUpdated(boost::bind(&GpsSensorImpl::OnUpdate,c));
+		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		boost::weak_ptr<GpsSensorImpl> weak_this = RR::rr_cast<GpsSensorImpl>(shared_from_this());
 		this->rrvar_state->GetWire()->SetPeekInValueCallback(
@@ -55,12 +54,6 @@ namespace RobotRaconteurGazeboServerPlugin
 		);
 	}
 
-	void GpsSensorImpl::OnUpdate(RR_WEAK_PTR<SensorImpl> c)
-	{
-		RR_SHARED_PTR<GpsSensorImpl> c1=RR_DYNAMIC_POINTER_CAST<GpsSensorImpl>(c.lock());
-		if (!c1) return;
-		c1->OnUpdate1();
-	}
 				
 	sensors::GpsSensorPtr GpsSensorImpl::get_gpssensor()
 	{
@@ -69,7 +62,9 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void GpsSensorImpl::OnUpdate1()
 	{
-		auto s = get_gpssensor();
+		SensorImpl::OnUpdate1();
+		auto s = gz_gps.lock();
+		if (!s) return;		
 		auto i = gz_to_rr_gpsstate(s);
 		rrvar_state->SetOutValue(i);		
 	}

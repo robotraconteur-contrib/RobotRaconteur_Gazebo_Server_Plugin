@@ -101,6 +101,13 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  std::list<WorldImpl_insert_op> insert_ops;
 
+	  transport::NodePtr gz_node;
+	  transport::PublisherPtr gz_request_pub;
+	  transport::PublisherPtr gz_factory_pub;
+
+
+
+
   };
 
 }

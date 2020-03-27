@@ -32,14 +32,10 @@ namespace rrgz=experimental::gazebo;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class MagnetometerSensorImpl : public virtual rrgz::MagnetometerSensor_default_abstract_impl, public virtual RR::IRRServiceObject, public virtual SensorImpl
+  class MagnetometerSensorImpl : public virtual rrgz::MagnetometerSensor_default_abstract_impl, public virtual SensorImpl
   {
   public:
   	  MagnetometerSensorImpl(sensors::MagnetometerSensorPtr gz_Magnetometer);
-
-  	  void Init();
-
-  	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
   	  virtual std::string RRType() {return rrgz::MagnetometerSensor_default_abstract_impl::RRType();  }
 
@@ -48,8 +44,10 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
       sensors::MagnetometerSensorPtr get_magnetometersensor();
 
-      void OnUpdate1();
-      event::ConnectionPtr updateConnection;
+      virtual void OnUpdate1();
+
+      std::weak_ptr<sensors::MagnetometerSensor> gz_mag;
+      
   };
 
 
