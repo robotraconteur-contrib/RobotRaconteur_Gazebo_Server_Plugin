@@ -26,12 +26,65 @@ WorldImpl::WorldImpl(physics::WorldPtr w)
 	gz_world=w;
 }
 
-void WorldImpl::Init(const std::string& rr_path)
+static datetime::Duration gz_time_to_rr_duration(const gazebo::common::Time& t)
 {
+	datetime::Duration o;
+	o.clock_info.clock_type = datetime::ClockTypeCode::sim_clock_scaled;
+	o.seconds = t.sec;
+	o.nanoseconds = t.nsec;
+	return o;
+}
+
+static datetime::DateTimeUTC gz_time_to_rr_datetimeutc(const gazebo::common::Time& t)
+{
+	datetime::DateTimeUTC o;
+	o.clock_info.clock_type = datetime::ClockTypeCode::sim_clock_scaled;
+	o.seconds = t.sec;
+	o.nanoseconds = t.nsec;
+	return o;
+}
+
+static rrgz::WorldTimesPtr gz_to_rr_worldtimes(gazebo::physics::WorldPtr& world)
+{
+	rrgz::WorldTimesPtr t(new rrgz::WorldTimes());
+
+	t->sim_time = gz_time_to_rr_duration(world->SimTime());
+	t->real_time = gz_time_to_rr_duration(world->RealTime());
+	t->wall_time = gz_time_to_rr_datetimeutc(common::Time::GetWallTime());
+	t->start_time = gz_time_to_rr_datetimeutc(world->StartTime());
+	return t;
+}
+
+void WorldImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
+{
+	auto context1 = context.lock();
+	if (!context1) return;
+	rr_node=context1->GetNode();
 	RR_WEAK_PTR<WorldImpl> w1=shared_from_this();
 	this->updateConnection = event::Events::ConnectWorldUpdateBegin(
 			          boost::bind(&WorldImpl::OnUpdate, w1, _1));
-	this->rr_path=rr_path;
+	this->rr_path=service_path;
+
+	RR_WEAK_PTR<WorldImpl> weak_this = shared_from_this();
+	rrvar_sim_time->GetWire()->SetPeekInValueCallback(
+		[weak_this](const uint32_t&)
+		{
+			auto this_ = weak_this.lock();
+			if (!this_) throw RR::InvalidOperationException("Gazebo world object not found");
+			return gz_time_to_rr_duration(this_->get_world()->SimTime());
+		}
+	);
+
+	rrvar_time->GetWire()->SetPeekInValueCallback(
+		[weak_this](const uint32_t&)
+		{
+			auto this_ = weak_this.lock();
+			if (!this_) throw RR::InvalidOperationException("Gazebo world object not found");
+			physics::WorldPtr w = this_->get_world();			
+			
+			return gz_to_rr_worldtimes(w);
+		}
+	);
 }
 
 std::string WorldImpl::GetRRPath()
@@ -90,65 +143,6 @@ rrgz::LightPtr WorldImpl::get_lights(const std::string& ind)
 	return l_impl;
 }
 
-static datetime::Duration gz_time_to_rr_duration(const gazebo::common::Time& t)
-{
-	datetime::Duration o;
-	o.clock_info.clock_type = datetime::ClockTypeCode::sim_clock_scaled;
-	o.seconds = t.sec;
-	o.nanoseconds = t.nsec;
-	return o;
-}
-
-static datetime::DateTimeUTC gz_time_to_rr_datetimeutc(const gazebo::common::Time& t)
-{
-	datetime::DateTimeUTC o;
-	o.clock_info.clock_type = datetime::ClockTypeCode::sim_clock_scaled;
-	o.seconds = t.sec;
-	o.nanoseconds = t.nsec;
-	return o;
-}
-
-static rrgz::WorldTimesPtr gz_to_rr_worldtimes(gazebo::physics::WorldPtr& world)
-{
-	rrgz::WorldTimesPtr t(new rrgz::WorldTimes());
-
-	t->sim_time = gz_time_to_rr_duration(world->SimTime());
-	t->real_time = gz_time_to_rr_duration(world->RealTime());
-	t->wall_time = gz_time_to_rr_datetimeutc(common::Time::GetWallTime());
-	t->start_time = gz_time_to_rr_datetimeutc(world->StartTime());
-	return t;
-}
-
-void WorldImpl::set_sim_time(RR::WirePtr<datetime::Duration> value)
-{
-	rrgz::World_default_impl::set_sim_time(value);
-	RR_WEAK_PTR<WorldImpl> weak_this = shared_from_this();
-	rrvar_sim_time->GetWire()->SetPeekInValueCallback(
-		[weak_this](const uint32_t&)
-		{
-			auto this_ = weak_this.lock();
-			if (!this_) throw RR::InvalidOperationException("Gazebo world object not found");
-			return gz_time_to_rr_duration(this_->get_world()->SimTime());
-		}
-	);
-}
-
-void WorldImpl::set_time(RR::WirePtr<rrgz::WorldTimesPtr> value)
-{
-	rrgz::World_default_impl::set_time(value);
-	RR_WEAK_PTR<WorldImpl> weak_this = shared_from_this();
-	rrvar_time->GetWire()->SetPeekInValueCallback(
-		[weak_this](const uint32_t&)
-		{
-			auto this_ = weak_this.lock();
-			if (!this_) throw RR::InvalidOperationException("Gazebo world object not found");
-			physics::WorldPtr w = this_->get_world();			
-			
-			return gz_to_rr_worldtimes(w);
-		}
-	);
-}
-
 void WorldImpl::OnUpdate(RR_WEAK_PTR<WorldImpl> j, const common::UpdateInfo & _info)
 {
 	RR_SHARED_PTR<WorldImpl> w1=j.lock();
@@ -158,19 +152,38 @@ void WorldImpl::OnUpdate(RR_WEAK_PTR<WorldImpl> j, const common::UpdateInfo & _i
 
 void WorldImpl::OnUpdate1(const common::UpdateInfo & _info)
 {
-	RR_SHARED_PTR<RR::WireBroadcaster<rrgz::WorldTimesPtr > > time_b;
-	RR_SHARED_PTR<RR::WireBroadcaster<datetime::Duration > > simtime_b;
+	auto w = gz_world.lock();
+	if (!w) return;	
 	
-	{
-		boost::mutex::scoped_lock lock(this_lock);
-		time_b = rrvar_time;
-		simtime_b = rrvar_sim_time;
-	}
-	
-	physics::WorldPtr w = get_world();
+	rrvar_sim_time->SetOutValue(gz_time_to_rr_duration(w->SimTime()));
+	rrvar_time->SetOutValue(gz_to_rr_worldtimes(w));
 
-	if (simtime_b) simtime_b->SetOutValue(gz_time_to_rr_duration(w->SimTime()));
-	if (time_b) time_b->SetOutValue(gz_to_rr_worldtimes(w));
+	for (auto e = insert_ops.begin(); e!=insert_ops.end();)
+	{
+
+		if (w->ModelByName(e->model_name))
+		{
+			auto rr_handler = e->handler;
+			RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler](){
+				rr_handler(nullptr);
+			});
+			e=insert_ops.erase(e);
+		}
+		else if (common::Time::GetWallTime() > e->insert_time + common::Time(10,0))
+		{
+			auto model_name = e->model_name;
+			auto rr_handler = e->handler;
+			RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler,model_name](){
+				rr_handler(RR_MAKE_SHARED<RR::RequestTimeoutException>("Model insert for " + model_name + " timed out"));
+			});
+			e=insert_ops.erase(e);			
+		}
+		else
+		{
+			e++;
+		}
+	}
+
 }
 
 physics::WorldPtr WorldImpl::get_world()
@@ -239,5 +252,55 @@ void WorldImpl::remove_model(const std::string& model_name)
 
 	w->RemoveModel(model_name);
 }
+
+void WorldImpl::async_get_name(boost::function<void (const std::string&,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+{
+	std::string name = get_name();
+	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler,name] { rr_handler(name,nullptr); });
+}
+
+void WorldImpl::async_get_model_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+{
+	auto model_names = get_model_names();
+	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler,model_names] { rr_handler(model_names,nullptr); });
+}
+
+void WorldImpl::async_get_light_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+{
+	auto light_names = get_light_names();
+	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler,light_names] { rr_handler(light_names,nullptr); });
+}
+
+void WorldImpl::async_insert_model(const std::string& model_sdf, const std::string& model_name, const com::robotraconteur::geometry::Pose& model_pose,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+{
+	insert_model(model_sdf, model_name, model_pose);
+	//RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler] { rr_handler(nullptr); });
+	WorldImpl_insert_op op;
+	op.handler = rr_handler;
+	op.model_name = model_name;
+	op.insert_time = common::Time::GetWallTime();
+
+	insert_ops.push_back(op);
+
+}
+
+void WorldImpl::async_remove_model(const std::string& model_name,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+{
+	remove_model(model_name);
+	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler] { rr_handler(nullptr); });
+}
+
+void WorldImpl::async_get_models(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Model>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout)
+{
+	auto m = get_models(ind);
+	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [handler,m] { handler(m,nullptr); });
+}
+
+void WorldImpl::async_get_lights(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Light>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout)
+{
+	auto m = get_lights(ind);
+	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [handler,m] { handler(m,nullptr); });
+}
+
 
 }

@@ -36,7 +36,6 @@ namespace RobotRaconteurGazeboServerPlugin
 			if (!w) return;
 
 			RR_SHARED_PTR<WorldImpl> rr_w=RR_MAKE_SHARED<WorldImpl>(w);
-			rr_w->Init("GazeboServer.Worlds[" + RR::detail::encode_index(w->Name()) +  "]");
 			rr_worlds.insert(std::make_pair(w->Name(),rr_w));
 		}
 	}

@@ -32,12 +32,22 @@ namespace geometry = com::robotraconteur::geometry;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
-  class WorldImpl : public rrgz::World_default_impl, public RR_ENABLE_SHARED_FROM_THIS<WorldImpl>
+
+  class WorldImpl_insert_op
+  {
+  public:
+    std::string model_name;
+	common::Time insert_time;
+	boost::function<void (RR::RobotRaconteurExceptionPtr) > handler;
+  };
+
+
+  class WorldImpl : public virtual rrgz::World_default_impl, public virtual rrgz::async_World, public virtual RR::IRRServiceObject, public RR_ENABLE_SHARED_FROM_THIS<WorldImpl>
   {
   public:
 	  WorldImpl(physics::WorldPtr w);
 
-	  virtual void Init(const std::string& rr_path);
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
 	  virtual std::string get_name() override;	  
 
@@ -47,10 +57,6 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual RR::RRListPtr<RR::RRArray<char> > get_light_names() override;
 	  	  
-	  virtual void set_time(RR::WirePtr<rrgz::WorldTimesPtr> value) override;
-
-	  virtual void set_sim_time(RR::WirePtr<datetime::Duration> value) override;
-
 	  virtual rrgz::ModelPtr get_models(const std::string& ind) override;
 	  virtual rrgz::LightPtr get_lights(const std::string& ind) override;
 
@@ -62,6 +68,25 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual void remove_model(const std::string& model_name);
 
+	  // Async versions of functions to allow for delayed returns
+
+	  virtual void async_get_name(boost::function<void (const std::string&,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+
+	  virtual void async_get_model_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+
+	  virtual void async_get_light_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+
+	  virtual void async_insert_model(const std::string& model_sdf, const std::string& model_name, const com::robotraconteur::geometry::Pose& model_pose,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+
+
+	  virtual void async_remove_model(const std::string& model_name,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+
+
+	  virtual void async_get_models(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Model>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout=RR_TIMEOUT_INFINITE);
+
+	  virtual void async_get_lights(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Light>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout=RR_TIMEOUT_INFINITE);
+
+
 
   protected:
 	  boost::weak_ptr<physics::World> gz_world;
@@ -71,6 +96,10 @@ namespace RobotRaconteurGazeboServerPlugin
 	  event::ConnectionPtr updateConnection;
 
 	  std::string rr_path;
+
+	  RR_WEAK_PTR<RR::RobotRaconteurNode> rr_node;
+
+	  std::list<WorldImpl_insert_op> insert_ops;
 
   };
 
