@@ -26,17 +26,17 @@ import cv2
 import numpy as np
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.sensor_names
+print(server.sensor_names)
 a=server.get_sensors('default::rip::pendulum::altimeter')
 
 altitude=a.altitude
-print altitude
+print(altitude)
 
 p=a.altitude.Connect()
 try:
     while True:
         if (p.InValueValid):
-            print p.InValue
+            print(p.InValue)
         time.sleep(.01)
 except KeyboardInterrupt: pass
 

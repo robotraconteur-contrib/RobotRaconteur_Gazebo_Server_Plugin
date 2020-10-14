@@ -24,9 +24,9 @@ import time
 import math
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.world_names
+print(server.world_names)
 w=server.get_worlds('default')
-print w.name
+print(w.name)
 m=w.get_models('rip')
 try:
     m.destroy_joint_controller()
@@ -45,8 +45,8 @@ pid.imin=-100
 pid.cmdMax=1000
 pid.cmdMin=-1000
 
-print c.joint_names
-print c.position_pid
+print(c.joint_names)
+print(c.position_pid)
 c.setf_position_pid('rip::joint_1',pid)
 c.setf_position_pid('rip::joint_2',pid)
 

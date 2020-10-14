@@ -14,7 +14,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>robotraconteur</depend>
-  <depend>robotraconteur_standard_robdef_cpp</depend>
+  <depend>robotraconteur_companion</depend>
   <depend>gazebo</depend>
       
   <export>    

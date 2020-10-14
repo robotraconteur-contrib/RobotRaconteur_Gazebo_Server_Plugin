@@ -1,6 +1,6 @@
 service experimental.gazebo
 
-stdver 0.9
+stdver 0.10
 
 import com.robotraconteur.geometry
 import com.robotraconteur.image
@@ -30,12 +30,12 @@ using com.robotraconteur.imu.ImuState
 struct Contact
 	field string contact_name1
 	field string contact_name2
-end struct
+end
 
 object Base
 	property string name [readonly]
 	property string scoped_name [readonly]
-end object
+end
 
 object Server
 	property string{list} world_names [readonly]
@@ -43,7 +43,7 @@ object Server
 
 	property string{list} sensor_names [readonly]
 	objref Sensor{string} sensors
-end object
+end
 
 struct WorldTimes
     field Duration sim_time
@@ -67,7 +67,7 @@ object World
 	function void insert_model(string model_sdf, string model_name, Pose model_pose)
 	function void remove_model(string model_name)
 
-end object
+end
 
 object Entity
 	implements Base
@@ -83,7 +83,7 @@ object Entity
 	wire SpatialVelocity relative_velocity [readonly]
 	wire SpatialAcceleration world_acceleration [readonly]
 	wire SpatialAcceleration relative_acceleration [readonly]
-end object
+end
 
 object Model
 	implements Entity
@@ -120,7 +120,7 @@ object Model
 
 	objref JointController kinematic_joint_controller
 
-end object
+end
 
 object Link
 	implements Entity
@@ -141,7 +141,7 @@ object Link
 	wire SpatialAcceleration relative_acceleration [readonly]
 		
 	wire Wrench{list} applied_wrenches [writeonly]
-end object
+end
 
 namedarray JointWrench
     field Wrench body1_wrench
@@ -173,7 +173,7 @@ object Joint
 
 	wire double[] apply_axes_force [writeonly]
 
-end object
+end
 
 object JointController
 	property string{list} joint_names [readonly]
@@ -189,7 +189,7 @@ object JointController
 	function void add_joint(string name)
 	function void setf_position_pid(string name, PIDParam pid)
 	function void setf_velocity_pid(string name, PIDParam pid)
-end object
+end
 
 object Sensor
 	property string name [readonly]
@@ -201,7 +201,7 @@ object Sensor
 	property double update_rate
 	property Duration last_update_time [readonly]
 	property Duration last_measurement_time	[readonly]
-end object
+end
 
 object CameraSensor
 	implements Sensor
@@ -217,7 +217,7 @@ object CameraSensor
 	
 	function Image capture_image()
 	pipe Image image_stream [readonly]
-end object
+end
 
 object MultiCameraSensor
 	implements Sensor
@@ -234,7 +234,7 @@ object MultiCameraSensor
 	property int32 camera_count [readonly]
 	function Image capture_image(int32 ind)
 	pipe Image{int32} image_stream [readonly]
-end object
+end
 
 object DepthCameraSensor
 	implements Sensor
@@ -250,7 +250,7 @@ object DepthCameraSensor
 	
 	function DepthImage capture_image()
 	pipe DepthImage image_stream [readonly]
-end object
+end
 
 object RaySensor
 	implements Sensor
@@ -266,7 +266,7 @@ object RaySensor
 	
 	function LaserScan capture_scan()
 	pipe LaserScan scan_stream [readonly]
-end object
+end
 
 object ContactSensor
 	implements Sensor
@@ -281,7 +281,7 @@ object ContactSensor
 	property Duration last_measurement_time [readonly]
 	
 	wire Contact{list} contacts [readonly]
-end object
+end
 
 object AltimeterSensor
 	implements Sensor
@@ -296,7 +296,7 @@ object AltimeterSensor
 	property Duration last_measurement_time [readonly]
 	
 	wire double altitude [readonly]	
-end object
+end
 
 object SonarSensor
 	implements Sensor
@@ -315,7 +315,7 @@ object SonarSensor
 	property double radius [readonly]
 	
 	wire double range [readonly]	
-end object
+end
 
 object MagnetometerSensor
 	implements Sensor
@@ -330,7 +330,7 @@ object MagnetometerSensor
 	property Duration last_measurement_time [readonly]
 	
 	wire Vector3 magnetic_field [readonly]	
-end object
+end
 
 object ForceTorqueSensor
 	implements Sensor
@@ -345,7 +345,7 @@ object ForceTorqueSensor
 	property Duration last_measurement_time [readonly]
 	
 	wire Wrench force_torque [readonly]	
-end object
+end
 
 object GpsSensor
 	implements Sensor
@@ -360,7 +360,7 @@ object GpsSensor
 	property Duration last_measurement_time [readonly]
 		
 	wire GpsState state [readonly]
-end object
+end
 
 object ImuSensor
 	implements Sensor
@@ -377,7 +377,7 @@ object ImuSensor
 	function void setf_reference_pose()
 		
 	wire ImuState state [readonly]
-end object
+end
 
 object Light
 	property string name [readonly]
@@ -387,4 +387,4 @@ object Light
 	
 	property Color diffuse_color
 	property Color specular_color
-end object
+end

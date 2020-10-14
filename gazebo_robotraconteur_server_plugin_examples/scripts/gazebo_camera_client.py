@@ -39,7 +39,7 @@ def new_frame(pipe_ep):
         current_frame=ImageToMat(image)
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.sensor_names
+print(server.sensor_names)
 cam=server.get_sensors('default::rip::pendulum::camera')
 image=cam.capture_image()
 image1=ImageToMat(image)

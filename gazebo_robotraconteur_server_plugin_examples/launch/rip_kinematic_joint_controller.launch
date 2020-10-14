@@ -9,8 +9,8 @@
     <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen"/>
   </group>
 
-  <node name="rip_balance" pkg="gazebo_robotraconteur_server_plugin_examples"
-      type="rip_kinematic_joint_controller.py" respawn="true" respawn_delay="5" output="screen"/>
+  <!--<node name="rip_balance" pkg="gazebo_robotraconteur_server_plugin_examples"
+      type="rip_kinematic_joint_controller.py" respawn="true" respawn_delay="5" output="screen"/>-->
 
 
 

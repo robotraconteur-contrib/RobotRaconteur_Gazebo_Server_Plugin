@@ -45,6 +45,8 @@ public:
 
 	  static void OnUpdate(RR_WEAK_PTR<EntityImpl> j, const common::UpdateInfo & _info);
 
+	  static void OnDelete(RR_WEAK_PTR<EntityImpl> j, const std::string& entity);
+
 	  virtual void setf_world_pose(const geometry::Pose& value) override;
 	  	  
 	  virtual void setf_relative_pose(const geometry::Pose& value) override;
@@ -57,6 +59,7 @@ protected:
 	  virtual void OnUpdate1(const common::UpdateInfo & _info);
 
 	  event::ConnectionPtr updateConnection;
+	  event::ConnectionPtr deleteConnection;
 	  
 	  std::string gz_path;
 	  std::string rr_path;

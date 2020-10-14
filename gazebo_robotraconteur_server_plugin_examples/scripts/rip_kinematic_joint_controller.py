@@ -24,9 +24,9 @@ import time
 import math
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.world_names
+print(server.world_names)
 w=server.get_worlds('default')
-print w.name
+print(w.name)
 m=w.get_models('rip')
 try:
     m.destroy_kinematic_joint_controller()

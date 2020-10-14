@@ -28,6 +28,8 @@ using namespace gazebo;
 namespace RR=RobotRaconteur;
 namespace rrgz=experimental::gazebo;
 
+#include "RobotRaconteurCompanion/StdRobDef/StdRobDefAll.h"
+
 #include "ServerImpl.h"
 #include "WorldImpl.h"
 #include "EntityImpl.h"

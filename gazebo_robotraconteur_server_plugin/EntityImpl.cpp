@@ -130,6 +130,42 @@ namespace RobotRaconteurGazeboServerPlugin
 		rrvar_relative_acceleration->SetOutValue(racc1);
 	}
 
+	void EntityImpl::OnDelete(RR_WEAK_PTR<EntityImpl> e, const std::string& entity)
+	{
+		RR_SHARED_PTR<EntityImpl> e1=e.lock();
+		bool match = false;
+		if (!e1)
+		{
+			match = true;
+		}
+		else
+		{
+			if (e1->gz_path == entity)
+			{
+				match = true;
+			}
+		}
+
+		if (!match)
+		{
+			return;
+		}
+
+		gzmsg << "Robot Raconteur Server releasing entity: " << entity << std::endl;
+
+		e1->updateConnection.reset();
+		e1->deleteConnection.reset();
+
+		RR_SHARED_PTR<RR::ServerContext> ctx = e1->rr_context.lock();
+		if (!ctx)
+			return;
+		try
+		{
+			ctx->ReleaseServicePath(e1->rr_path);
+		}
+		catch (std::exception&) {}
+	}
+
 	std::string EntityImpl::GetRRPath()
 	{
 		return rr_path;
@@ -153,6 +189,8 @@ namespace RobotRaconteurGazeboServerPlugin
 		RR_WEAK_PTR<EntityImpl> w1=shared_from_this();
 		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
 		boost::bind(&EntityImpl::OnUpdate, w1, _1));
+		this->deleteConnection = event::Events::ConnectDeleteEntity(
+		boost::bind(&EntityImpl::OnDelete, w1, _1));
 
 		gz_path=get_entity()->GetScopedName(true);
 		this->rr_path=service_path;

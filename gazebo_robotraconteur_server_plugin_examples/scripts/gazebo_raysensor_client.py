@@ -43,7 +43,7 @@ def new_frame(pipe_ep):
 
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
-print server.sensor_names
+print(server.sensor_names)
 cam=server.get_sensors('default::rip::pendulum::laser')
 scan=cam.capture_scan()
 
