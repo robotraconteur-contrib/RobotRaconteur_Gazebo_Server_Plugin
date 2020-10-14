@@ -184,7 +184,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void EntityImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		rr_context = context.lock();
-		BOOST_ASSERT(rr_context);
+		BOOST_ASSERT(rr_context.lock());
 
 		RR_WEAK_PTR<EntityImpl> w1=shared_from_this();
 		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
