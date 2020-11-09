@@ -31,6 +31,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		SensorImpl::RRServiceObjectInit(context, service_path);
 
 		rrvar_image_stream->SetMaxBacklog(3);
+		rr_downsampler->AddPipeBroadcaster(rrvar_image_stream);
 	}
 
 	namespace detail

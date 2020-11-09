@@ -28,6 +28,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void ContactSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		SensorImpl::RRServiceObjectInit(context, service_path);
+		rr_downsampler->AddWireBroadcaster(rrvar_contacts);
 
 		boost::weak_ptr<ContactSensorImpl> weak_this = RR::rr_cast<ContactSensorImpl>(shared_from_this());
 		this->rrvar_contacts->GetWire()->SetPeekInValueCallback(

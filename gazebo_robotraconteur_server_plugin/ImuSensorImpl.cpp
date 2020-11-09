@@ -53,6 +53,8 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		SensorImpl::RRServiceObjectInit(context, service_path);
 
+		rr_downsampler->AddWireBroadcaster(rrvar_state);
+
 		boost::weak_ptr<ImuSensorImpl> weak_this = RR::rr_cast<ImuSensorImpl>(shared_from_this());
 		this->rrvar_state->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {

@@ -10,6 +10,8 @@ import com.robotraconteur.laserscan
 import com.robotraconteur.pid
 import com.robotraconteur.gps
 import com.robotraconteur.imu
+import com.robotraconteur.device
+import com.robotraconteur.device.isoch
 
 using com.robotraconteur.geometry.Vector3
 using com.robotraconteur.geometry.Quaternion
@@ -26,6 +28,10 @@ using com.robotraconteur.laserscan.LaserScan
 using com.robotraconteur.pid.PIDParam
 using com.robotraconteur.gps.GpsState
 using com.robotraconteur.imu.ImuState
+using com.robotraconteur.device.Device
+using com.robotraconteur.device.DeviceInfo
+using com.robotraconteur.device.isoch.IsochDevice
+using com.robotraconteur.device.isoch.IsochInfo
 
 struct Contact
 	field string contact_name1
@@ -38,6 +44,9 @@ object Base
 end
 
 object Server
+    implements Device
+	property DeviceInfo device_info [readonly,nolock]
+
 	property string{list} world_names [readonly]
 	objref World{string} worlds
 
@@ -71,6 +80,7 @@ end
 
 object Entity
 	implements Base
+	implements IsochDevice
 	property string name [readonly]
 	property string scoped_name [readonly]
 
@@ -83,11 +93,15 @@ object Entity
 	wire SpatialVelocity relative_velocity [readonly]
 	wire SpatialAcceleration world_acceleration [readonly]
 	wire SpatialAcceleration relative_acceleration [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object Model
 	implements Entity
 	implements Base
+	implements IsochDevice
 	property string name [readonly]
 	property string scoped_name [readonly]
 
@@ -120,11 +134,15 @@ object Model
 
 	objref JointController kinematic_joint_controller
 
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
+
 end
 
 object Link
 	implements Entity
 	implements Base
+	implements IsochDevice
 	property string name [readonly]
 	property string scoped_name [readonly]
 
@@ -141,6 +159,9 @@ object Link
 	wire SpatialAcceleration relative_acceleration [readonly]
 		
 	wire Wrench{list} applied_wrenches [writeonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 namedarray JointWrench
@@ -150,6 +171,7 @@ end
 
 object Joint
 	implements Base
+	implements IsochDevice
 
 	property string name [readonly]
 	property string scoped_name [readonly]
@@ -173,9 +195,13 @@ object Joint
 
 	wire double[] apply_axes_force [writeonly]
 
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
+
 end
 
 object JointController
+    implements IsochDevice
 	property string{list} joint_names [readonly]
 	property PIDParam{string} position_pid [readonly]
 	property PIDParam{string} velocity_pid [readonly]
@@ -189,9 +215,13 @@ object JointController
 	function void add_joint(string name)
 	function void setf_position_pid(string name, PIDParam pid)
 	function void setf_velocity_pid(string name, PIDParam pid)
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -201,10 +231,14 @@ object Sensor
 	property double update_rate
 	property Duration last_update_time [readonly]
 	property Duration last_measurement_time	[readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object CameraSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -217,10 +251,14 @@ object CameraSensor
 	
 	function Image capture_image()
 	pipe Image image_stream [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object MultiCameraSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -234,10 +272,14 @@ object MultiCameraSensor
 	property int32 camera_count [readonly]
 	function Image capture_image(int32 ind)
 	pipe Image{int32} image_stream [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object DepthCameraSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -250,10 +292,14 @@ object DepthCameraSensor
 	
 	function DepthImage capture_image()
 	pipe DepthImage image_stream [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object RaySensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -266,10 +312,14 @@ object RaySensor
 	
 	function LaserScan capture_scan()
 	pipe LaserScan scan_stream [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object ContactSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -281,10 +331,14 @@ object ContactSensor
 	property Duration last_measurement_time [readonly]
 	
 	wire Contact{list} contacts [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object AltimeterSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -295,11 +349,15 @@ object AltimeterSensor
 	property Duration last_update_time [readonly]
 	property Duration last_measurement_time [readonly]
 	
-	wire double altitude [readonly]	
+	wire double altitude [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object SonarSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -314,11 +372,15 @@ object SonarSensor
 	property double range_max [readonly]
 	property double radius [readonly]
 	
-	wire double range [readonly]	
+	wire double range [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object MagnetometerSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -329,11 +391,15 @@ object MagnetometerSensor
 	property Duration last_update_time [readonly]
 	property Duration last_measurement_time [readonly]
 	
-	wire Vector3 magnetic_field [readonly]	
+	wire Vector3 magnetic_field [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 	
 end
 
 object ForceTorqueSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -344,11 +410,15 @@ object ForceTorqueSensor
 	property Duration last_update_time [readonly]
 	property Duration last_measurement_time [readonly]
 	
-	wire Wrench force_torque [readonly]	
+	wire Wrench force_torque [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object GpsSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -360,10 +430,14 @@ object GpsSensor
 	property Duration last_measurement_time [readonly]
 		
 	wire GpsState state [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object ImuSensor
 	implements Sensor
+	implements IsochDevice
 	property string name [readonly]
 	property string type [readonly]
 	property string parent_name [readonly]
@@ -377,6 +451,9 @@ object ImuSensor
 	function void setf_reference_pose()
 		
 	wire ImuState state [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
 end
 
 object Light

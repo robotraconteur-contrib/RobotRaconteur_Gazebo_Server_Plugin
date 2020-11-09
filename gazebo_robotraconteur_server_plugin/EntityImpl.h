@@ -50,6 +50,12 @@ public:
 	  virtual void setf_world_pose(const geometry::Pose& value) override;
 	  	  
 	  virtual void setf_relative_pose(const geometry::Pose& value) override;
+
+	  virtual com::robotraconteur::device::isoch::IsochInfoPtr get_isoch_info() override;
+
+	  virtual uint32_t get_isoch_downsample() override;
+
+	  virtual void set_isoch_downsample(uint32_t value) override;
 	  		  
 	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
@@ -57,6 +63,7 @@ protected:
 	  virtual physics::EntityPtr get_entity();
 
 	  virtual void OnUpdate1(const common::UpdateInfo & _info);
+	  virtual void OnUpdate0(const common::UpdateInfo & _info);
 
 	  event::ConnectionPtr updateConnection;
 	  event::ConnectionPtr deleteConnection;
@@ -66,6 +73,8 @@ protected:
 	  RR_WEAK_PTR<RR::ServerContext> rr_context;
 
 	  boost::weak_ptr<physics::Entity> gz_entity;
+
+	  RR::BroadcastDownsamplerPtr rr_downsampler;
 };
 
 }

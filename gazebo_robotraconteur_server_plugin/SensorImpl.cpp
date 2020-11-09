@@ -112,6 +112,9 @@ namespace RobotRaconteurGazeboServerPlugin
 		rr_context = context;
 		rr_path = service_path;
 
+		rr_downsampler = boost::make_shared<RR::BroadcastDownsampler>();
+		rr_downsampler->Init(context.lock(),0);
+
 		RR_WEAK_PTR<SensorImpl> c=shared_from_this();
 		updateConnection=get_sensor()->ConnectUpdated(boost::bind(&SensorImpl::OnUpdate,c));		
 	}
@@ -120,11 +123,13 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR_SHARED_PTR<SensorImpl> e1=e.lock();
 		if (!e1) return;
-		e1->OnUpdate1();
+		e1->OnUpdate0();
 	}
 
-	void SensorImpl::OnUpdate1()
+	void SensorImpl::OnUpdate0()
 	{
+		RR::BroadcastDownsamplerStep step(rr_downsampler);
+
 		sensors::SensorPtr e = gz_sensor.lock();
 		if (!e) 
 		{
@@ -140,5 +145,36 @@ namespace RobotRaconteurGazeboServerPlugin
 			
 			return;
 		}
+
+		OnUpdate1();
+	}
+
+	void SensorImpl::OnUpdate1()
+	{
+
+	}
+
+	com::robotraconteur::device::isoch::IsochInfoPtr SensorImpl::get_isoch_info()
+	{
+		com::robotraconteur::device::isoch::IsochInfoPtr ret(new com::robotraconteur::device::isoch::IsochInfo());
+		auto sensor = get_sensor();
+		auto world = physics::get_world(sensor->WorldName());
+		common::Time start_time = world->StartTime();
+		ret->isoch_epoch.seconds = start_time.sec;
+		ret->isoch_epoch.nanoseconds = start_time.nsec;
+		ret->max_downsample = 100;
+		ret->update_rate = sensor->UpdateRate();
+
+		return ret;
+	}
+
+	uint32_t SensorImpl::get_isoch_downsample()
+	{
+		return rr_downsampler->GetClientDownsample(RR::ServerEndpoint::GetCurrentEndpoint()->GetLocalEndpoint());
+	}
+
+	void SensorImpl::set_isoch_downsample(uint32_t value)
+	{
+		return rr_downsampler->SetClientDownsample(RR::ServerEndpoint::GetCurrentEndpoint()->GetLocalEndpoint(), value);
 	}
 }

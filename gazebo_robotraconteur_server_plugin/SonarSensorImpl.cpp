@@ -30,6 +30,8 @@ namespace RobotRaconteurGazeboServerPlugin
 		
 		SensorImpl::RRServiceObjectInit(context, service_path);
 
+		rr_downsampler->AddWireBroadcaster(rrvar_range);
+
 		boost::weak_ptr<SonarSensorImpl> weak_this = RR::rr_cast<SonarSensorImpl>(shared_from_this());
 		this->rrvar_range->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {

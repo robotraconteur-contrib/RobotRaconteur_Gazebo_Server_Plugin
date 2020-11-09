@@ -132,6 +132,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	void KinematicJointControllerImpl::OnUpdate1(const common::UpdateInfo & _info)
 	{
+		RR::BroadcastDownsamplerStep step(rr_downsampler);
+
 		auto o_pos=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
 		auto o_vel=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
 		
@@ -185,6 +187,13 @@ namespace RobotRaconteurGazeboServerPlugin
 	void KinematicJointControllerImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		rr_path = service_path;
+
+		rr_downsampler = boost::make_shared<RR::BroadcastDownsampler>();
+		rr_downsampler->Init(context.lock(),9);
+
+		rr_downsampler->AddWireBroadcaster(rrvar_joint_position);
+		rr_downsampler->AddWireBroadcaster(rrvar_joint_velocity);
+		rr_downsampler->AddWireBroadcaster(rrvar_joint_forces);
 
 		RR_WEAK_PTR<KinematicJointControllerImpl> weak_this=shared_from_this();
 		this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -288,6 +297,29 @@ namespace RobotRaconteurGazeboServerPlugin
 	std::string KinematicJointControllerImpl::RRPath()
 	{
 		return rr_path;
+	}
+
+	com::robotraconteur::device::isoch::IsochInfoPtr KinematicJointControllerImpl::get_isoch_info()
+	{
+		com::robotraconteur::device::isoch::IsochInfoPtr ret(new com::robotraconteur::device::isoch::IsochInfo());
+		auto world = get_model()->GetWorld();
+		common::Time start_time = world->StartTime();
+		ret->isoch_epoch.seconds = start_time.sec;
+		ret->isoch_epoch.nanoseconds = start_time.nsec;
+		ret->max_downsample = 100;
+		ret->update_rate = world->Physics()->GetRealTimeUpdateRate();
+
+		return ret;
+	}
+
+	uint32_t KinematicJointControllerImpl::get_isoch_downsample()
+	{
+		return rr_downsampler->GetClientDownsample(RR::ServerEndpoint::GetCurrentEndpoint()->GetLocalEndpoint());
+	}
+
+	void KinematicJointControllerImpl::set_isoch_downsample(uint32_t value)
+	{
+		return rr_downsampler->SetClientDownsample(RR::ServerEndpoint::GetCurrentEndpoint()->GetLocalEndpoint(), value);
 	}
 
 }

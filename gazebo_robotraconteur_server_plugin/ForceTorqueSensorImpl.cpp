@@ -45,6 +45,8 @@ namespace RobotRaconteurGazeboServerPlugin
 		
 		SensorImpl::RRServiceObjectInit(context, service_path);
 
+		rr_downsampler->AddWireBroadcaster(rrvar_force_torque);
+
 		boost::weak_ptr<ForceTorqueSensorImpl> weak_this = RR::rr_cast<ForceTorqueSensorImpl>(shared_from_this());
 		this->rrvar_force_torque->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {

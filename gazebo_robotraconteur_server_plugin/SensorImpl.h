@@ -57,11 +57,18 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  static void OnUpdate(RR_WEAK_PTR<SensorImpl> c);
 
+	  virtual com::robotraconteur::device::isoch::IsochInfoPtr get_isoch_info() override;
+
+	  virtual uint32_t get_isoch_downsample() override;
+
+	  virtual void set_isoch_downsample(uint32_t value) override;
+
 	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
   protected:
 
 	  virtual void OnUpdate1();
+	  virtual void OnUpdate0();
 
 	  std::weak_ptr<sensors::Sensor> gz_sensor;
 	  sensors::SensorPtr get_sensor();
@@ -69,7 +76,9 @@ namespace RobotRaconteurGazeboServerPlugin
 	  event::ConnectionPtr updateConnection;
 
 	  RR_WEAK_PTR<RR::ServerContext> rr_context;
-	  std::string rr_path;  
+	  std::string rr_path;
+
+	  RR::BroadcastDownsamplerPtr rr_downsampler;
   };
 
 }

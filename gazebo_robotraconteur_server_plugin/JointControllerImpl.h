@@ -50,6 +50,12 @@ public:
 
 	  virtual void setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid) override;
 
+	  virtual com::robotraconteur::device::isoch::IsochInfoPtr get_isoch_info() override;
+
+	  virtual uint32_t get_isoch_downsample() override;
+
+	  virtual void set_isoch_downsample(uint32_t value) override;
+
 	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
 	  virtual std::string RRPath();
@@ -66,6 +72,8 @@ protected:
 	  event::ConnectionPtr updateConnection;
 
 	  std::string rr_path;
+
+	  RR::BroadcastDownsamplerPtr rr_downsampler;
 
 };
 

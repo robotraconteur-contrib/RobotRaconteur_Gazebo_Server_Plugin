@@ -56,8 +56,13 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual void setf_axis_velocity(uint32_t axis, double vel);
 
-	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+	  virtual com::robotraconteur::device::isoch::IsochInfoPtr get_isoch_info() override;
 
+	  virtual uint32_t get_isoch_downsample() override;
+
+	  virtual void set_isoch_downsample(uint32_t value) override;
+
+	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 	 
   protected:
 
@@ -76,6 +81,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	 std::string rr_path;
 	 RR_WEAK_PTR<RR::ServerContext> rr_context;	
+
+	 RR::BroadcastDownsamplerPtr rr_downsampler;
   };
 
 }

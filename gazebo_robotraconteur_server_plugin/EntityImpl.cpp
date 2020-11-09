@@ -94,11 +94,12 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		RR_SHARED_PTR<EntityImpl> e1=e.lock();
 		if (!e1) return;
-		e1->OnUpdate1(_info);
+		e1->OnUpdate0(_info);
 	}
 
-	void EntityImpl::OnUpdate1(const common::UpdateInfo & _info)
+	void EntityImpl::OnUpdate0(const common::UpdateInfo & _info)
 	{
+		RR::BroadcastDownsamplerStep step(rr_downsampler);
 		physics::EntityPtr e = gz_entity.lock();
 		if (!e || !e->GetParent()) 
 		{
@@ -128,6 +129,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		rrvar_relative_velocity->SetOutValue(rvel1);
 		rrvar_world_acceleration->SetOutValue(wacc1);
 		rrvar_relative_acceleration->SetOutValue(racc1);
+
+		OnUpdate1(_info);
+	}
+
+	void EntityImpl::OnUpdate1(const common::UpdateInfo & _info)
+	{
 	}
 
 	void EntityImpl::OnDelete(RR_WEAK_PTR<EntityImpl> e, const std::string& entity)
@@ -195,6 +202,16 @@ namespace RobotRaconteurGazeboServerPlugin
 		gz_path=get_entity()->GetScopedName(true);
 		this->rr_path=service_path;
 
+		rr_downsampler = boost::make_shared<RR::BroadcastDownsampler>();
+		rr_downsampler->Init(context.lock(),9);
+
+		rr_downsampler->AddWireBroadcaster(rrvar_world_pose);
+		rr_downsampler->AddWireBroadcaster(rrvar_relative_pose);
+		rr_downsampler->AddWireBroadcaster(rrvar_world_velocity);
+		rr_downsampler->AddWireBroadcaster(rrvar_relative_velocity);
+		rr_downsampler->AddWireBroadcaster(rrvar_world_acceleration);
+		rr_downsampler->AddWireBroadcaster(rrvar_relative_acceleration);
+
 		boost::weak_ptr<EntityImpl> weak_this = shared_from_this();
 		this->rrvar_relative_acceleration->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {
@@ -253,5 +270,28 @@ namespace RobotRaconteurGazeboServerPlugin
 				return gz_pose_to_rr_pose(p);
 			}
 		);
+	}
+
+	com::robotraconteur::device::isoch::IsochInfoPtr EntityImpl::get_isoch_info()
+	{
+		com::robotraconteur::device::isoch::IsochInfoPtr ret(new com::robotraconteur::device::isoch::IsochInfo());
+		auto world = get_entity()->GetWorld();
+		common::Time start_time = world->StartTime();
+		ret->isoch_epoch.seconds = start_time.sec;
+		ret->isoch_epoch.nanoseconds = start_time.nsec;
+		ret->max_downsample = 100;
+		ret->update_rate = world->Physics()->GetRealTimeUpdateRate();
+
+		return ret;
+	}
+
+	uint32_t EntityImpl::get_isoch_downsample()
+	{
+		return rr_downsampler->GetClientDownsample(RR::ServerEndpoint::GetCurrentEndpoint()->GetLocalEndpoint());
+	}
+
+	void EntityImpl::set_isoch_downsample(uint32_t value)
+	{
+		return rr_downsampler->SetClientDownsample(RR::ServerEndpoint::GetCurrentEndpoint()->GetLocalEndpoint(), value);
 	}
 }

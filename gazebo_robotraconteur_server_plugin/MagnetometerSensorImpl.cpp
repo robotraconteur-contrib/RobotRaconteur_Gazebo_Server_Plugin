@@ -29,6 +29,8 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 		SensorImpl::RRServiceObjectInit(context, service_path);
 
+		rr_downsampler->AddWireBroadcaster(rrvar_magnetic_field);
+
 		boost::weak_ptr<MagnetometerSensorImpl> weak_this = RR::rr_cast<MagnetometerSensorImpl>(shared_from_this());
 		this->rrvar_magnetic_field->GetWire()->SetPeekInValueCallback(
 			[weak_this](uint32_t ep) {

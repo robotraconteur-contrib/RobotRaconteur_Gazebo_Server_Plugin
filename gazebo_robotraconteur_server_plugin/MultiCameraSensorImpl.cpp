@@ -29,7 +29,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	void MultiCameraSensorImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
 		SensorImpl::RRServiceObjectInit(context, service_path);
-
+		rr_downsampler->AddPipeBroadcaster(rrvar_image_stream);
 		rrvar_image_stream->SetMaxBacklog(3);
 	}
 
