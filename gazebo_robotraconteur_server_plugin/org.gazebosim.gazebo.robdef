@@ -1,4 +1,4 @@
-service experimental.gazebo
+service org.gazebosim.gazebo
 
 stdver 0.10
 

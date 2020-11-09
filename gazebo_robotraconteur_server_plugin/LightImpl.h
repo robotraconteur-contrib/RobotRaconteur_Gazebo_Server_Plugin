@@ -15,14 +15,14 @@
  *
 */
 
-#include "experimental__gazebo.h"
-#include "experimental__gazebo_stubskel.h"
+#include "org__gazebosim__gazebo.h"
+#include "org__gazebosim__gazebo_stubskel.h"
 
 #pragma once
 
 using namespace gazebo;
 namespace RR=RobotRaconteur;
-namespace rrgz=experimental::gazebo;
+namespace rrgz=org::gazebosim::gazebo;
 namespace geometry = com::robotraconteur::geometry;
 namespace color = com::robotraconteur::color;
 

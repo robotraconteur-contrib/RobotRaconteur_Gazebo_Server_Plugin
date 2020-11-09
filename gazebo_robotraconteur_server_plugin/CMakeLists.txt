@@ -21,7 +21,7 @@ find_package(RobotRaconteurCompanion REQUIRED)
 include_directories(${RobotRaconteur_INCLUDE_DIR})
 
 ROBOTRACONTEUR_GENERATE_THUNK(RR_THUNK_SRCS RR_THUNK_HDRS
-    experimental.gazebo.robdef    
+    org.gazebosim.gazebo.robdef    
 	MASTER_HEADER
 	IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${RobotRaconteur_STANDARD_ROBDEF_DIRS}
 	AUTO_IMPORT
@@ -35,7 +35,7 @@ endif()
 add_library(gazebo_robotraconteur_server_plugin SHARED 
 	robotraconteur_gazebo_server_plugin.cpp
 	robotraconteur_gazebo_server_plugin.h
-	${CMAKE_CURRENT_BINARY_DIR}/experimental__gazebo_stubskel.cpp
+	${CMAKE_CURRENT_BINARY_DIR}/org__gazebosim__gazebo_stubskel.cpp
 	ServerImpl.cpp
 	WorldImpl.cpp
 	JointImpl.cpp

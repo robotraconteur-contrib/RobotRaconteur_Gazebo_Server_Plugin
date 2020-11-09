@@ -113,7 +113,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 			if (use_nodeid==false && use_nodename==false)
 			{
-				nodename="experimental.gazebo.GazeboServer";
+				nodename="org.gazebosim.gazebo.GazeboServer";
 			}
 
 			//tcp_port=11346;
@@ -154,7 +154,7 @@ namespace RobotRaconteurGazeboServerPlugin
 
 			rr_node->SetLogLevelFromEnvVariable();
 
-			rr_node->RegisterServiceType(RR_MAKE_SHARED<rrgz::experimental__gazeboFactory>());
+			rr_node->RegisterServiceType(RR_MAKE_SHARED<rrgz::org__gazebosim__gazeboFactory>());
 			RR::Companion::RegisterStdRobDefServiceTypes(rr_node);
 			
 			rr_local_transport=RR_MAKE_SHARED<RR::LocalTransport>(rr_node);
@@ -228,7 +228,7 @@ namespace RobotRaconteurGazeboServerPlugin
 			
 			if(password_file=="")
 			{
-				rr_node->RegisterService("GazeboServer", "experimental.gazebo", server);
+				rr_node->RegisterService("GazeboServer", "org.gazebosim.gazebo", server);
 			}
 			else
 			{

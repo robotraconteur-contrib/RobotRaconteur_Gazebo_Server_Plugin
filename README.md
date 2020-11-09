@@ -20,7 +20,7 @@ The plugin will scan the command line to configure plugin options. The options t
 
 `--robotraconteur-server-nodename=`*nodename*
 
-Set the NodeName of the server plugin. Default is "experimental.gazebo.GazeboServer".
+Set the NodeName of the server plugin. Default is "org.gazebosim.gazebo.GazeboServer".
 
 `--robotraconteur-server-nodeid=`*nodeid*
 
@@ -32,7 +32,7 @@ Set the TCP port to use for the plugin. Set to "sharer" to use the Robot Raconte
 
 `--robotraconteur-server-tcp-announce`
 
-Enable the node discovery announce for Robot Raconteur. Search for service type `experimental.gazebo.Server` to find the service.
+Enable the node discovery announce for Robot Raconteur. Search for service type `org.gazebosim.gazebo.Server` to find the service.
 
 `--robotraconteur-server-tcp-loadtls`
 
@@ -44,7 +44,7 @@ Load a file containing password information to enable authentication. Uses `Pass
 
 ## Designing clients
 
-Clients using Python, MATLAB, and JavaScript will automatically generate object references to communicate with the server plugin. For the other languages, the file `experimental.gazebo.robdef` contains the full service definition to use with RobotRaconteurGen.
+Clients using Python, MATLAB, and JavaScript will automatically generate object references to communicate with the server plugin. For the other languages, the file `org.gazebosim.gazebo.robdef` contains the full service definition to use with RobotRaconteurGen.
 
 ## Examples
 
