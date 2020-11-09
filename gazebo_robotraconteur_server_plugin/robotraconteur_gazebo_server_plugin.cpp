@@ -152,6 +152,8 @@ namespace RobotRaconteurGazeboServerPlugin
 			rr_node->SetThreadPool(thread_pool);
 			rr_node->Init();
 
+			rr_node->SetLogLevelFromEnvVariable();
+
 			rr_node->RegisterServiceType(RR_MAKE_SHARED<rrgz::experimental__gazeboFactory>());
 			RR::Companion::RegisterStdRobDefServiceTypes(rr_node);
 			
@@ -167,6 +169,7 @@ namespace RobotRaconteurGazeboServerPlugin
 				rr_local_transport->StartServerAsNodeID(nodeid);
 			}
 
+			rr_local_transport->SetMaxMessageSize(100*1024*1024);
 			rr_node->RegisterTransport(rr_local_transport);
 
 
@@ -205,7 +208,7 @@ namespace RobotRaconteurGazeboServerPlugin
 						gzwarn << "Could not load Robot Raconteur Server Plugin TLS certificate" << std::endl;
 					}
 				}
-
+				rr_tcp_transport->SetMaxMessageSize(100*1024*1024);
 				rr_node->RegisterTransport(rr_tcp_transport);
 			}
 			else
