@@ -45,6 +45,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual rrgz::SensorPtr get_sensors(const std::string& ind) override;
 
+	  virtual com::robotraconteur::device::DeviceInfoPtr get_device_info() override;
+
 	  virtual void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
 
   protected:

@@ -18,6 +18,11 @@
 #include "ServerImpl.h"
 #include "robotraconteur_gazebo_server_plugin.h"
 
+#include "RobotRaconteurCompanion/Util/IdentifierUtil.h"
+
+namespace device = com::robotraconteur::device;
+namespace RRU = RobotRaconteur::Companion::Util;
+
 namespace RobotRaconteurGazeboServerPlugin
 {
 	void ServerImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
@@ -162,6 +167,21 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		auto rr_s=RR_MAKE_SHARED<SensorImpl>(s);
 		return rr_s;
+	}
+
+	com::robotraconteur::device::DeviceInfoPtr ServerImpl::get_device_info()
+	{
+		device::DeviceInfoPtr ret(new device::DeviceInfo());
+		ret->device = RRU::CreateIdentifierFromName("gazebosim");
+		ret->manufacturer = RRU::CreateIdentifier("OSRF", "e72378a1-7f24-40f3-be19-30d5f12e2c46");
+		ret->model = RRU::CreateIdentifier("Gazebo_Sim", "e90fee61-1c12-4747-b1c3-3b059b27466d");
+		ret->device_classes = RR::AllocateEmptyRRList<device::DeviceClass>();
+		device::DeviceClassPtr dev_class(new device::DeviceClass());
+		dev_class->class_identifier = RRU::CreateIdentifier("robot_simulator","183c1fdc-6d2c-4e23-b323-6c0283b75e4c");
+		dev_class->subclasses->push_back(RR::stringToRRArray("physics"));
+		ret->device_classes->push_back(dev_class);
+		ret->user_description = "Gazebo Robot Simulator";
+		return ret;
 	}
 
 
