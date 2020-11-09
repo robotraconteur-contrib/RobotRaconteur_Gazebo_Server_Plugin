@@ -50,8 +50,8 @@ namespace RobotRaconteurGazeboServerPlugin
 			pid->i=e->second.GetIGain();
 			pid->imax=e->second.GetIMax();
 			pid->imin=e->second.GetIMin();
-			pid->cmdMax=e->second.GetCmdMax();
-			pid->cmdMin=e->second.GetCmdMin();
+			pid->cmd_max=e->second.GetCmdMax();
+			pid->cmd_min=e->second.GetCmdMin();
 			o->insert(std::make_pair(e->first,pid));
 		}
 		return o;
@@ -69,8 +69,8 @@ namespace RobotRaconteurGazeboServerPlugin
 			pid->i=e->second.GetIGain();
 			pid->imax=e->second.GetIMax();
 			pid->imin=e->second.GetIMin();
-			pid->cmdMax=e->second.GetCmdMax();
-			pid->cmdMin=e->second.GetCmdMin();
+			pid->cmd_max=e->second.GetCmdMax();
+			pid->cmd_min=e->second.GetCmdMin();
 			o->insert(std::make_pair(e->first,pid));
 		}
 		return o;
@@ -160,14 +160,14 @@ namespace RobotRaconteurGazeboServerPlugin
 	void JointControllerImpl::setf_position_pid(const std::string& name, pid::PIDParamPtr pid)
 	{
 		RR_NULL_CHECK(pid);
-		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmdMax, pid->cmdMin);
+		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmd_max, pid->cmd_min);
 		gz_controller->SetPositionPID(name, p);
 	}
 
 	void JointControllerImpl::setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid)
 	{
 		RR_NULL_CHECK(pid);
-		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmdMax, pid->cmdMin);
+		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmd_max, pid->cmd_min);
 		gz_controller->SetVelocityPID(name, p);
 	}
 	
