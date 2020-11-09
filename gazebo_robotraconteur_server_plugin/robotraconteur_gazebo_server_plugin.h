@@ -40,6 +40,7 @@ namespace rrgz=experimental::gazebo;
 #include "KinematicJointControllerImpl.h"
 #include "SensorImpl.h"
 #include "CameraImpl.h"
+#include "LogicalCameraImpl.h"
 #include "MultiCameraSensorImpl.h"
 #include "DepthCameraSensorImpl.h"
 #include "RaySensorImpl.h"

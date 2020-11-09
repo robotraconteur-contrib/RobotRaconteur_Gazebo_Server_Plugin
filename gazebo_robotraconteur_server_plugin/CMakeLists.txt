@@ -45,6 +45,7 @@ add_library(gazebo_robotraconteur_server_plugin SHARED
 	ModelImpl.cpp
 	SensorImpl.cpp
 	CameraImpl.cpp
+	LogicalCameraImpl.cpp
 	EntityImpl.cpp
 	MultiCameraSensorImpl.cpp
 	DepthCameraSensorImpl.cpp

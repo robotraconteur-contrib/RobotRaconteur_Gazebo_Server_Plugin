@@ -165,6 +165,13 @@ namespace RobotRaconteurGazeboServerPlugin
 			return rr_m;
 		}
 
+		sensors::LogicalCameraSensorPtr gz_logical_camera=std::dynamic_pointer_cast<sensors::LogicalCameraSensor>(s);
+		if (gz_logical_camera)
+		{
+			auto rr_camera=RR_MAKE_SHARED<LogicalCameraImpl>(gz_logical_camera);
+			return rr_camera;
+		}
+
 		auto rr_s=RR_MAKE_SHARED<SensorImpl>(s);
 		return rr_s;
 	}

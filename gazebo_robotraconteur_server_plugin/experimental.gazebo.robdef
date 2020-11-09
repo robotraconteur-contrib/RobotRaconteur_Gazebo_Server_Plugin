@@ -12,6 +12,7 @@ import com.robotraconteur.gps
 import com.robotraconteur.imu
 import com.robotraconteur.device
 import com.robotraconteur.device.isoch
+import com.robotraconteur.objectrecognition
 
 using com.robotraconteur.geometry.Vector3
 using com.robotraconteur.geometry.Quaternion
@@ -32,6 +33,7 @@ using com.robotraconteur.device.Device
 using com.robotraconteur.device.DeviceInfo
 using com.robotraconteur.device.isoch.IsochDevice
 using com.robotraconteur.device.isoch.IsochInfo
+using com.robotraconteur.objectrecognition.RecognizedObjects
 
 struct Contact
 	field string contact_name1
@@ -451,6 +453,26 @@ object ImuSensor
 	function void setf_reference_pose()
 		
 	wire ImuState state [readonly]
+
+	property IsochInfo isoch_info [readonly,nolock]
+    property uint32 isoch_downsample [perclient] 
+end
+
+object LogicalCameraSensor
+	implements Sensor
+	implements IsochDevice
+	property string name [readonly]
+	property string type [readonly]
+	property string parent_name [readonly]
+	property Pose pose [readonly]
+	
+	property bool active
+	property double update_rate
+	property Duration last_update_time [readonly]
+	property Duration last_measurement_time	[readonly]
+	
+	function RecognizedObjects capture_image()
+	pipe RecognizedObjects image_stream [readonly]
 
 	property IsochInfo isoch_info [readonly,nolock]
     property uint32 isoch_downsample [perclient] 
