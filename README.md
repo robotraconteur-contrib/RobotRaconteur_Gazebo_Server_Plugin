@@ -55,8 +55,8 @@ The examples directory contains a number of Python scripts demonstrating the usa
     mkdir -p catkin_ws/src
     cd catkin_ws/src
     git clone https://github.com/robotraconteur/robotraconteur.git
-    git clone https://github.com/johnwason/robotraconteur_standard_robdef_cpp.git
-    git clone https://github.com/johnwason/RobotRaconteur_Gazebo_Server_Plugin.git
+    git clone https://github.com/robotraconteur/robotraconteur_companion.git --recursive
+    git clone https://github.com/robotraconteur-contrib/RobotRaconteur_Gazebo_Server_Plugin.git
     cd ..
     catkin_make_isolated -DROBOTRACONTEUR_ROS=1 -DCMAKE_BUILD_TYPE=Release
     source devel_isolated/setup.bash
