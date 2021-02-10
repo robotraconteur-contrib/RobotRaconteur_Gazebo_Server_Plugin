@@ -42,8 +42,8 @@ pid.i=0
 pid.d=.2
 pid.imax=100
 pid.imin=-100
-pid.cmdMax=1000
-pid.cmdMin=-1000
+pid.cmd_max=1000
+pid.cmd_min=-1000
 
 print(c.joint_names)
 print(c.position_pid)

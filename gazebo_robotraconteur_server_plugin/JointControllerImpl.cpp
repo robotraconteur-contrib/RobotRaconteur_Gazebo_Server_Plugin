@@ -207,7 +207,8 @@ namespace RobotRaconteurGazeboServerPlugin
 		auto o_vel=RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
 		auto o_f = RR::AllocateEmptyRRMap<std::string, RR::RRArray<double> >();
 
-		for (auto j : gz_controller->GetJoints() | boost::adaptors::map_values)
+		auto gz_controller_joints = gz_controller->GetJoints();
+		for (auto j : gz_controller_joints | boost::adaptors::map_values)
 		{			
 			if (j->DOF()<1) continue;
 			o_pos->insert(std::make_pair(j->GetName(),RR::ScalarToRRArray(j->Position(0))));
