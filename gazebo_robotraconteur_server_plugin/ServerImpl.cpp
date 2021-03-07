@@ -185,6 +185,7 @@ namespace RobotRaconteurGazeboServerPlugin
 		ret->device_classes = RR::AllocateEmptyRRList<device::DeviceClass>();
 		device::DeviceClassPtr dev_class(new device::DeviceClass());
 		dev_class->class_identifier = RRU::CreateIdentifier("robot_simulator","183c1fdc-6d2c-4e23-b323-6c0283b75e4c");
+		dev_class->subclasses = RR::AllocateEmptyRRList<RR::RRArray<char>>();
 		dev_class->subclasses->push_back(RR::stringToRRArray("physics"));
 		ret->device_classes->push_back(dev_class);
 		ret->user_description = "Gazebo Robot Simulator";
