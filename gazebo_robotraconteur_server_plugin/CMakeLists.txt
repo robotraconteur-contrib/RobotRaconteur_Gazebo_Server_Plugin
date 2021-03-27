@@ -67,4 +67,8 @@ target_link_libraries(gazebo_robotraconteur_server_plugin ${GAZEBO_LIBRARIES} Ro
 
 include(GNUInstallDirs)
 
-install(TARGETS gazebo_robotraconteur_server_plugin DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS gazebo_robotraconteur_server_plugin 
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+		)
