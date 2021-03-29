@@ -163,7 +163,11 @@ object Link
 	wire Wrench{list} applied_wrenches [writeonly]
 
 	property IsochInfo isoch_info [readonly,nolock]
-    property uint32 isoch_downsample [perclient] 
+    property uint32 isoch_downsample [perclient]
+
+	function void attach_link(string model, string link_name)
+	function void attach_link_with_pose(string model_name, string link_name, Pose pose)
+	function void detach_link(string model_name, string link_name)
 end
 
 namedarray JointWrench

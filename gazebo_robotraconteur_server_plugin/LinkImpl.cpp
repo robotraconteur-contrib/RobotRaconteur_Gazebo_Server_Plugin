@@ -73,6 +73,105 @@ namespace RobotRaconteurGazeboServerPlugin
 			o->push_back(RR::stringToRRArray(l->GetSensorName(i)));
 		}
 		return o;
-	}	
+	}
 
+	void LinkImpl::attach_link(const std::string& model2, const std::string& link2)
+	{
+		// Based on https://github.com/pal-robotics/gazebo_ros_link_attacher
+
+		physics::LinkPtr l1 = get_link();
+
+		LinkImpl_attached_joint j;
+		if(this->get_attached_link_joint(model2, link2, j)){			
+			j.joint->Attach(l1, j.l2);
+			return;
+		}
+		
+		j.model2 = model2;
+		j.link2 = link2;
+		
+		physics::BasePtr b1 = l1->GetModel();
+	
+		physics::BasePtr b2 = l1->GetWorld()->ModelByName(model2);
+		if (b2 == NULL){
+			throw RR::InvalidArgumentException("Invalid model name for link attach: " + model2);
+		}
+		
+		physics::ModelPtr m1(dynamic_cast<physics::Model*>(b1.get()));
+		
+		physics::ModelPtr m2(dynamic_cast<physics::Model*>(b2.get()));
+		j.m2 = m2;
+		
+		physics::LinkPtr l2 = m2->GetLink(link2);
+		if (l2 == NULL){
+			throw RR::InvalidArgumentException("Invalid link name for link attach: " + link2);
+		
+		}
+		
+		j.l2 = l2;
+
+		
+		j.joint = l1->GetWorld()->Physics()->CreateJoint("fixed", m1);
+		this->attached_link_joints.push_back(j);
+
+		
+		j.joint->Attach(l1, l2);
+		
+		j.joint->Load(l1, l2, ignition::math::Pose3d());
+		
+		j.joint->SetModel(m1);
+		/*
+		* If SetModel is not done we get:
+		* ***** Internal Program Error - assertion (this->GetParentModel() != __null)
+		failed in void gazebo::physics::Entity::PublishPose():
+		/tmp/buildd/gazebo2-2.2.3/gazebo/physics/Entity.cc(225):
+		An entity without a parent model should not happen
+		* If SetModel is given the same model than CreateJoint given
+		* Gazebo crashes with
+		* ***** Internal Program Error - assertion (self->inertial != __null)
+		failed in static void gazebo::physics::ODELink::MoveCallback(dBodyID):
+		/tmp/buildd/gazebo2-2.2.3/gazebo/physics/ode/ODELink.cc(183): Inertial pointer is NULL
+		*/
+
+		
+		/*j.joint->SetUpperLimit(0, 0);
+		ROS_DEBUG_STREAM("SetLowStop");
+		j.joint->SetLowerLimit(0, 0);
+		ROS_DEBUG_STREAM("Init");*/
+		j.joint->Init();
+		
+	}
+
+	void LinkImpl::attach_link_with_pose(const std::string& model, const std::string& link_name, const com::robotraconteur::geometry::Pose& pose)
+	{
+		// Based on https://github.com/pal-robotics/gazebo_ros_link_attacher
+		throw RR::NotImplementedException("Not implemented");
+	}
+
+	void LinkImpl::detach_link(const std::string& model2, const std::string& link2)
+	{
+		// Based on https://github.com/pal-robotics/gazebo_ros_link_attacher
+
+		LinkImpl_attached_joint j;
+		if(this->get_attached_link_joint(model2, link2, j)){
+			j.joint->Detach();
+			return;
+		}
+
+		throw RR::InvalidArgumentException("Model " + model2 + " link " + link2 + " is not attached");
+	}
+
+	bool LinkImpl::get_attached_link_joint(std::string model2, std::string link2, LinkImpl_attached_joint &joint)
+	{
+		LinkImpl_attached_joint j;
+		for(std::vector<LinkImpl_attached_joint>::iterator it = this->attached_link_joints.begin(); it != this->attached_link_joints.end(); ++it){
+			j = *it;
+			if ((j.model2.compare(model2) == 0)
+					&& (j.link2.compare(link2) == 0)){
+				joint = j;
+				return true;
+			}
+		}
+		return false;
+	}
 }

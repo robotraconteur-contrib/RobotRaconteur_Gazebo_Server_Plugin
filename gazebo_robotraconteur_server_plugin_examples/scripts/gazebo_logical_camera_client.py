@@ -32,7 +32,7 @@ def print_logical_image(img):
     for e in img.recognized_objects:
         print("  Detected object: " + str(e.recognized_object.name))
         e_pos = e.pose.pose.pose["position"]
-        print("  Detected object position: (%d,%d,%d)" % (e_pos["x"],e_pos["y"],e_pos["z"]))
+        print("  Detected object position: (%f,%f,%f)" % (e_pos["x"],e_pos["y"],e_pos["z"]))
 
 def new_logical_image(pipe_ep):
     global current_logical_image
@@ -43,7 +43,7 @@ def new_logical_image(pipe_ep):
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
 print(server.sensor_names)
-cam=server.get_sensors('default::rip::pendulum::logical_camera')
+cam=server.get_sensors('default::ur5e1::gripper::body::logical_camera')
 image=cam.capture_image()
 print_logical_image(image)
 
@@ -53,9 +53,10 @@ p.PacketReceivedEvent+=new_logical_image
 
 try:
     while True:
-        if current_logical_image is not None:
-            print_logical_image(current_logical_image)
-        time.sleep(.05)
+        #if current_logical_image is not None:
+        image=cam.capture_image()
+        print_logical_image(image)
+        time.sleep(.1)
 except KeyboardInterrupt: pass
 
 p.Close()

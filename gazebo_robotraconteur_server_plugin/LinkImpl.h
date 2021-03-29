@@ -33,12 +33,27 @@ namespace geometry = com::robotraconteur::geometry;
 
 namespace RobotRaconteurGazeboServerPlugin
 {
+  struct LinkImpl_attached_joint
+  {
+	// Based on https://github.com/pal-robotics/gazebo_ros_link_attacher
+	std::string model2;
+	physics::ModelPtr m2;
+	std::string link2;
+	physics::LinkPtr l2;
+	physics::JointPtr joint;
+  };
   class LinkImpl : public virtual rrgz::Link_default_abstract_impl, public virtual EntityImpl
   {
   public:
 	  LinkImpl(physics::LinkPtr l);
 	 
       virtual RR::RRListPtr<RR::RRArray<char> > get_sensor_names() override;
+
+	  virtual void attach_link(const std::string& model, const std::string& link_name) override;
+
+	  virtual void attach_link_with_pose(const std::string& model, const std::string& link_name, const com::robotraconteur::geometry::Pose& pose) override;
+
+	  virtual void detach_link(const std::string& model, const std::string& link_name) override;
 
 	  virtual std::string RRType() { return Link_default_abstract_impl::RRType(); }
 
@@ -51,6 +66,9 @@ namespace RobotRaconteurGazeboServerPlugin
   	  
   	  RR::RRListPtr<RR::RRArray<double > > applied_wrenches;
   	  virtual void OnUpdate1(const common::UpdateInfo & _info);
+
+	  std::vector<LinkImpl_attached_joint> attached_link_joints;
+	  bool get_attached_link_joint(std::string model2, std::string link2, LinkImpl_attached_joint &joint);
   };
 
 }
