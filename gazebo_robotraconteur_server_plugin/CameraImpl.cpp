@@ -23,7 +23,7 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	CameraImpl::CameraImpl(sensors::CameraSensorPtr gz_camera) : SensorImpl(gz_camera)
 	{
-		this->gz_camera = gz_camera;
+		this->gz_camera = gz_camera;		
 	}
 
 	void CameraImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
@@ -32,6 +32,12 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		rrvar_image_stream->SetMaxBacklog(3);
 		rr_downsampler->AddPipeBroadcaster(rrvar_image_stream);
+		RR_SHARED_PTR<CameraImpl> this_ = RR_DYNAMIC_POINTER_CAST<CameraImpl>(shared_from_this());
+		boost::weak_ptr<CameraImpl> weak_this = this_;
+		camera_update_connection = get_camera()->Camera()->ConnectNewImageFrame([weak_this](const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format)
+		{
+			OnNewFrame(weak_this,image,width,height,depth,format);
+		});
 	}
 
 	namespace detail
@@ -81,21 +87,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	image::ImagePtr CameraImpl::capture_image()
 	{
-
-		sensors::CameraSensorPtr c=get_camera();
-		rendering::CameraPtr c2=c->Camera();
-		if (!c2->CaptureData()) throw std::runtime_error("Image not ready");
-		image::ImagePtr o(new image::Image());
-		o->image_info = new image::ImageInfo();
-		o->image_info->data_header = new com::robotraconteur::sensordata::SensorDataHeader();
-		const uint8_t* image_bytes=c2->ImageData();
-		size_t image_byte_size=c2->ImageByteSize();
-		o->data=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
-		o->image_info->encoding = detail::gz_image_enconding_to_rr_encoding(c2->ImageFormat());
-		o->image_info->width=c2->ImageWidth();
-		o->image_info->height=c2->ImageHeight();
-		o->image_info->step = c2->ImageWidth() * c2->ImageDepth();
-		return o;
+		return current_frame;
+		
 	}
 
 	sensors::CameraSensorPtr CameraImpl::get_camera()
@@ -103,13 +96,27 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::CameraSensor>(get_sensor());
 	}
 		
-	void CameraImpl::OnUpdate1()
+	void CameraImpl::OnNewFrame(RR_WEAK_PTR<CameraImpl> this_, const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format)
 	{
-		SensorImpl::OnUpdate1();
+		RR_SHARED_PTR<CameraImpl> this1 = this_.lock();
+		if (!this1) return;
+		this1->OnNewFrame1(image, width, height, depth, format);
+	}
 
-		auto c = gz_camera.lock();
-		if (!c) return;
-		auto i=capture_image();
-		rrvar_image_stream->AsyncSendPacket(i, []() {});
+	void CameraImpl::OnNewFrame1(const unsigned char *image_bytes, unsigned int width, unsigned int height, unsigned int depth, const std::string &format)
+	{
+		sensors::CameraSensorPtr c=get_camera();
+				
+		image::ImagePtr o(new image::Image());
+		o->image_info = new image::ImageInfo();
+		o->image_info->data_header = new com::robotraconteur::sensordata::SensorDataHeader();
+		size_t image_byte_size=width*height*depth;
+		o->data=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
+		o->image_info->encoding = detail::gz_image_enconding_to_rr_encoding(format);
+		o->image_info->width=width;
+		o->image_info->height=height;
+		o->image_info->step = width * depth;
+		current_frame = o;
+		rrvar_image_stream->AsyncSendPacket(o, []() {});
 	}
 }

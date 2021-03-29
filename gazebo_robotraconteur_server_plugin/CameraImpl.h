@@ -49,9 +49,15 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
 	  sensors::CameraSensorPtr get_camera();	  
 
-	  virtual void OnUpdate1();
+	  static void OnNewFrame(RR_WEAK_PTR<CameraImpl> this_, const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format);
+
+    void OnNewFrame1(const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format);
 
 	 std::weak_ptr<sensors::CameraSensor> gz_camera;
+
+   image::ImagePtr current_frame;
+
+   event::ConnectionPtr camera_update_connection;
   };
 
   namespace detail
