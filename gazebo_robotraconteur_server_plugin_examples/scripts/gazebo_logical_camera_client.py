@@ -43,7 +43,7 @@ def new_logical_image(pipe_ep):
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
 print(server.sensor_names)
-cam=server.get_sensors('default::ur5e1::gripper::body::logical_camera')
+cam=server.get_sensors('default::rip::pendulum::logical_camera')
 image=cam.capture_image()
 print_logical_image(image)
 
@@ -53,10 +53,9 @@ p.PacketReceivedEvent+=new_logical_image
 
 try:
     while True:
-        #if current_logical_image is not None:
-        image=cam.capture_image()
-        print_logical_image(image)
-        time.sleep(.1)
+        if current_logical_image is not None:
+            print_logical_image(current_logical_image)
+        time.sleep(.05)
 except KeyboardInterrupt: pass
 
 p.Close()
