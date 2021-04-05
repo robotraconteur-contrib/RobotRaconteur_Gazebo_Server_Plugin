@@ -49,9 +49,15 @@ namespace RobotRaconteurGazeboServerPlugin
   protected:
 	  sensors::MultiCameraSensorPtr get_camera();
 	  
-	  virtual void OnUpdate1();
+	  static void OnNewFrame(RR_WEAK_PTR<MultiCameraSensorImpl> this_, const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format, unsigned int index);
+
+      void OnNewFrame1(const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format, unsigned int index);
 
 	  std::weak_ptr<sensors::MultiCameraSensor> gz_camera;
+
+	  RR::RRMapPtr<int32_t,image::Image> current_frame;
+
+   	  std::vector<event::ConnectionPtr> camera_update_connection;
   };
 
 }

@@ -25,12 +25,7 @@ import time
 import cv2
 import numpy as np
 
-current_frame=None
 current_depth=None
-
-def ImageToMat(image):
-    frame2=image.data.reshape([image.image_info.height, image.image_info.width, 3], order='C')
-    return np.concatenate((np.atleast_3d(frame2[:,:,2]), np.atleast_3d(frame2[:,:,1]), np.atleast_3d(frame2[:,:,0])),axis=2)
 
 def DepthToMat(image):
     dt = np.dtype(np.float32)
@@ -40,38 +35,29 @@ def DepthToMat(image):
     return frame2
 
 def new_frame(pipe_ep):
-    global current_frame
     global current_depth
 
     while (pipe_ep.Available > 0):
-        image=pipe_ep.ReceivePacket()
-        current_frame=ImageToMat(image.intensity_image)
-        current_depth=DepthToMat(image.depth_image)
+        image=pipe_ep.ReceivePacket()        
+        current_depth=DepthToMat(image)
 
 server=RRN.ConnectService('rr+tcp://localhost:11346/?service=GazeboServer')
 print(server.sensor_names)
 cam=server.get_sensors('default::rip::pendulum::depth')
-image=cam.capture_image()
+image=cam.capture_depth_image()
 print(cam)
 print(image)
 print(dir(image))
 
-image1=ImageToMat(image.intensity_image)
-
-cv2.imshow('Captured Image',image1)
-
-depth1=DepthToMat(image.depth_image)
+depth1=DepthToMat(image)
 cv2.imshow("Captured Depth", depth1)
 
-p=cam.image_stream.Connect(-1)
+p=cam.depth_image_stream.Connect(-1)
 p.PacketReceivedEvent+=new_frame
 
-cv2.namedWindow("Image")
 cv2.namedWindow("Depth")
 
-while True:
-    if (not current_frame is None):
-        cv2.imshow("Image",current_frame)
+while True:    
     if (not current_depth is None):
         cv2.imshow("Depth", current_depth)
     ret = cv2.waitKey(50)

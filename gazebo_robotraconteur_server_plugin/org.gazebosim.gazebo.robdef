@@ -21,7 +21,6 @@ using com.robotraconteur.geometry.SpatialVelocity
 using com.robotraconteur.geometry.SpatialAcceleration
 using com.robotraconteur.geometry.Wrench
 using com.robotraconteur.image.Image
-using com.robotraconteur.image.DepthImage
 using com.robotraconteur.color.ColorRGBAf as Color
 using com.robotraconteur.datetime.DateTimeUTC
 using com.robotraconteur.datetime.Duration
@@ -296,8 +295,8 @@ object DepthCameraSensor
 	property Duration last_update_time [readonly]
 	property Duration last_measurement_time	[readonly]
 	
-	function DepthImage capture_image()
-	pipe DepthImage image_stream [readonly]
+	function Image capture_depth_image()
+	pipe Image depth_image_stream [readonly]
 
 	property IsochInfo isoch_info [readonly,nolock]
     property uint32 isoch_downsample [perclient] 

@@ -37,7 +37,7 @@ namespace RobotRaconteurGazeboServerPlugin
   public:
 	  DepthCameraSensorImpl(sensors::DepthCameraSensorPtr gz_camera);
 
-	  virtual image::DepthImagePtr capture_image() override;
+	  virtual image::ImagePtr capture_depth_image() override;
 	  	  
 	  virtual std::string RRType() {return rrgz::DepthCameraSensor_default_abstract_impl::RRType();  }
 
@@ -45,10 +45,16 @@ namespace RobotRaconteurGazeboServerPlugin
 
   protected:
 	  sensors::DepthCameraSensorPtr get_camera();
-	  
-	  virtual void OnUpdate1();
 
+	  static void OnNewFrame(RR_WEAK_PTR<DepthCameraSensorImpl> this_, const float *image, unsigned int width, unsigned int height, const std::string &format);
+
+      void OnNewFrame1(const float *image, unsigned int width, unsigned int height, const std::string &format);
+	  
 	  std::weak_ptr<sensors::DepthCameraSensor> gz_camera;
+
+	  image::ImagePtr current_frame;
+
+   	  event::ConnectionPtr camera_update_connection;
   };
 
 }

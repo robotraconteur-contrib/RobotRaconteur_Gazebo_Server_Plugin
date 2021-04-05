@@ -31,6 +31,21 @@ namespace RobotRaconteurGazeboServerPlugin
 		SensorImpl::RRServiceObjectInit(context, service_path);
 		rr_downsampler->AddPipeBroadcaster(rrvar_image_stream);
 		rrvar_image_stream->SetMaxBacklog(3);
+
+		current_frame = RR::AllocateEmptyRRMap<int32_t,image::Image>();
+
+		auto cam = get_camera();
+
+		RR_SHARED_PTR<MultiCameraSensorImpl> this_ = RR_DYNAMIC_POINTER_CAST<MultiCameraSensorImpl>(shared_from_this());
+		boost::weak_ptr<MultiCameraSensorImpl> weak_this = this_;
+		for (unsigned int i=0; i<cam->CameraCount(); i++)
+		{
+			auto camera_update_connection1 = cam->Camera(i)->ConnectNewImageFrame([weak_this,i](const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format)
+			{
+				OnNewFrame(weak_this,image,width,height,depth,format,i);
+			});
+			camera_update_connection.push_back(camera_update_connection1);
+		}		
 	}
 
 	int32_t MultiCameraSensorImpl::get_camera_count()
@@ -43,21 +58,8 @@ namespace RobotRaconteurGazeboServerPlugin
 	{
 
 		if (ind<0) throw std::invalid_argument("Invalid camera");
-		sensors::MultiCameraSensorPtr c=get_camera();
-		rendering::CameraPtr c2=c->Camera((uint32_t)ind);
-		if (!c2) throw std::invalid_argument("Invalid camera");
-		if (!c2->CaptureData()) throw std::runtime_error("Image not ready");
-		image::ImagePtr o(new image::Image());
-		o->image_info = new image::ImageInfo();
-		o->image_info->data_header = new com::robotraconteur::sensordata::SensorDataHeader();
-		const uint8_t* image_bytes = c2->ImageData();
-		size_t image_byte_size = c2->ImageByteSize();
-		o->data = RR::AttachRRArrayCopy(image_bytes, image_byte_size);
-		o->image_info->encoding = detail::gz_image_enconding_to_rr_encoding(c2->ImageFormat());
-		o->image_info->width = c2->ImageWidth();
-		o->image_info->height = c2->ImageHeight();
-		o->image_info->step = c2->ImageWidth() * c2->ImageDepth();
-		return o;
+		
+		return current_frame->at(ind);
 	}
 
 	sensors::MultiCameraSensorPtr MultiCameraSensorImpl::get_camera()
@@ -65,21 +67,33 @@ namespace RobotRaconteurGazeboServerPlugin
 		return std::dynamic_pointer_cast<sensors::MultiCameraSensor>(get_sensor());
 	}
 
-	void MultiCameraSensorImpl::OnUpdate1()
+	
+	void MultiCameraSensorImpl::OnNewFrame(RR_WEAK_PTR<MultiCameraSensorImpl> this_, const unsigned char *image, unsigned int width, unsigned int height, unsigned int depth, const std::string &format, unsigned int index)
 	{
-		SensorImpl::OnUpdate1();
-
-		auto c = gz_camera.lock();
-		if (!c) return;
-
-		auto o=RR::AllocateEmptyRRMap<int32_t, image::Image >();
-
-		int32_t count=get_camera_count();
-		for (int32_t i=0; i<count; i++ )
-		{
-			auto img=capture_image(i);
-			o->insert(std::make_pair(i,img));
-		}
-		rrvar_image_stream->AsyncSendPacket(o, []() {});
+		RR_SHARED_PTR<MultiCameraSensorImpl> this1 = this_.lock();
+		if (!this1) return;
+		this1->OnNewFrame1(image, width, height, depth, format, index);
 	}
+
+    void MultiCameraSensorImpl::OnNewFrame1(const unsigned char *image_bytes, unsigned int width, unsigned int height, unsigned int depth, const std::string &format, unsigned int index)
+	{
+						
+		image::ImagePtr o(new image::Image());
+		o->image_info = new image::ImageInfo();
+		o->image_info->data_header = new com::robotraconteur::sensordata::SensorDataHeader();
+		size_t image_byte_size=width*height*depth;
+		o->data=RR::AttachRRArrayCopy(image_bytes,image_byte_size);
+		o->image_info->encoding = detail::gz_image_enconding_to_rr_encoding(format);
+		o->image_info->width=width;
+		o->image_info->height=height;
+		o->image_info->step = width * depth;
+		(*current_frame)[index] = o;
+		if (index == current_frame->size()-1)
+		{
+			auto o2 = RR::AllocateEmptyRRMap<int32_t, image::Image>();
+			o2->GetStorageContainer() = current_frame->GetStorageContainer();
+			rrvar_image_stream->AsyncSendPacket(o2, []() {});
+		}
+	}
+
 }

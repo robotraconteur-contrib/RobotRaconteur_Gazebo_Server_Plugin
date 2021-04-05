@@ -28,14 +28,17 @@ namespace RobotRaconteurGazeboServerPlugin
 	static gps::GpsStatePtr gz_to_rr_gpsstate(sensors::GpsSensorPtr& c)
 	{		
 		gps::GpsStatePtr o(new gps::GpsState());
+		
+		memset(o.get(),sizeof(gps::GpsState),0);
+
 		o->altitude = c->Altitude();
 		o->latitude_deg = c->Latitude().Degree();
 		o->longitude_deg = c->Longitude().Degree();
 
 		//TODO: Access velocities?
-		o->velocity_east = 0.0;
+		/*o->velocity_east = 0.0;
 		o->velocity_north = 0.0;
-		o->velocity_up = 0.0;
+		o->velocity_up = 0.0;*/
 		return o;
 	}
 

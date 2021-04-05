@@ -50,33 +50,41 @@ namespace RobotRaconteurGazeboServerPlugin
 			{
 				return mono8;
 			}
-			else if (format == "L16" || format == "L_INT16")
+			else if (format == "L16" || format == "L_INT16" || format == "L_UINT16")
 			{
 				return mono16;
 			}
 			else if (format == "R8G8B8" || format == "RGB_INT8")
 			{
-				return rgb8;
+				return rgb888;
 			}
 			else if (format == "B8G8R8" || format == "BGR_INT8")
 			{
-				return bgr8;
+				return bgr888;
 			}
 			else if (format == "BAYER_RGGB8")
 			{
-				return bayer_rggb8;
+				return bayer_rggb8888;
 			}
 			else if (format == "BAYER_BGGR8")
 			{
-				return bayer_bggr8;
+				return bayer_bggr8888;
 			}
 			else if (format == "BAYER_GBRG8")
 			{
-				return bayer_gbrg8;
+				return bayer_gbrg8888;
 			}
 			else if (format == "BAYER_GRBG8")
 			{
-				return bayer_grbg8;
+				return bayer_grbg8888;
+			}
+			else if (format == "FLOAT16")
+			{
+				return monof16;
+			}
+			else if (format == "FLOAT32")
+			{
+				return monof32;
 			}
 			else
 			{
