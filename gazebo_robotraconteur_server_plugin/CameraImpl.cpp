@@ -80,11 +80,11 @@ namespace RobotRaconteurGazeboServerPlugin
 			}
 			else if (format == "FLOAT16")
 			{
-				return monof16;
+				return mono_f16;
 			}
 			else if (format == "FLOAT32")
 			{
-				return monof32;
+				return mono_f32;
 			}
 			else
 			{
