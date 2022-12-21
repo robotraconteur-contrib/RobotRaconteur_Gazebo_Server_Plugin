@@ -157,14 +157,14 @@ namespace RobotRaconteurGazeboServerPlugin
 		gz_controller->AddJoint(j);
 	}
 
-	void JointControllerImpl::setf_position_pid(const std::string& name, pid::PIDParamPtr pid)
+	void JointControllerImpl::setf_position_pid(const std::string& name, const pid::PIDParamPtr& pid)
 	{
 		RR_NULL_CHECK(pid);
 		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmd_max, pid->cmd_min);
 		gz_controller->SetPositionPID(name, p);
 	}
 
-	void JointControllerImpl::setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid)
+	void JointControllerImpl::setf_velocity_pid(const std::string& name, const pid::PIDParamPtr& pid)
 	{
 		RR_NULL_CHECK(pid);
 		common::PID p(pid->p, pid->i, pid->d, pid->imax, pid->imin, pid->cmd_max, pid->cmd_min);
