@@ -113,12 +113,12 @@ namespace RobotRaconteurGazeboServerPlugin
 		joints.insert(std::make_pair(name,j));
 	}
 
-	void KinematicJointControllerImpl::setf_position_pid(const std::string& name, pid::PIDParamPtr pid)
+	void KinematicJointControllerImpl::setf_position_pid(const std::string& name, const pid::PIDParamPtr& pid)
 	{
 		throw RR::NotImplementedException("Not implemented for KinematicJointController");
 	}
 
-	void KinematicJointControllerImpl::setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid)
+	void KinematicJointControllerImpl::setf_velocity_pid(const std::string& name, const pid::PIDParamPtr& pid)
 	{
 		throw RR::NotImplementedException("Not implemented for KinematicJointController");
 	}

@@ -46,9 +46,9 @@ public:
 
 	  virtual void add_joint(const std::string& name) override;
 
-	  virtual void setf_position_pid(const std::string& name, pid::PIDParamPtr pid) override;
+	  virtual void setf_position_pid(const std::string& name, const pid::PIDParamPtr& pid) override;
 
-	  virtual void setf_velocity_pid(const std::string& name, pid::PIDParamPtr pid) override;
+	  virtual void setf_velocity_pid(const std::string& name, const pid::PIDParamPtr& pid) override;
 
 	  virtual com::robotraconteur::device::isoch::IsochInfoPtr get_isoch_info() override;
 

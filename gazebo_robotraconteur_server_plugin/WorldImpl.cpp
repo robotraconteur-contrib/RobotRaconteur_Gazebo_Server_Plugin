@@ -270,25 +270,25 @@ void WorldImpl::remove_model(const std::string& model_name)
 	
 }
 
-void WorldImpl::async_get_name(boost::function<void (const std::string&,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+void WorldImpl::async_get_name(boost::function<void (const std::string&,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout)
 {
 	std::string name = get_name();
 	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler,name] { rr_handler(name,nullptr); });
 }
 
-void WorldImpl::async_get_model_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+void WorldImpl::async_get_model_names(boost::function<void (const RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >&,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout)
 {
 	auto model_names = get_model_names();
 	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler,model_names] { rr_handler(model_names,nullptr); });
 }
 
-void WorldImpl::async_get_light_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+void WorldImpl::async_get_light_names(boost::function<void (const RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >&,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout)
 {
 	auto light_names = get_light_names();
 	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler,light_names] { rr_handler(light_names,nullptr); });
 }
 
-void WorldImpl::async_insert_model(const std::string& model_sdf, const std::string& model_name, const com::robotraconteur::geometry::Pose& model_pose,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+void WorldImpl::async_insert_model(const std::string& model_sdf, const std::string& model_name, const com::robotraconteur::geometry::Pose& model_pose,boost::function<void (const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout)
 {
 	insert_model(model_sdf, model_name, model_pose);
 	//RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler] { rr_handler(nullptr); });
@@ -301,19 +301,19 @@ void WorldImpl::async_insert_model(const std::string& model_sdf, const std::stri
 
 }
 
-void WorldImpl::async_remove_model(const std::string& model_name,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout)
+void WorldImpl::async_remove_model(const std::string& model_name,boost::function<void (const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout)
 {
 	remove_model(model_name);
 	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [rr_handler] { rr_handler(nullptr); });
 }
 
-void WorldImpl::async_get_models(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Model>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout)
+void WorldImpl::async_get_models(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Model>,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&)> handler, int32_t timeout)
 {
 	auto m = get_models(ind);
 	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [handler,m] { handler(m,nullptr); });
 }
 
-void WorldImpl::async_get_lights(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Light>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout)
+void WorldImpl::async_get_lights(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Light>,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&)> handler, int32_t timeout)
 {
 	auto m = get_lights(ind);
 	RR::RobotRaconteurNode::TryPostToThreadPool(rr_node, [handler,m] { handler(m,nullptr); });

@@ -70,21 +70,21 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  // Async versions of functions to allow for delayed returns
 
-	  virtual void async_get_name(boost::function<void (const std::string&,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+	  virtual void async_get_name(boost::function<void (const std::string&,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE) override;
 
-	  virtual void async_get_model_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+	  virtual void async_get_model_names(boost::function<void (const RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >&, const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE) override;
 
-	  virtual void async_get_light_names(boost::function<void (RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+	  virtual void async_get_light_names(boost::function<void (const RR_INTRUSIVE_PTR<RobotRaconteur::RRList<RobotRaconteur::RRArray<char>  > >&,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE) override;
 
-	  virtual void async_insert_model(const std::string& model_sdf, const std::string& model_name, const com::robotraconteur::geometry::Pose& model_pose,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
-
-
-	  virtual void async_remove_model(const std::string& model_name,boost::function<void (RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE);
+	  virtual void async_insert_model(const std::string& model_sdf, const std::string& model_name, const com::robotraconteur::geometry::Pose& model_pose,boost::function<void (const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE) override;
 
 
-	  virtual void async_get_models(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Model>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout=RR_TIMEOUT_INFINITE);
+	  virtual void async_remove_model(const std::string& model_name,boost::function<void (const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&) > rr_handler, int32_t rr_timeout=RR_TIMEOUT_INFINITE) override;
 
-	  virtual void async_get_lights(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Light>,RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>)> handler, int32_t timeout=RR_TIMEOUT_INFINITE);
+
+	  virtual void async_get_models(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Model>,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&)> handler, int32_t timeout=RR_TIMEOUT_INFINITE) override;
+
+	  virtual void async_get_lights(const std::string& ind, boost::function<void(RR_SHARED_PTR<rrgz::Light>,const RR_SHARED_PTR<RobotRaconteur::RobotRaconteurException>&)> handler, int32_t timeout=RR_TIMEOUT_INFINITE) override;
 
 
 
