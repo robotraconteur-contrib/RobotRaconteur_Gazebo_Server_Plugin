@@ -24,7 +24,7 @@ jobs:
         conda install git cmake ninja vs2019_win-64 vs2015_runtime gtest gmock robotraconteur robotraconteur_companion gazebo
     - name: configure
       run: >
-        cmake -DCMAKE_BUILD_TYPE:STRING=Release -GNinja -S . -B build2
+        cmake -DCMAKE_BUILD_TYPE:STRING=Release -GNinja -S gazebo_robotraconteur_server_plugin -B build2
       shell: cmd /C call {0}
     - name: build
       working-directory: build2
@@ -49,7 +49,7 @@ jobs:
         conda install git cmake make compilers gcc_impl_linux-64 gtest gmock robotraconteur robotraconteur_companion gazebo 
     - name: configure
       run: >
-        cmake -S . robotraconteur -B build2
+        cmake -DCMAKE_BUILD_TYPE:STRING=Release -S gazebo_robotraconteur_server_plugin robotraconteur -B build2
     - name: build
       working-directory: build2
       run: cmake --build . --config Release -j 4
@@ -70,7 +70,7 @@ jobs:
         conda install git cmake clang clangxx compiler-rt gtest gmock ninja robotraconteur robotraconteur_companion gazebo
     - name: configure
       run: >
-        cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -S . -B build2
+        cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -S gazebo_robotraconteur_server_plugin -B build2
     - name: build
       working-directory: build2
       run: cmake --build . --config Release -j 4
