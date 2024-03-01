@@ -1,0 +1,141 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  release:
+    types:
+      - created
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-conda-win:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v4
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        channels: conda-forge
+    - name: conda install
+      run: >
+        conda install git cmake ninja vs2019_win-64 vs2015_runtime gtest gmock robotraconteur robotraconteur_companion gazebo
+    - name: configure
+      run: >
+        cmake -DCMAKE_BUILD_TYPE:STRING=Release -GNinja -S gazebo_robotraconteur_server_plugin -B build2
+      shell: cmd /C call {0}
+    - name: build
+      working-directory: build2
+      run: cmake --build . --config Release -j 4
+      shell: cmd /C call {0}
+  
+  build-conda-linux:
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        channels: conda-forge
+    - name: conda install
+      run: >
+        conda install git cmake make compilers gcc_impl_linux-64 gtest gmock robotraconteur robotraconteur_companion gazebo 
+    - name: configure
+      run: >
+        cmake -DCMAKE_BUILD_TYPE:STRING=Release -S gazebo_robotraconteur_server_plugin robotraconteur -B build2
+    - name: build
+      working-directory: build2
+      run: cmake --build . --config Release -j 4
+
+  build-conda-osx:
+    runs-on: macos-12
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        channels: conda-forge
+    - name: conda install
+      run: >
+        conda install git cmake clang clangxx compiler-rt gtest gmock ninja robotraconteur robotraconteur_companion gazebo pkgconfig
+    - name: configure
+      run: >
+        cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -S gazebo_robotraconteur_server_plugin -B build2
+    - name: build
+      working-directory: build2
+      run: cmake --build . --config Release -j 4
+
+  build-ubuntu:
+    runs-on: ${{ matrix.config.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - os: ubuntu-20.04
+          runs_on: ubuntu-20.04
+          ros_distro: noetic
+        - os: ubuntu-22.04
+          runs_on: ubuntu-22.04
+          ros_distro: humble
+        - os: ubuntu-22.04
+          runs_on: ubuntu-22.04
+          ros_distro: iron         
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        path: ws/src/gazebo_plugin
+        submodules: recursive
+    - name: apt update
+      run: sudo apt update
+    - name: apt
+      run: >
+        sudo apt-get install build-essential cmake ninja-build curl -qq
+    - name: ros repo
+      if: ${{ matrix.config.os == 'ubuntu-20.04' }}
+      run: |
+        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+        curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+        sudo apt update
+    - name: ros2 repo
+      if: ${{ matrix.config.os == 'ubuntu-22.04' }}
+      run: |
+        sudo sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros2-latest.list'
+        curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+        sudo apt update
+    - name: pip
+      run: |
+        sudo python -m pip install --upgrade pip
+        sudo python -m pip install colcon-common-extensions vcstool rosdep
+    - name: vcs
+      working-directory: ws/src
+      run: |
+        vcs import --input gazebo_plugin/gazebo_robotraconteur_server_plugin/dependencies.repos --recursive
+    - name: rosdep
+      run: |
+        sudo rosdep init
+        rosdep update
+    - name: rosdep install
+      working-directory: ws
+      run: |
+        rosdep install --from-paths src --ignore-src --rosdistro ${{ matrix.config.ros_distro }} -y
+    - name: build
+      working-directory: ws
+      run: |
+        colcon build --packages-up-to gazebo_robotraconteur_server_plugin --cmake-args -GNinja -DCMAKE_BUILD_TYPE=Release
+    - name: archive logs
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: logs
+        path: |
+         ws/logs/**/*.log
