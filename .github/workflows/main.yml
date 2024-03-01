@@ -65,7 +65,7 @@ jobs:
         channels: conda-forge
     - name: conda install
       run: >
-        conda install git cmake clang clangxx compiler-rt gtest gmock ninja robotraconteur robotraconteur_companion gazebo
+        conda install git cmake clang clangxx compiler-rt gtest gmock ninja robotraconteur robotraconteur_companion gazebo bullet-cpp
     - name: configure
       run: >
         cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -S gazebo_robotraconteur_server_plugin -B build2
