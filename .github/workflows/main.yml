@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    tags:
+      - v*
+  pull_request:
+  release:
+    types:
+      - created
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-conda-win:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v4
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        channels: conda-forge
+    - name: conda install
+      run: >
+        conda install git cmake ninja vs2019_win-64 vs2015_runtime gtest gmock robotraconteur robotraconteur_companion gazebo
+    - name: configure
+      run: >
+        cmake -DCMAKE_BUILD_TYPE:STRING=Release -GNinja -S . -B build2
+      shell: cmd /C call {0}
+    - name: build
+      working-directory: build2
+      run: cmake --build . --config Release -j 4
+      shell: cmd /C call {0}
+  
+  build-conda-linux:
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: robotraconteur
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        channels: conda-forge
+    - name: conda install
+      run: >
+        conda install git cmake make compilers gcc_impl_linux-64 gtest gmock robotraconteur robotraconteur_companion gazebo 
+    - name: configure
+      run: >
+        cmake -S . robotraconteur -B build2
+    - name: build
+      working-directory: build2
+      run: cmake --build . --config Release -j 4
+
+  build-conda-osx:
+    runs-on: macos-12
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        channels: conda-forge
+    - name: conda install
+      run: >
+        conda install git cmake clang clangxx compiler-rt gtest gmock ninja robotraconteur robotraconteur_companion gazebo
+    - name: configure
+      run: >
+        cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Release -S . -B build2
+    - name: build
+      working-directory: build2
+      run: cmake --build . --config Release -j 4
