@@ -78,11 +78,11 @@ namespace RobotRaconteurGazeboServerPlugin
 			{
 				return bayer_grbg8888;
 			}
-			else if (format == "FLOAT16")
+			else if (format == "R_FLOAT16")
 			{
 				return mono_f16;
 			}
-			else if (format == "FLOAT32")
+			else if (format == "R_FLOAT32")
 			{
 				return mono_f32;
 			}
