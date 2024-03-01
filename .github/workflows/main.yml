@@ -72,3 +72,70 @@ jobs:
     - name: build
       working-directory: build2
       run: cmake --build . --config Release -j 4
+
+  build-ubuntu:
+    runs-on: ${{ matrix.config.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - os: ubuntu-20.04
+          runs_on: ubuntu-20.04
+          ros_distro: noetic
+        - os: ubuntu-22.04
+          runs_on: ubuntu-22.04
+          ros_distro: humble
+        - os: ubuntu-22.04
+          runs_on: ubuntu-22.04
+          ros_distro: iron         
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        path: ws/src/gazebo_plugin
+        submodules: recursive
+    - name: apt update
+      run: sudo apt update
+    - name: apt
+      run: >
+        sudo apt-get install build-essential cmake ninja-build curl -qq
+    - name: ros repo
+      if: ${{ matrix.config.os == 'ubuntu-20.04' }}
+      run: |
+        sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+        curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+        sudo apt update
+    - name: ros2 repo
+      if: ${{ matrix.config.os == 'ubuntu-22.04' }}
+      run: |
+        sudo sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros2-latest.list'
+        curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+        sudo apt update
+    - name: pip
+      run: |
+        sudo python -m pip install --upgrade pip
+        sudo python -m pip install colcon-common-extensions vcstool rosdep
+    - name: vcs
+      working-directory: ws/src
+      run: |
+        vcs import --input gazebo_plugin/gazebo_robotraconteur_server_plugin/dependencies.repos --recursive
+    - name: rosdep
+      run: |
+        sudo rosdep init
+        rosdep update
+    - name: rosdep install
+      working-directory: ws
+      run: |
+        rosdep install --from-paths src --ignore-src --rosdistro ${{ matrix.config.ros_distro }} -y
+    - name: build
+      working-directory: ws
+      run: |
+        colcon build --packages-up-to gazebo_robotraconteur_server_plugin --cmake-args -GNinja -DCMAKE_BUILD_TYPE=Release
+    - name: archive logs
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: logs
+        path: |
+         ws/logs/**/*.log
