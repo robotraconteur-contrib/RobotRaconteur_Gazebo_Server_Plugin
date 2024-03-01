@@ -1,0 +1,8 @@
+- git:
+    local-name: robotraconteur
+    uri: https://github.com/robotraconteur/robotraconteur.git
+    version: master
+- git:
+    local-name: robotraconteur_companion
+    uri: https://github.com/robotraconteur/robotraconteur_companion.git
+    version: master
