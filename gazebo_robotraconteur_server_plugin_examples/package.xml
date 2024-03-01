@@ -12,8 +12,11 @@
 
   <author email="wason@wasontech.com">John Wason</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>cmake</buildtool_depend>
   <depend>robotraconteur</depend>
   <depend>gazebo_robotraconteur_server_plugin</depend>
+  <export>    
+    <build_type>cmake</build_type>
+  </export>
         
 </package>
