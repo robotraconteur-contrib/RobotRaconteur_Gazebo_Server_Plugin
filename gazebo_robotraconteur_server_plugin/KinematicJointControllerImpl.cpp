@@ -322,4 +322,14 @@ namespace RobotRaconteurGazeboServerPlugin
 		return rr_downsampler->SetClientDownsample(RR::ServerEndpoint::GetCurrentEndpoint()->GetLocalEndpoint(), value);
 	}
 
+	void KinematicJointControllerImpl::_set_joint_target(const std::string& name, const RR::RRArrayPtr<double>& value)
+	{
+		if (!joint_targets)
+		{
+			joint_targets = RR::AllocateEmptyRRMap<std::string,RR::RRArray<double> >();
+		}
+		joint_targets->insert(std::make_pair(name,value));
+		gzmsg << "Setting joint target: " << name << " to " << value->at(0) << std::endl;
+	}
+
 }

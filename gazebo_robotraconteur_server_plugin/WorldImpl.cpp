@@ -90,6 +90,32 @@ void WorldImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, cons
 	gz_node->Init(get_world()->Name());
 	gz_request_pub = gz_node->Advertise<gazebo::msgs::Request>("~/request");
 	gz_factory_pub = gz_node->Advertise<gazebo::msgs::Factory>("~/factory");
+
+	// Touch all models to activate RR skels
+	
+	physics::WorldPtr w=gz_world.lock();	
+	if (context1 && w)
+	{
+		// Iterate over models
+		physics::Model_V v=w->Models();
+		for(auto e=v.begin(); e!=v.end(); e++)
+		{
+			std::string model_name = (*e)->GetName();
+			context1->GetNode()->GetThreadPool()->Post([context1, model_name, service_path]()
+			{
+				try
+				{
+					std::string model_path = service_path + ".models[" + RR::detail::encode_index(model_name) + "]";
+					context1->GetObjectSkel(model_path);
+					gzmsg << "Initialized model " << model_name << " with RR path " << model_path << std::endl;
+				}
+				catch (std::exception& e)
+				{
+					gzerr << "Error initializing model with RR: " << e.what() << std::endl;
+				}
+			});
+		}			
+	}
 }
 
 std::string WorldImpl::GetRRPath()

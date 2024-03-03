@@ -60,6 +60,8 @@ public:
 
 	  virtual std::string RRPath();
 
+	  virtual void _set_joint_target(const std::string& name, const RR::RRArrayPtr<double>& value);
+
 protected:
 	  boost::weak_ptr<physics::Model> gz_model;
 	  std::map<std::string,boost::weak_ptr<physics::Joint> > joints;

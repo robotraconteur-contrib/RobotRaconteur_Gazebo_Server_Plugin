@@ -27,6 +27,7 @@ namespace RobotRaconteurGazeboServerPlugin
 {
 	void ServerImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
 	{
+		rr_context = context;
 		worldCreatedConnection=event::Events::ConnectWorldCreated(
 				boost::bind(&ServerImpl::OnWorldCreated,shared_from_this(),_1));
 
@@ -42,6 +43,26 @@ namespace RobotRaconteurGazeboServerPlugin
 
 			RR_SHARED_PTR<WorldImpl> rr_w=RR_MAKE_SHARED<WorldImpl>(w);
 			rr_worlds.insert(std::make_pair(w->Name(),rr_w));
+
+			lock.unlock();
+
+			RR::ServerContextPtr rr_context1 = rr_context.lock();			
+			if (rr_context1)
+			{
+				rr_context1->GetNode()->GetThreadPool()->Post([rr_w, rr_context1, name]()
+				{
+					try
+					{
+						std::string world_path = rr_context1->GetServiceName() + ".worlds[" + RR::detail::encode_index(name) + "]";
+						rr_context1->GetObjectSkel(world_path);
+						gzmsg << "Initialized world " << name << " with RR path " << world_path << std::endl;
+					}
+					catch (std::exception& e)
+					{
+						gzerr << "Error initializing world with RR: " << e.what() << std::endl;
+					}
+				});				
+			}			
 		}
 	}
 

@@ -63,6 +63,8 @@ namespace RobotRaconteurGazeboServerPlugin
 
 	  virtual std::string RRType() override { return Model_default_abstract_impl::RRType(); }
 
+	  void RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path) override;
+
   protected:
 	  boost::weak_ptr<physics::Model> gz_model;
 	  physics::WorldPtr gz_world;
