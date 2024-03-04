@@ -56,5 +56,7 @@ namespace RobotRaconteurGazeboServerPlugin
 	  std::map<std::string,RR_SHARED_PTR<WorldImpl> > rr_worlds;
 
 	  event::ConnectionPtr worldCreatedConnection;
+
+	  RR_WEAK_PTR<RR::ServerContext> rr_context;
   };
 }

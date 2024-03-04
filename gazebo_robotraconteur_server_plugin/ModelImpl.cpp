@@ -26,6 +26,64 @@ namespace RobotRaconteurGazeboServerPlugin
 		gz_world=m->GetWorld();
 	}
 
+	void ModelImpl::RRServiceObjectInit(RR_WEAK_PTR<RR::ServerContext> context, const std::string& service_path)
+	{
+		EntityImpl::RRServiceObjectInit(context,service_path);
+
+		RR_SHARED_PTR<physics::Model> m=gz_model.lock();
+		if (!m) return;
+		auto sdf = m->GetSDF();
+		if (sdf->HasElement("gazebo_robotraconteur_server_plugin_model"))
+		{
+			auto sdf_plugin_model = sdf->GetElement("gazebo_robotraconteur_server_plugin_model");
+			
+						
+			if (sdf_plugin_model->HasElement("kinematic_joint_controller"))			
+			{
+				auto sdf_plugin_kinematic_joint_controller = sdf_plugin_model->GetElement("kinematic_joint_controller");
+				create_kinematic_joint_controller();
+
+				// Fill in joints
+				std::set<std::string> joint_names;
+				physics::Joint_V v=get_model()->GetJoints();
+				for(auto e=v.begin(); e!=v.end(); e++)
+				{
+					joint_names.insert((*e)->GetName());
+				}
+
+				RR_SHARED_PTR<KinematicJointControllerImpl> j=kinematic_joint_controller;
+
+				if (sdf_plugin_kinematic_joint_controller->HasElement("joint"))
+				{
+					auto sdf_joint = sdf_plugin_kinematic_joint_controller->GetElement("joint");
+					while(sdf_joint)
+					{
+						std::string joint_name = sdf_joint->Get<std::string>("name");
+						if (joint_names.find(joint_name) == joint_names.end())
+						{
+							gzerr << "Kinematic joint controller joint not found: " << joint_name << " for model: " << m->GetName() << std::endl;
+							sdf_joint = sdf_joint->GetNextElement("joint");
+							continue;
+						}
+						j->add_joint(joint_name);
+
+						if (sdf_joint->HasElement("initial_position"))
+						{
+							auto initial_position = sdf_joint->GetElement("initial_position")->Get<double>();
+							j->_set_joint_target(joint_name, RR::ScalarToRRArray<double>(initial_position));
+						}
+						else
+						{
+							j->_set_joint_target(joint_name, RR::ScalarToRRArray<double>(0.0));
+						}
+						sdf_joint = sdf_joint->GetNextElement("joint");			
+					}
+				}
+			}
+		}
+		
+	}
+
 	RR::RRListPtr<RR::RRArray<char> > ModelImpl::get_child_model_names()
 	{
 		RR::RRListPtr<RR::RRArray<char> > o(new RR::RRList<RR::RRArray<char> >());
@@ -132,7 +190,18 @@ namespace RobotRaconteurGazeboServerPlugin
 
 		RR_SHARED_PTR<KinematicJointControllerImpl> j=RR_MAKE_SHARED<KinematicJointControllerImpl>(RR_DYNAMIC_POINTER_CAST<ModelImpl>(shared_from_this()), get_model());
 
-		kinematic_joint_controller=j;		
+		kinematic_joint_controller=j;
+
+		RR::ServerContextPtr rr_context1 = rr_context.lock();
+		if (rr_context1)
+		{
+			std::string controller_rr_path = this->rr_path + ".kinematic_joint_controller";
+			auto node = rr_context1->GetNode();			
+			node->GetThreadPool()->Post([rr_context1, controller_rr_path]
+			{
+				rr_context1->GetObjectSkel(controller_rr_path);
+			});
+		}
 	}
 	void ModelImpl::destroy_kinematic_joint_controller()
 	{
