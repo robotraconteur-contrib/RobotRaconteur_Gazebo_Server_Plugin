@@ -1,4 +1,6 @@
-# Robot Raconteur Gazebo Server Plugin
+MODERN GZ SIM PLUGIN IS NOW AVAILABLE: https://github.com/robotraconteur-contrib/gz-sim-robotraconteur-plugins
+
+## Robot Raconteur Gazebo Server Plugin
 
 A plugin for [Gazebo](http://gazebosim.org) using the [Robot Raconteur](http://robotraconteur.com) communication system to provide a friendly object-oriented interface to the Gazebo API without requiring the modification of SDF world files. It is developed by Wason Technology, LLC.
 
